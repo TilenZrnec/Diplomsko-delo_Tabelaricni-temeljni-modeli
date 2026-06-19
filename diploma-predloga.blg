@@ -1,0 +1,15 @@
+[0] Config.pm:328> INFO - This is Biber 2.21
+[0] Config.pm:331> INFO - Logfile is 'diploma-predloga.blg'
+[62] biber:342> INFO - === Fri Jun 19, 2026, 15:43:27
+[81] Biber.pm:421> INFO - Reading 'diploma-predloga.bcf'
+[135] Biber.pm:1002> INFO - Found 18 citekeys in bib section 0
+[149] Biber.pm:4487> INFO - Processing section 0
+[158] Biber.pm:4678> INFO - Looking for bibtex file 'literatura.bib' for section 0
+[164] bibtex.pm:1713> INFO - LaTeX decoding ...
+[177] bibtex.pm:1519> INFO - Found BibTeX data source 'literatura.bib'
+[277] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[278] UCollate.pm:68> INFO - Overriding locale 'en-US' defaults 'variable = shifted' with 'variable = non-ignorable'
+[278] Biber.pm:4307> INFO - Sorting list 'nty/global//global/global/global' of type 'entry' with template 'nty' and locale 'en-US'
+[278] Biber.pm:4313> INFO - No sort tailoring available for locale 'en-US'
+[295] bbl.pm:676> INFO - Writing 'diploma-predloga.bbl' with encoding 'UTF-8'
+[303] bbl.pm:779> INFO - Output to diploma-predloga.bbl
