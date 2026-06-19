@@ -1,9 +1,9 @@
-PWD /mnt/d/fri/Diplomska/bachelor-thesis-book
+PWD /mnt/c/Users/Tilen/Documents/GitHub/Diplomsko-delo_Tabelaricni-temeljni-modeli
 INPUT /etc/texmf/web2c/texmf.cnf
 INPUT /usr/share/texmf/web2c/texmf.cnf
 INPUT /usr/share/texlive/texmf-dist/web2c/texmf.cnf
 INPUT /var/lib/texmf/web2c/pdftex/pdflatex.fmt
-INPUT /mnt/d/fri/Diplomska/bachelor-thesis-book/diploma-predloga.tex
+INPUT /mnt/c/Users/Tilen/Documents/GitHub/Diplomsko-delo_Tabelaricni-temeljni-modeli/diploma-predloga.tex
 OUTPUT diploma-predloga.log
 INPUT /usr/share/texlive/texmf-dist/tex/latex/latex-lab/documentmetadata-support.ltx
 INPUT /usr/share/texlive/texmf-dist/tex/latex/latex-lab/documentmetadata-support.ltx
