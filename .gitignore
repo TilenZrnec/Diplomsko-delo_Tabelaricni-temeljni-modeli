@@ -1,1 +1,54 @@
 .DS_Store
+
+# ------------------------------------------------------------------
+# Datoteke, ki jih LaTeX ustvari sam ob vsakem prevajanju.
+# Ne spadajo v git: ob vsakem prevodu se spremenijo, zato bi pri delu
+# na dveh racunalnikih (PC + prenosnik) povzrocale konflikte pri pull.
+# V gitu hranimo samo IZVORNE datoteke: .tex, .bib, slike/, podporno/
+# ------------------------------------------------------------------
+
+# Osnovni izhodi prevajanja
+*.aux
+*.log
+*.out
+*.toc
+*.lof
+*.lot
+*.idx
+*.ind
+*.ilg
+*.nav
+*.snm
+*.vrb
+
+# BibLaTeX / biber
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+
+# latexmk
+*.fdb_latexmk
+*.fls
+
+# SyncTeX (povezava med PDF in izvorno kodo v urejevalniku)
+*.synctex.gz
+*.synctex(busy)
+
+# minted / pygments (vkljucevanje programske kode)
+*.data.minted
+_minted*/
+*.pyg
+
+# Zacasne datoteke
+*.bak
+*.tmp
+*~
+
+# Prevedena naloga.
+# Odstrani spodnjo vrstico, ce zelis PDF hraniti tudi na GitHubu.
+*.pdf
+
+# Izjema: PDF-ji licenc Creative Commons so del predloge in NISO izhod
+# prevajanja, zato jih kljub pravilu *.pdf obdrzimo.
+!podporno/cc_*.pdf
