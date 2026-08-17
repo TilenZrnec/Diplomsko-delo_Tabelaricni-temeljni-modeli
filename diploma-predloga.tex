@@ -170,7 +170,242 @@ morda bo zapisal tudi ključno literaturo.}
 \section{Algoritmi}
 \label{sec:algoritmi}
 
-\todo{Six subsections, roughly a page each: what it is, why it's in the comparison, version pinned, the defaults that matter. This is your longest section and probably your best use of today.}
+V primerjavo smo vključili šest algoritmov za nadzorovano klasifikacijo
+tabelaričnih podatkov. Prvi štirje --- naključni gozd, XGBoost, LightGBM in
+CatBoost --- so ansambli odločitvenih dreves (angl. \emph{decision tree
+ensembles}). Ti že dve desetletji veljajo za privzeto orodje na tabelaričnih
+podatkih; primerjalne študije kažejo, da na tipičnih tabelaričnih množicah
+srednje velikosti še vedno prekašajo arhitekture globokega učenja, zasnovane
+posebej za tabelarične podatke~\cite{grinsztajn2022why}. Zadnja dva, TabPFN in
+TabICL, sta tabelarična temeljna modela (angl. \emph{tabular foundation
+models}): predhodno naučena modela, ki ciljne podatkovne množice ne vidita med
+učenjem, temveč jo ob napovedovanju prejmeta kot kontekst.
+
+Izbor pokriva obe uveljavljeni družini drevesnih ansamblov --- vrečenje
+(angl. \emph{bagging}) pri naključnem gozdu in gradientno pospeševanje
+(angl. \emph{gradient boosting}) pri preostalih treh --- in znotraj
+gradientnega pospeševanja tri implementacije, ki se med seboj razlikujejo po
+načinu rasti dreves in po obravnavi kategoričnih atributov. Prav zadnje je za
+našo nalogo bistveno, saj se algoritmi zelo razlikujejo po tem, koliko
+značilnosti surovih podatkov obravnavajo nativno; to razliko obravnavamo kot
+namerno eksperimentalno spremenljivko in jo podrobneje opišemo v
+razdelku~\ref{sec:predobdelava}.
+
+Vse algoritme uporabljamo s privzetimi hiperparametri. Edina nastavitev, ki jo
+podamo eksplicitno, je naključno seme (\texttt{random\_state=42}); razlogi za
+tako zasnovo so navedeni v razdelku~\ref{sec:protokol}. Ker so pri takem
+protokolu privzete vrednosti dejanski del metode, jih pri vsakem algoritmu
+posebej navedemo skupaj z virom, iz katerega so povzete. Različice knjižnic so
+zbrane v tabeli~\ref{tab:razlicice} in pripete v datoteki
+\texttt{requirements.txt} repozitorija s kodo.
+
+\begin{table}[htbp]
+\centering
+\caption{Uporabljeni algoritmi, implementacije in pripete različice knjižnic.}
+\label{tab:razlicice}
+\begin{tabular}{llll}
+\hline
+Algoritem & Knjižnica & Razred & Različica \\
+\hline
+Naključni gozd & scikit-learn & \texttt{RandomForestClassifier} & 1.5.1 \\
+XGBoost & xgboost & \texttt{XGBClassifier} & 2.1.1 \\
+LightGBM & lightgbm & \texttt{LGBMClassifier} & 4.6.0 \\
+CatBoost & catboost & \texttt{CatBoostClassifier} & 1.2.7 \\
+TabPFN & tabpfn & \texttt{TabPFNClassifier} & 8.1.0 \\
+TabICL & tabicl & \texttt{TabICLClassifier} & 2.1.1 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Naključni gozd}
+\label{sec:rf}
+
+Naključni gozd (angl. \emph{random forest}) je ansambel odločitvenih dreves,
+naučenih na vzorcih učne množice, dobljenih z vzorčenjem s ponavljanjem
+(vrečenje~\cite{breiman1996bagging}), pri čemer se v vsakem vozlišču kandidat za
+delitev izbira le med naključno izbrano podmnožico
+atributov~\cite{breiman2001random}. Oba vira naključnosti drevesa medsebojno
+razkorelirata, zato povprečenje njihovih napovedi zmanjša varianco
+ansambla~\cite{breiman2001random}. V primerjavo smo ga uvrstili kot najstarejši
+in konceptualno najpreprostejši ansambel, katerega drevesa --- za razliko od
+gradientnega pospeševanja --- nastanejo neodvisno drugo od drugega.
+
+Uporabljamo razred \texttt{RandomForestClassifier} iz knjižnice
+scikit-learn~1.5.1~\cite{pedregosa2011scikit}. Pomembnejše privzete vrednosti
+so: 100 dreves, gini kot mera nečistosti, neomejena globina, najmanj en primer v
+listu in kvadratni koren števila atributov kot velikost naključne podmnožice
+kandidatov v vozlišču~\cite{sklearndocsrf}. Poleg naključnega semena podajamo še
+\texttt{n\_jobs=-1}, kar ni hiperparameter modela, ampak nastavitev računanja:
+drevesa so neodvisna, zato so napovedi bitno identične zaporednemu izračunu,
+spremeni se le čas učenja. Brez tega bi naključni gozd kot edini od štirih
+ansamblov tekel na enem samem procesorskem jedru in izmerjeni časi ne bi bili
+primerljivi. Nativne podpore za manjkajoče vrednosti in kategorične atribute ta
+implementacija nima, zato je edini od šestih algoritmov, ki surovih podatkovnih
+množic sploh ne more sprejeti.
+
+\subsection{XGBoost}
+\label{sec:xgboost}
+
+Gradientno pospeševanje gradi ansambel zaporedno: model je vsota dreves, vsako
+naslednje drevo pa se prilega negativnemu gradientu izgube dosedanjega
+ansambla, kar postopek prevede na gradientni spust v prostoru
+funkcij~\cite{friedman2001greedy}. XGBoost to zamisel dopolni z aproksimacijo
+kriterijske funkcije drugega reda in členom, ki kaznuje kompleksnost drevesa ---
+regularizacija je torej del kriterija za izbiro delitve --- ter z iskanjem
+delitev, ki se zaveda redkosti podatkov (angl. \emph{sparsity-aware split
+finding}): vsakemu vozlišču iz podatkov določi privzeto smer, v katero se
+usmerijo primeri z manjkajočo vrednostjo obravnavanega atributa, od koder izvira
+nativna obravnava manjkajočih vrednosti~\cite{chen2016xgboost}. V primerjavo smo
+ga vključili kot najzgodnejšo od treh obravnavanih implementacij gradientnega
+pospeševanja in kot referenco, na katero se sklicujeta tako
+LightGBM~\cite{ke2017lightgbm} kot CatBoost~\cite{prokhorenkova2018catboost}.
+
+Uporabljamo razred \texttt{XGBClassifier} iz knjižnice xgboost~2.1.1.
+Pomembnejše privzete vrednosti so: 100 krogov pospeševanja, stopnja učenja
+\num{0.3}, največja globina drevesa 6, koeficient L2 regularizacije 1 in
+izklopljeno podvzorčenje primerov ter atributov; drevesa privzeto rastejo po
+histogramski metodi~\cite{xgboostdocs}. Manjkajoče vrednosti algoritem obravnava
+sam, nativna obravnava kategoričnih atributov pa je označena kot poskusna in
+privzeto izklopljena (\texttt{enable\_categorical=False}), zato kategorične
+atribute kodiramo sami.
+
+\subsection{LightGBM}
+\label{sec:lightgbm}
+
+LightGBM je implementacija gradientnega pospeševanja, zasnovana za hitrost na
+velikih množicah. Avtorji predlagajo dve tehniki, ki zmanjšata delo pri iskanju
+najboljše delitve~\cite{ke2017lightgbm}: vzorčenje na podlagi gradientov
+(angl. \emph{gradient-based one-side sampling}, GOSS), ki obdrži vse primere z
+velikim gradientom in naključno podvzorči tiste z majhnim, ter združevanje
+izključujočih se atributov (angl. \emph{exclusive feature bundling}, EFB), ki
+atribute, redko hkrati različne od nič, združi v en sam atribut. Drevesa poleg
+tega rastejo po listih (angl. \emph{leaf-wise}) in ne po nivojih, kar pri enakem
+številu listov daje globlja in bolj asimetrična drevesa --- torej drugačno
+induktivno pristranskost kot pri XGBoost in glavni razlog, da sta v primerjavi
+oba.
+
+Uporabljamo razred \texttt{LGBMClassifier} iz knjižnice lightgbm~4.6.0.
+Pomembnejše privzete vrednosti so: 100 iteracij, stopnja učenja \num{0.1}, 31
+listov na drevo, neomejena globina, najmanj 20 primerov v listu, 255 košev v
+histogramu in izklopljeno podvzorčenje~\cite{lightgbmdocs}. Privzete nastavitve
+ne vključujejo obeh tehnik iz izvirnega članka: združevanje atributov je
+vklopljeno, GOSS pa ne, saj je privzeta strategija vzorčenja navadno
+vrečenje~\cite{lightgbmdocs}. Poleg naključnega semena podajamo še
+\texttt{verbosity=-1}, kar zgolj izklopi izpisovanje. Manjkajoče vrednosti in
+kategorične atribute LightGBM obravnava nativno.
+
+\subsection{CatBoost}
+\label{sec:catboost}
+
+CatBoost je implementacija gradientnega pospeševanja, ki jo avtorji utemeljujejo
+z odpravo dveh pristranskosti~\cite{prokhorenkova2018catboost}. Premik napovedi
+(angl. \emph{prediction shift}) nastane, ker gradiente ocenjujemo na istih
+primerih, na katerih je bil naučen dosedanji ansambel; urejeno pospeševanje
+(angl. \emph{ordered boosting}) to reši z naključno permutacijo učnih primerov,
+v kateri gradient za posamezni primer oceni na modelu, naučenem le na primerih
+pred njim. Isto zamisel uporabijo urejene ciljne statistike
+(angl. \emph{ordered target statistics}) za kategorične atribute, pri katerih bi
+sicer ob kodiranju s ciljno spremenljivko informacija o ciljni vrednosti primera
+pronicala v njegov lastni vhodni podatek. Drevesa so simetrična
+(angl. \emph{oblivious}), torej je na vsakem nivoju uporabljen isti test za vse
+liste, kar deluje kot dodatna regularizacija. V primerjavo smo CatBoost uvrstili
+predvsem zato, ker je edini od štirih ansamblov s teoretično utemeljeno nativno
+obravnavo kategoričnih atributov.
+
+Uporabljamo razred \texttt{CatBoostClassifier} iz knjižnice catboost~1.2.7.
+Pomembnejše privzete vrednosti so: 1000 iteracij, globina drevesa 6 in
+koeficient L2 regularizacije \num{3.0}; stopnje učenja ne podamo, saj jo
+knjižnica pri izgubah \texttt{Logloss} in \texttt{MultiClass} določi samodejno
+glede na število iteracij~\cite{catboostdocs}. Privzetih 1000 iteracij je
+desetkrat več kot pri XGBoost in LightGBM --- asimetrija protokola s privzetimi
+nastavitvami, ki jo upoštevamo pri razlagi izmerjenih časov učenja v
+poglavju~\ref{ch:rezultati}. Poleg naključnega semena podajamo še
+\texttt{verbose=False}. Manjkajoče vrednosti v številskih atributih CatBoost
+obravnava nativno, kategorične atribute pa mu podamo prek parametra
+\texttt{cat\_features}.
+
+\subsection{TabPFN}
+\label{sec:tabpfn}
+
+TabPFN je predstavnik nove družine modelov za tabelarične podatke, ki temelji na
+zamisli mreže, prilagojene apriornim podatkom (angl. \emph{prior-data fitted
+network}, PFN)~\cite{muller2022transformers}. Namesto da bi se model učil na
+ciljni podatkovni množici, ga enkrat in vnaprej naučimo na velikem številu
+sintetičnih podatkovnih množic, vzorčenih iz vnaprej določene apriorne
+porazdelitve nad nalogami. Naučeni transformer~\cite{vaswani2017attention} se
+tako približa Bayesovemu napovedovanju: ob danih označenih primerih vrne
+aposteriorno napovedno porazdelitev, ki ustreza apriorni porazdelitvi, na kateri
+je bil naučen~\cite{muller2022transformers}.
+
+Posledica je nenavaden potek uporabe: klic metode za učenje ne izvede nobene
+posodobitve uteži. Učna množica se skupaj s testnimi primeri poda modelu kot
+vhodno zaporedje in napovedi za celotno testno množico nastanejo v enem samem
+prehodu naprej. Temu pravimo učenje iz konteksta (angl. \emph{in-context
+learning}); ciljna podatkovna množica je za model zgolj vhod, nikoli učni signal.
+
+Prva različica TabPFN~\cite{hollmann2023tabpfn} je to zamisel prenesla na
+tabelarične podatke, a z ozkim območjem uporabnosti: do 1000 učnih primerov, do
+100 številskih atributov, do 10 razredov in brez manjkajočih vrednosti. Druga
+različica~\cite{hollmann2025tabpfn} je model razširila na do \num{10000}
+primerov, 500 atributov in 10 razredov ter mu dodala sposobnost, da se z
+manjkajočimi vrednostmi, kategoričnimi atributi in osamelci spoprime sam:
+avtorji poročajo, da so ga predhodno naučili na približno 100 milijonih
+sintetičnih podatkovnih množic, ki take težave vsebujejo, zato se ustreznih
+strategij nauči namesto ročno vgrajenih rešitev. Arhitekturno vsaka plast
+izvede najprej pozornost po atributih in nato pozornost po
+primerih~\cite{hollmann2025tabpfn}.
+
+V naši primerjavi uporabljamo tretjo različico iz paketa tabpfn~8.1.0, in sicer
+z razredom \texttt{TabPFNClassifier}, privzetimi nastavitvami in podanim
+naključnim semenom. Njeno tehnično poročilo navaja, da je model predhodno naučen
+izključno na sintetičnih podatkih, da doseže do \num{1000000} učnih primerov in
+200 atributov ter da na zbirki TabArena en sam prehod naprej z znatno razliko
+prekaša vse druge modele, vključno z uglaševanimi in ansambelskimi primerjalnimi
+modeli~\cite{grinsztajn2026tabpfn3}. Te trditve navajamo kot kontekst, ne kot
+ugotovitev te naloge; ali držijo tudi na zbirki OpenML-CC18 in pod našim
+protokolom, je predmet poglavja~\ref{ch:rezultati}. Pri izvedbi sta pomembni še
+dve praktični posebnosti: model za smiselno hitrost potrebuje grafično procesno
+enoto in uteži prenese ob prvi uporabi, poleg tega je za prvo uporabo potreben
+enkraten sprejem licence prek uporabniškega računa ponudnika. Oboje vpliva na
+zasnovo izvedbenega okolja in je opisano v razdelku~\ref{sec:okolje}.
+
+\subsection{TabICL}
+\label{sec:tabicl}
+
+TabICL izhaja iz iste paradigme kot TabPFN --- gre za predhodno naučen
+transformer, ki napoveduje z učenjem iz konteksta --- vendar je arhitekturno
+zasnovan tako, da se dobro obnese na večjih podatkovnih
+množicah~\cite{qu2025tabicl}. Ključna razlika je dvostopenjska zasnova. V prvi
+stopnji model z mehanizmom pozornosti najprej po stolpcih in nato po vrsticah
+(angl. \emph{column-then-row attention}) vsako vrstico tabele preslika v
+vektorsko predstavitev s fiksno razsežnostjo. Ta predstavitev ni odvisna od
+števila atributov, zato se dolžina zaporedja, ki ga obdela druga stopnja, z
+večanjem števila atributov ne povečuje. V drugi stopnji transformer za učenje iz
+konteksta obdela zaporedje teh vektorskih predstavitev in napove razrede testnih
+vrstic.
+
+Avtorji navajajo, da je model predhodno naučen na sintetičnih podatkovnih
+množicah z do \num{60000} primeri in da na dostopni strojni opremi obvlada
+množice z do \num{500000} primeri. Na 200 klasifikacijskih množicah zbirke
+TALENT je po njihovih meritvah primerljiv s TabPFN v2 in do desetkrat hitrejši,
+na 53 množicah z več kot \num{10000} primeri pa prekaša tako TabPFN v2 kot
+CatBoost~\cite{qu2025tabicl}. V primerjavo smo ga uvrstili kot naravno protiutež
+modelu TabPFN: ista paradigma, a drugačna arhitektura, izrecna usmerjenost k
+večjim množicam in prosto dostopne uteži.
+
+Uporabljamo razred \texttt{TabICLClassifier} iz paketa tabicl~2.1.1 s privzetimi
+nastavitvami in podanim naključnim semenom. Paket privzeto uporabi kontrolno
+točko različice TabICLv2 (\texttt{tabicl-classifier-v2-20260212.ckpt}), zato v
+resnici vrednotimo to različico~\cite{tabicldocs}; njeno tehnično poročilo kot
+glavne izboljšave navaja nov generator sintetičnih podatkov za predhodno učenje,
+arhitekturne spremembe in bolje skalirajoč mehanizem
+pozornosti~\cite{qu2026tabiclv2}. Enako kot TabPFN tudi TabICL uteži prenese ob
+prvi uporabi in za smiselno hitrost potrebuje grafično procesno enoto.
+
+Ker zbirka OpenML-CC18 vsebuje tudi množice, ki po velikosti močno presegajo
+razpon, na katerem sta bila oba temeljna modela prvotno predstavljena, ju naš
+protokol namerno postavi tudi zunaj njunega najbolj ugodnega območja. Kje se pri
+tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 
 \section{Protokol vrednotenja}
 \label{sec:protokol}
