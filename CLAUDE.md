@@ -61,9 +61,18 @@ ne opozori posebej.
 
 ## Metodološke zahteve, ki se odražajo v besedilu
 
-- **Osnovni primerjalni model (angl. baseline).** Rezultate vedno primerjamo z
-  najpreprostejšo, naivno metodo, ki služi kot spodnja meja in dokaz, da
-  predlagana rešitev prinaša merljivo izboljšavo.
+- **Osnovni primerjalni model (angl. baseline) — namenoma ga ne uporabljamo.
+  Odločeno 2026-08-16, ne odpiramo znova.** Smernice sicer navajajo primerjavo z
+  naivno metodo kot spodnjo mejo, a je ta naloga ne potrebuje: raziskovalno
+  vprašanje je, kako se tabelarični temeljni modeli odrežejo *v primerjavi z
+  uveljavljenimi drevesnimi ansambli*, in štirje ansambli (RandomForest,
+  XGBoost, LightGBM, CatBoost) že sami služijo kot referenčna točka. Naivni
+  klasifikator (`DummyClassifier`) je po konstrukciji pri ROC-AUC 0,5 in ne bi
+  prispeval nobene informacije. V besedilu torej ne trdimo, da primerjamo z
+  naivno spodnjo mejo; namesto tega v metodologiji **eksplicitno utemeljimo**,
+  zakaj vlogo referenčne točke prevzamejo drevesni ansambli. Usklajeno z
+  `../Diplomsko-delo_Koda/CLAUDE.md`, kjer v `REGISTRY` ni in ne bo vnosa
+  tipa `DummyClassifier`.
 - **Ponovljivost.** V besedilu navedemo fiksirana naključna semena, vse vhodne
   parametre, verzije knjižnic in okolje, tako da lahko nekdo drug (ali avtor čez
   tri mesece) dobi identične rezultate.
