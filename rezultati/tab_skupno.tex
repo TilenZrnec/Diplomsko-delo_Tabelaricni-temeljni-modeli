@@ -1,0 +1,21 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v2/summary/overall.csv, results/runs/cc18_v2/summary/overall_nonsaturated.csv (zagon cc18_v2, commit dc1aeb2). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Skupna primerjava algoritmov na zbirki OpenML-CC18. Povprečni ROC-AUC je izračunan le na podatkovnih množicah, na katerih so uspeli vsi algoritmi (71 od 72 oziroma 38 od 39), povprečni rang pa na vseh; neuspeh na podatkovni množici prejme najslabši rang. Zmage štejejo prvo mesto, vključno z izenačitvami.}
+\label{tab:skupno}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrr}
+\hline
+ & \multicolumn{4}{c}{vseh 72 množic} & \multicolumn{3}{c}{39 nenasičenih množic} \\
+Algoritem & ROC-AUC & rang & zmage & neuspehi & ROC-AUC & rang & zmage \\
+\hline
+TabICL & \num{0.9396} & \num{1.58} & 49 & 1 & \num{0.8885} & \num{1.60} & 26 \\
+TabPFN & \num{0.9387} & \num{1.90} & 22 & 1 & \num{0.8866} & \num{1.88} & 11 \\
+CatBoost & \num{0.9285} & \num{3.33} & 4 & 0 & \num{0.8703} & \num{3.31} & 2 \\
+LightGBM & \num{0.9226} & \num{4.42} & 0 & 0 & \num{0.8604} & \num{4.44} & 0 \\
+XGBoost & \num{0.9212} & \num{4.62} & 2 & 0 & \num{0.8574} & \num{4.85} & 0 \\
+Naključni gozd & \num{0.9195} & \num{5.17} & 0 & 0 & \num{0.8582} & \num{4.92} & 0 \\
+\hline
+\end{tabular}
+\end{table}

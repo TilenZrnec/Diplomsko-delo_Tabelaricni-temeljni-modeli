@@ -52,3 +52,9 @@ _minted*/
 # Izjema: PDF-ji licenc Creative Commons so del predloge in NISO izhod
 # prevajanja, zato jih kljub pravilu *.pdf obdrzimo.
 !podporno/cc_*.pdf
+
+# Izjema: slike v slike/ so izvorne datoteke naloge (npr. diagrama kritične
+# razdalje cc18_cd*.pdf, ki ju vključi \includegraphics), ne izhod prevajanja.
+# Brez te vrstice ju git ne bi poznal in naloga se na drugem računalniku ne bi
+# prevedla.
+!slike/*.pdf

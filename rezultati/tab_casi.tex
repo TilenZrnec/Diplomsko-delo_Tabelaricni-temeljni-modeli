@@ -1,0 +1,20 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v2/summary/overall.csv, results/runs/cc18_v2/results.csv (zagon cc18_v2, commit dc1aeb2). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh 1080 učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi.}
+\label{tab:casi}
+\footnotesize
+\begin{tabular}{llrrr}
+\hline
+ & & \multicolumn{2}{c}{mediana na učenje [s]} & skupni čas \\
+Algoritem & naprava & učenje & napovedovanje & [h] \\
+\hline
+CatBoost & CPU (8 jeder) & \num{4.784} & \num{0.0043} & \num{55.1} \\
+XGBoost & CPU (8 jeder) & \num{0.191} & \num{0.0039} & \num{6.6} \\
+TabICL & GPU (H100) & \num{0.536} & \num{0.2347} & \num{3.1} \\
+LightGBM & CPU (8 jeder) & \num{0.225} & \num{0.0056} & \num{2.9} \\
+TabPFN & GPU (H100) & \num{0.547} & \num{0.6754} & \num{1.0} \\
+Naključni gozd & CPU (8 jeder) & \num{0.168} & \num{0.0259} & \num{0.6} \\
+\hline
+\end{tabular}
+\end{table}

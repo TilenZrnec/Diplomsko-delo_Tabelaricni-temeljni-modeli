@@ -471,7 +471,193 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 %    kategoričnih atributov.
 %  - Neuspela učenja in njihovi vzroki.
 
-\todo{Predstavi rezultate: skupna primerjava, rezultati po množicah, statistična značilnost, časi in neuspela učenja.}
+% Vse številke v tem poglavju izvirajo iz zagona cc18_v2 v repozitoriju s kodo
+% (Diplomsko-delo_Koda/results/runs/cc18_v2, commit dc1aeb2). Tabele v mapi
+% rezultati/ in sliki slike/cc18_cd*.pdf so generirane iz datotek summary/*.csv
+% in results.csv s skriptom rezultati/generiraj_iz_cc18_v2.py; številke v
+% besedilu so povzete iz istih datotek (vir je naveden v komentarju ob odstavku).
+% OPOMBA: angleške izvirnike statističnih izrazov ob prvi pojavitvi prestavi v
+% razdelek Protokol vrednotenja, ko bo napisan.
+
+V tem poglavju predstavimo rezultate primerjave šestih algoritmov na
+72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml}. Vsak
+algoritem smo na vsaki podatkovni množici ovrednotili s petkratnim
+stratificiranim prečnim preverjanjem (angl. \emph{stratified cross-validation}),
+ponovljenim trikrat z različnim mešanjem primerov. Na vsak par podatkovne
+množice in algoritma tako pride 15 učenj, skupaj pa 6480 učenj. Protokol je
+podrobneje opisan v razdelku~\ref{sec:protokol}. V tem poglavju meritve zgolj
+predstavimo, njihovo razlago in omejitve pa obravnavamo v
+poglavju~\ref{ch:zakljucek}.
+
+Podatkovno množico imenujemo \emph{nasičena}, če najboljši algoritem na njej
+doseže ROC-AUC vsaj \num{0.995}. Takih je 33 od 72 podatkovnih množic. Ker so
+razlike med algoritmi na nasičenih množicah blizu zgornje meje metrike, vse
+povzetke in statistične teste podamo dvakrat: na vseh 72 podatkovnih množicah in
+na 39 nenasičenih.
+
+\section{Skupna primerjava}
+\label{sec:rez-skupno}
+% Vir: summary/overall.csv, summary/overall_nonsaturated.csv
+
+Tabela~\ref{tab:skupno} povzema uspešnost algoritmov. Za vsako podatkovno
+množico algoritme razvrstimo po povprečnem ROC-AUC čez 15 učenj; najboljši
+prejme rang 1, izenačeni algoritmi si delijo povprečje rangov, algoritem, ki na
+podatkovni množici ni uspel, pa prejme najslabši rang. Povprečni ROC-AUC
+računamo le na podatkovnih množicah, na katerih so uspeli vsi algoritmi, da so
+povprečja izračunana na isti podmnožici.
+
+\input{rezultati/tab_skupno.tex}
+
+Najnižji povprečni rang doseže TabICL (\num{1.58}), ki je bil najboljši na 49
+podatkovnih množicah, sledi mu TabPFN (\num{1.90}, 22 zmag). Med drevesnimi
+ansambli je najuspešnejši CatBoost s povprečnim rangom \num{3.33}, sledijo mu
+LightGBM (\num{4.42}), XGBoost (\num{4.62}) in naključni gozd (\num{5.17}). Enak
+vrstni red se pokaže v povprečnem ROC-AUC, ki se giblje od \num{0.9396} pri
+TabICL do \num{0.9195} pri naključnem gozdu. Brez nasičenih podatkovnih množic
+vrstni red po povprečnem rangu ostane enak, razlike v povprečnem ROC-AUC pa se
+povečajo:
+TabICL doseže \num{0.8885}, CatBoost \num{0.8703} in naključni gozd
+\num{0.8582}.
+
+\section{Statistična značilnost razlik}
+\label{sec:rez-znacilnost}
+% Vir: summary/friedman.csv, summary/nemenyi.csv, summary/wilcoxon_holm.csv
+% in njihove različice *_nonsaturated.csv
+
+Razlike med algoritmi smo preverili po postopku za primerjavo več
+klasifikatorjev na več podatkovnih množicah, ki ga
+priporoča Demšar~\cite{demsar2006statistical}: s Friedmanovim testom, ki
+preveri ničelno domnevo, da so vsi algoritmi enakovredni, z Nemenyijevim testom
+kot naknadnim testom (angl. \emph{post-hoc test}) nad povprečnimi rangi ter s
+parnimi Wilcoxonovimi testi predznačenih rangov (angl. \emph{Wilcoxon
+signed-rank test}) s Holmovim popravkom za večkratno primerjanje. Stopnja
+značilnosti je povsod $\alpha = 0{,}05$.
+
+Friedmanov test ničelno domnevo zavrne tako na vseh 72 podatkovnih množicah
+($\chi^2_F = \num{230.37}$, $p = \num{8.91e-48}$) kot na 39 nenasičenih
+($\chi^2_F = \num{122.21}$, $p = \num{1.07e-24}$). Kritična razdalja
+(angl. \emph{critical difference}) Nemenyijevega testa znaša \num{0.889} na vseh
+in \num{1.207} na nenasičenih podatkovnih množicah; povprečna ranga dveh
+algoritmov, ki se razlikujeta za manj od kritične razdalje, se značilno ne
+razlikujeta. Rezultat prikazujeta diagrama kritične razdalje na
+sliki~\ref{fig:cd}.
+
+\begin{figure}[htbp]
+\centering
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[width=\linewidth]{cc18_cd.pdf}
+\caption{Vseh 72 podatkovnih množic.}
+\label{fig:cd-vse}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{\linewidth}
+\centering
+\includegraphics[width=\linewidth]{cc18_cd_nenasicene.pdf}
+\caption{39 nenasičenih podatkovnih množic.}
+\label{fig:cd-nenasicene}
+\end{subfigure}
+\caption{Diagrama kritične razdalje (Nemenyijev test, $\alpha = 0{,}05$). Na osi
+so povprečni rangi, daljica CD nad osjo ponazarja kritično razdaljo, odebeljene
+vodoravne črte pa povezujejo skupine algoritmov, med katerimi razlika ni
+značilna.}
+\label{fig:cd}
+\end{figure}
+
+Na vseh podatkovnih množicah Nemenyijev test loči tri skupine. Temeljna modela
+TabICL in TabPFN se med seboj značilno ne razlikujeta (razlika povprečnih rangov
+\num{0.32}), sta pa značilno boljša od vseh drevesnih ansamblov. CatBoost se
+značilno razlikuje od vseh preostalih algoritmov, LightGBM, XGBoost in naključni
+gozd pa tvorijo skupino brez značilnih razlik. Na nenasičenih podatkovnih
+množicah se zaradi večje kritične razdalje v skupino brez značilne razlike
+združita tudi CatBoost in LightGBM (razlika povprečnih rangov \num{1.13}).
+
+\input{rezultati/tab_wilcoxon.tex}
+
+Parni Wilcoxonovi testi v tabeli~\ref{tab:wilcoxon} potrdijo razlike med
+temeljnima modeloma in vsemi drevesnimi ansambli ter med CatBoostom in
+preostalimi tremi ansambli, tudi na nenasičenih podatkovnih množicah.
+Neznačilni ostaneta para LightGBM--XGBoost in XGBoost--naključni gozd, na
+nenasičenih množicah pa še par LightGBM--naključni gozd. Parni test pokaže
+značilno razliko pri nekaterih parih, pri katerih je Nemenyijev test ne. Na
+vseh podatkovnih množicah sta to para TabICL--TabPFN in LightGBM--naključni
+gozd ($p_\mathrm{Holm} = \num{0.0046}$ oziroma \num{0.0419}), na
+nenasičenih pa para TabICL--TabPFN ($p_\mathrm{Holm} = \num{0.0197}$) in
+CatBoost--LightGBM ($p_\mathrm{Holm} = \num{3.16e-5}$). TabICL je od TabPFN
+na vseh podatkovnih množicah boljši na 47 in slabši na 20, povprečna razlika
+ROC-AUC pa znaša zgolj \num{0.0010}.
+
+\section{Rezultati po podatkovnih množicah}
+\label{sec:rez-mnozice}
+% Vir: summary/pivot.csv, summary/ranks.csv; razlike so izračunane iz
+% vrednosti v tabeli \ref{tab:mnozice}.
+
+Povprečni ROC-AUC vseh algoritmov na posameznih podatkovnih množicah je zbran v
+tabeli~\ref{tab:mnozice}. Najvišji ROC-AUC je drevesni ansambel dosegel le na
+petih podatkovnih množicah. Na CIFAR\_10 temeljna
+modela nista uspela (razdelek~\ref{sec:rez-neuspehi}), na množici adult je
+CatBoost (\num{0.9302}) presegel TabICL (\num{0.9265}), preostale tri
+(sick, tic-tac-toe in wall-robot-navigation) pa so nasičene, razlika do
+najboljšega temeljnega modela pa je na njih manjša od \num{0.0003}. Na vseh
+drugih 67 podatkovnih množicah je najboljši temeljni model presegel najboljši
+drevesni ansambel. Največja razlika v prid temeljnih modelov je na množicah
+GesturePhaseSegmentationProcessed (\num{0.0635}), balance-scale (\num{0.0487}),
+madelon (\num{0.0459}), vehicle (\num{0.0428}) in jm1 (\num{0.0318}).
+
+Razlike med temeljnima modeloma so praviloma majhne: mediana absolutne razlike
+ROC-AUC med TabICL in TabPFN čez podatkovne množice je \num{0.0008}. Največji
+razliki v prid TabPFN sta na množicah Bioresponse (\num{0.0179}) in
+jungle\_chess\_2pcs\_raw\_endgame\_complete (\num{0.0106}), v prid TabICL pa na
+množicah ilpd (\num{0.0153}) in mfeat-zernike (\num{0.0089}).
+
+\input{rezultati/tab_mnozice.tex}
+
+\section{Časovna zahtevnost}
+\label{sec:rez-casi}
+% Vir: summary/overall.csv (mediane in vsote časov), results.csv (stolpec device)
+
+Čase učenja in napovedovanja povzema tabela~\ref{tab:casi}. Pri branju je treba
+upoštevati, da so drevesni ansambli tekli na osmih procesorskih jedrih,
+temeljna modela pa na grafični procesni enoti NVIDIA H100 (stolpec
+\texttt{device} v datoteki z rezultati), zato izmerjeni časi primerjajo
+kombinacijo algoritma in strojne opreme. Pri temeljnih modelih klic učenja ne
+posodobi uteži (razdelek~\ref{sec:tabpfn}), zato večji del njune računske
+zahtevnosti odpade na napovedovanje.
+
+\input{rezultati/tab_casi.tex}
+
+Skupni čas vseh 6480 učenj je znašal \num{69.4} ure, od tega \num{55.1} ure
+CatBoost. Njegova mediana časa učenja (\num{4.784} s) je več kot dvajsetkrat
+večja od median preostalih treh drevesnih ansamblov (od \num{0.168} do
+\num{0.225} s), kar je skladno z njegovim privzetim številom iteracij
+(razdelek~\ref{sec:catboost}). Mediani časa učenja temeljnih modelov sta
+\num{0.536} s (TabICL) in \num{0.547} s (TabPFN), mediani časa napovedovanja pa
+\num{0.235} s in \num{0.675} s, medtem ko drevesni ansambli napovedujejo v
+največ \num{0.026} s.
+
+\section{Neuspela učenja}
+\label{sec:rez-neuspehi}
+% Vir: results.csv (stolpci error, raw_error, preprocessing),
+% results/runs/cc18_v2/PROVENANCE.md (dodeljeni pomnilnik)
+
+Od 6480 učenj jih 30 ni uspelo. Vsa pripadajo podatkovni množici CIFAR\_10 s
+3072 atributi, in sicer vseh 15 učenj modela TabPFN in vseh 15 učenj modela
+TabICL. Oba modela sta najprej prejela surove podatke, nato pa v skladu s
+politiko predobdelave (razdelek~\ref{sec:predobdelava}) še enkrat poskusila z
+zabeleženim minimalnim popravkom, ki napake ni odpravil. TabPFN je podatke
+zavrnil, ker število atributov presega uradno podprtih 2000. Omejitev je sicer
+mogoče izklopiti z nastavitvijo \texttt{ignore\_pretraining\_limits=True}, ki pa
+je nismo uporabili, saj protokol predvideva privzete nastavitve. TabICL je
+poskusil rezervirati \num{377978880000} bajtov (približno 378~GB) delovnega
+pomnilnika, opravilu pa je bilo dodeljenih 240~GB. Oba neuspeha sta v rangih
+upoštevana kot najslabši rang na tej podatkovni množici, pri povprečnem ROC-AUC
+pa je CIFAR\_10 izpuščen.
+
+\section{Odvisnost od lastnosti podatkovnih množic}
+\label{sec:rez-lastnosti}
+
+\todo{Odvisnost prednosti temeljnih modelov od števila primerov, števila atributov, števila razredov in deleža kategoričnih atributov. Pred pisanjem dodaj v repozitorij s kodo skript, ki to izračuna (npr. Spearmanov koeficient in razbitje po velikosti), da bo imela vsaka številka generiran vir.}
 
 %=========================================================================
 \chapter{Diskusija in zaključek}
