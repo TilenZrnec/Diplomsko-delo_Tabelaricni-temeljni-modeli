@@ -1,90 +1,90 @@
-% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v2/summary/pivot.csv (zagon cc18_v2, commit dc1aeb2). Ne urejaj na roko.
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/summary/pivot.csv (zagon cc18_v3, commit 69cc51e). Ne urejaj na roko.
 {\scriptsize
 \setlength{\tabcolsep}{3pt}
 \begin{longtable}{>{\raggedright\arraybackslash}p{3.3cm}rrrrrr}
-\caption{Povprečni ROC-AUC po podatkovnih množicah (povprečje čez 15 učenj). Nakl.\ gozd označuje naključni gozd. Najboljša vrednost v vrstici je v krepkem tisku (primerjava na štiri decimalke), -- označuje neuspeh, zvezdica pa nasičeno podatkovno množico (najboljši ROC-AUC vsaj \num{0.995}).}
+\caption{Povprečni ROC-AUC po podatkovnih množicah (povprečje čez 15 učenj). Nakl.\ gozd označuje naključni gozd. Najboljša vrednost v vrstici je v krepkem tisku (primerjava na štiri decimalke), zvezdica pa označuje nasičeno podatkovno množico (najboljši ROC-AUC vsaj \num{0.995}).}
 \label{tab:mnozice} \\
 \hline
-Podatkovna množica & TabICL & TabPFN & CatBoost & LightGBM & XGBoost & Nakl.\ gozd \\
+Podatkovna množica & TabPFN-3.5 & TabICL & CatBoost & LightGBM & XGBoost & Nakl.\ gozd \\
 \hline
 \endfirsthead
 \hline
-Podatkovna množica & TabICL & TabPFN & CatBoost & LightGBM & XGBoost & Nakl.\ gozd \\
+Podatkovna množica & TabPFN-3.5 & TabICL & CatBoost & LightGBM & XGBoost & Nakl.\ gozd \\
 \hline
 \endhead
 \hline
 \endfoot
-adult & \num{0.9265} & \num{0.9183} & \textbf{\num{0.9302}} & \num{0.9294} & \num{0.9277} & \num{0.9061} \\
+adult & \textbf{\num{0.9342}} & \num{0.9262} & \num{0.9302} & \num{0.9294} & \num{0.9277} & \num{0.9061} \\
 analcatdata\_\allowbreak authorship$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9997} & \num{0.9998} & \num{0.9995} & \num{0.9999} \\
-analcatdata\_\allowbreak dmft & \textbf{\num{0.5887}} & \num{0.5845} & \num{0.5536} & \num{0.5605} & \num{0.5477} & \num{0.5385} \\
-balance-scale$^{*}$ & \num{0.9993} & \textbf{\num{0.9994}} & \num{0.9506} & \num{0.9279} & \num{0.9318} & \num{0.8387} \\
-bank-marketing & \num{0.9419} & \textbf{\num{0.9449}} & \num{0.9380} & \num{0.9364} & \num{0.9306} & \num{0.9269} \\
+analcatdata\_\allowbreak dmft & \num{0.5815} & \textbf{\num{0.5887}} & \num{0.5536} & \num{0.5605} & \num{0.5477} & \num{0.5385} \\
+balance-scale$^{*}$ & \textbf{\num{0.9996}} & \num{0.9993} & \num{0.9506} & \num{0.9279} & \num{0.9318} & \num{0.8387} \\
+bank-marketing & \textbf{\num{0.9466}} & \num{0.9419} & \num{0.9380} & \num{0.9364} & \num{0.9306} & \num{0.9269} \\
 banknote-authentication$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9996} & \num{0.9999} & \num{0.9999} \\
-Bioresponse & \num{0.8622} & \textbf{\num{0.8801}} & \num{0.8732} & \num{0.8736} & \num{0.8715} & \num{0.8713} \\
-blood-transfusion-service-center & \num{0.7587} & \textbf{\num{0.7593}} & \num{0.7361} & \num{0.6982} & \num{0.6816} & \num{0.6861} \\
-breast-w & \textbf{\num{0.9949}} & \num{0.9943} & \num{0.9931} & \num{0.9926} & \num{0.9902} & \num{0.9918} \\
-car$^{*}$ & \num{0.9999} & \textbf{\num{1.0000}} & \num{0.9997} & \num{0.9992} & \num{0.9997} & \num{0.9987} \\
-churn & \num{0.9316} & \textbf{\num{0.9346}} & \num{0.9240} & \num{0.9189} & \num{0.9213} & \num{0.9166} \\
-CIFAR\_\allowbreak 10 & -- & -- & \textbf{\num{0.9104}} & \num{0.8949} & \num{0.8981} & \num{0.8508} \\
-climate-model-simulation-crashes & \textbf{\num{0.9639}} & \num{0.9565} & \num{0.9562} & \num{0.9423} & \num{0.9446} & \num{0.9195} \\
-cmc & \num{0.7516} & \textbf{\num{0.7533}} & \num{0.7250} & \num{0.7081} & \num{0.7050} & \num{0.7014} \\
-cnae-9$^{*}$ & \textbf{\num{0.9982}} & \num{0.9947} & \num{0.9952} & \num{0.9809} & \num{0.9932} & \num{0.9943} \\
-connect-4 & \textbf{\num{0.9424}} & \num{0.9400} & \num{0.9196} & \num{0.9133} & \num{0.9173} & \num{0.8912} \\
-credit-approval & \textbf{\num{0.9404}} & \num{0.9382} & \num{0.9361} & \num{0.9319} & \num{0.9327} & \num{0.9315} \\
-credit-g & \textbf{\num{0.7947}} & \num{0.7937} & \num{0.7882} & \num{0.7700} & \num{0.7723} & \num{0.7811} \\
-cylinder-bands & \textbf{\num{0.9125}} & \num{0.9091} & \num{0.8727} & \num{0.8807} & \num{0.8837} & \num{0.8892} \\
-Devnagari-Script$^{*}$ & \textbf{\num{0.9999}} & \num{0.9998} & \num{0.9994} & \num{0.9981} & \num{0.9983} & \num{0.9962} \\
-diabetes & \textbf{\num{0.8405}} & \num{0.8398} & \num{0.8335} & \num{0.8001} & \num{0.7916} & \num{0.8253} \\
-dna$^{*}$ & \textbf{\num{0.9956}} & \num{0.9951} & \num{0.9946} & \num{0.9946} & \num{0.9947} & \num{0.9932} \\
-dresses-sales & \textbf{\num{0.6259}} & \num{0.6220} & \num{0.6045} & \num{0.5679} & \num{0.5586} & \num{0.5933} \\
-electricity & \num{0.9804} & \textbf{\num{0.9853}} & \num{0.9562} & \num{0.9545} & \num{0.9697} & \num{0.9702} \\
-eucalyptus & \textbf{\num{0.9374}} & \num{0.9318} & \num{0.9147} & \num{0.9088} & \num{0.9077} & \num{0.9139} \\
-Fashion-MNIST$^{*}$ & \textbf{\num{0.9951}} & \num{0.9943} & \num{0.9932} & \num{0.9934} & \num{0.9935} & \num{0.9907} \\
-first-order-theorem-proving & \textbf{\num{0.8627}} & \num{0.8559} & \num{0.8439} & \num{0.8416} & \num{0.8413} & \num{0.8379} \\
-Gesture\allowbreak Phase\allowbreak Segmentation\allowbreak Processed & \textbf{\num{0.9617}} & \num{0.9602} & \num{0.8983} & \num{0.8890} & \num{0.8927} & \num{0.8922} \\
+Bioresponse & \textbf{\num{0.8854}} & \num{0.8622} & \num{0.8732} & \num{0.8736} & \num{0.8715} & \num{0.8713} \\
+blood-transfusion-service-center & \num{0.7557} & \textbf{\num{0.7587}} & \num{0.7361} & \num{0.6982} & \num{0.6816} & \num{0.6861} \\
+breast-w$^{*}$ & \textbf{\num{0.9951}} & \num{0.9949} & \num{0.9931} & \num{0.9926} & \num{0.9902} & \num{0.9918} \\
+car$^{*}$ & \textbf{\num{1.0000}} & \num{0.9999} & \num{0.9997} & \num{0.9992} & \num{0.9997} & \num{0.9987} \\
+churn & \textbf{\num{0.9343}} & \num{0.9316} & \num{0.9240} & \num{0.9189} & \num{0.9213} & \num{0.9166} \\
+CIFAR\_\allowbreak 10 & \textbf{\num{0.9158}} & \num{0.9050} & \num{0.9104} & \num{0.8949} & \num{0.8981} & \num{0.8508} \\
+climate-model-simulation-crashes & \num{0.9527} & \textbf{\num{0.9639}} & \num{0.9562} & \num{0.9423} & \num{0.9446} & \num{0.9195} \\
+cmc & \textbf{\num{0.7518}} & \num{0.7516} & \num{0.7250} & \num{0.7081} & \num{0.7050} & \num{0.7014} \\
+cnae-9$^{*}$ & \num{0.9977} & \textbf{\num{0.9982}} & \num{0.9952} & \num{0.9809} & \num{0.9932} & \num{0.9943} \\
+connect-4 & \textbf{\num{0.9564}} & \num{0.9424} & \num{0.9196} & \num{0.9133} & \num{0.9173} & \num{0.8912} \\
+credit-approval & \num{0.9401} & \textbf{\num{0.9404}} & \num{0.9361} & \num{0.9319} & \num{0.9327} & \num{0.9315} \\
+credit-g & \textbf{\num{0.8022}} & \num{0.7947} & \num{0.7882} & \num{0.7700} & \num{0.7723} & \num{0.7811} \\
+cylinder-bands & \textbf{\num{0.9447}} & \num{0.9125} & \num{0.8727} & \num{0.8807} & \num{0.8837} & \num{0.8892} \\
+Devnagari-Script$^{*}$ & \textbf{\num{0.9999}} & \textbf{\num{0.9999}} & \num{0.9994} & \num{0.9981} & \num{0.9983} & \num{0.9962} \\
+diabetes & \textbf{\num{0.8428}} & \num{0.8405} & \num{0.8335} & \num{0.8001} & \num{0.7916} & \num{0.8253} \\
+dna$^{*}$ & \num{0.9954} & \textbf{\num{0.9956}} & \num{0.9946} & \num{0.9946} & \num{0.9947} & \num{0.9932} \\
+dresses-sales & \textbf{\num{0.6327}} & \num{0.6259} & \num{0.6045} & \num{0.5679} & \num{0.5586} & \num{0.5933} \\
+electricity$^{*}$ & \textbf{\num{0.9968}} & \num{0.9804} & \num{0.9562} & \num{0.9545} & \num{0.9697} & \num{0.9702} \\
+eucalyptus & \textbf{\num{0.9387}} & \num{0.9374} & \num{0.9147} & \num{0.9088} & \num{0.9077} & \num{0.9139} \\
+Fashion-MNIST$^{*}$ & \textbf{\num{0.9951}} & \textbf{\num{0.9951}} & \num{0.9932} & \num{0.9934} & \num{0.9935} & \num{0.9907} \\
+first-order-theorem-proving & \textbf{\num{0.8641}} & \num{0.8627} & \num{0.8439} & \num{0.8416} & \num{0.8413} & \num{0.8379} \\
+Gesture\allowbreak Phase\allowbreak Segmentation\allowbreak Processed & \textbf{\num{0.9749}} & \num{0.9617} & \num{0.8983} & \num{0.8890} & \num{0.8927} & \num{0.8922} \\
 har$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9999} & \num{0.9999} & \num{0.9999} & \num{0.9995} \\
-ilpd & \textbf{\num{0.7878}} & \num{0.7725} & \num{0.7564} & \num{0.7490} & \num{0.7353} & \num{0.7497} \\
-Internet-Advertisements & \num{0.9837} & \textbf{\num{0.9870}} & \num{0.9758} & \num{0.9809} & \num{0.9785} & \num{0.9847} \\
-isolet$^{*}$ & \textbf{\num{0.9997}} & \num{0.9996} & \num{0.9993} & \num{0.9990} & \num{0.9988} & \num{0.9984} \\
-jm1 & \textbf{\num{0.7803}} & \num{0.7782} & \num{0.7459} & \num{0.7426} & \num{0.7229} & \num{0.7485} \\
-jungle\_\allowbreak chess\_\allowbreak 2pcs\_\allowbreak raw\_\allowbreak endgame\_\allowbreak complete$^{*}$ & \num{0.9872} & \textbf{\num{0.9978}} & \num{0.9754} & \num{0.9747} & \num{0.9779} & \num{0.9385} \\
-kc1 & \textbf{\num{0.8570}} & \num{0.8539} & \num{0.8266} & \num{0.7807} & \num{0.7881} & \num{0.8245} \\
-kc2 & \textbf{\num{0.8442}} & \num{0.8390} & \num{0.8236} & \num{0.7841} & \num{0.7681} & \num{0.8184} \\
-kr-vs-kp$^{*}$ & \textbf{\num{0.9998}} & \num{0.9997} & \num{0.9995} & \num{0.9997} & \num{0.9997} & \num{0.9988} \\
+ilpd & \num{0.7807} & \textbf{\num{0.7878}} & \num{0.7564} & \num{0.7490} & \num{0.7353} & \num{0.7497} \\
+Internet-Advertisements & \textbf{\num{0.9914}} & \num{0.9837} & \num{0.9758} & \num{0.9809} & \num{0.9785} & \num{0.9847} \\
+isolet$^{*}$ & \textbf{\num{0.9997}} & \textbf{\num{0.9997}} & \num{0.9993} & \num{0.9990} & \num{0.9988} & \num{0.9984} \\
+jm1 & \textbf{\num{0.7913}} & \num{0.7803} & \num{0.7459} & \num{0.7426} & \num{0.7229} & \num{0.7485} \\
+jungle\_\allowbreak chess\_\allowbreak 2pcs\_\allowbreak raw\_\allowbreak endgame\_\allowbreak complete$^{*}$ & \textbf{\num{0.9970}} & \num{0.9872} & \num{0.9754} & \num{0.9747} & \num{0.9779} & \num{0.9385} \\
+kc1 & \textbf{\num{0.8583}} & \num{0.8570} & \num{0.8266} & \num{0.7807} & \num{0.7881} & \num{0.8245} \\
+kc2 & \num{0.8430} & \textbf{\num{0.8442}} & \num{0.8236} & \num{0.7841} & \num{0.7681} & \num{0.8184} \\
+kr-vs-kp$^{*}$ & \textbf{\num{0.9998}} & \textbf{\num{0.9998}} & \num{0.9995} & \num{0.9997} & \num{0.9997} & \num{0.9988} \\
 letter$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9997} & \num{0.9997} & \num{0.9996} & \num{0.9995} \\
-madelon & \textbf{\num{0.9706}} & \num{0.9667} & \num{0.9246} & \num{0.8947} & \num{0.8838} & \num{0.7786} \\
-mfeat-factors$^{*}$ & \textbf{\num{0.9999}} & \num{0.9998} & \num{0.9990} & \num{0.9987} & \num{0.9983} & \num{0.9979} \\
-mfeat-fourier & \textbf{\num{0.9937}} & \num{0.9924} & \num{0.9840} & \num{0.9816} & \num{0.9817} & \num{0.9812} \\
-mfeat-karhunen$^{*}$ & \textbf{\num{0.9999}} & \textbf{\num{0.9998}} & \num{0.9991} & \num{0.9983} & \num{0.9976} & \num{0.9973} \\
-mfeat-morphological & \textbf{\num{0.9704}} & \num{0.9697} & \num{0.9638} & \num{0.9566} & \num{0.9580} & \num{0.9554} \\
-mfeat-pixel$^{*}$ & \textbf{\num{0.9998}} & \num{0.9997} & \num{0.9994} & \num{0.9990} & \num{0.9988} & \num{0.9987} \\
-mfeat-zernike & \textbf{\num{0.9919}} & \num{0.9829} & \num{0.9745} & \num{0.9661} & \num{0.9676} & \num{0.9680} \\
+madelon & \textbf{\num{0.9745}} & \num{0.9706} & \num{0.9246} & \num{0.8947} & \num{0.8838} & \num{0.7786} \\
+mfeat-factors$^{*}$ & \textbf{\num{0.9999}} & \textbf{\num{0.9999}} & \num{0.9990} & \num{0.9987} & \num{0.9983} & \num{0.9979} \\
+mfeat-fourier & \textbf{\num{0.9941}} & \num{0.9937} & \num{0.9840} & \num{0.9816} & \num{0.9817} & \num{0.9812} \\
+mfeat-karhunen$^{*}$ & \textbf{\num{0.9998}} & \textbf{\num{0.9999}} & \num{0.9991} & \num{0.9983} & \num{0.9976} & \num{0.9973} \\
+mfeat-morphological & \textbf{\num{0.9715}} & \num{0.9704} & \num{0.9638} & \num{0.9566} & \num{0.9580} & \num{0.9554} \\
+mfeat-pixel$^{*}$ & \textbf{\num{0.9998}} & \textbf{\num{0.9998}} & \num{0.9994} & \num{0.9990} & \num{0.9988} & \num{0.9987} \\
+mfeat-zernike & \num{0.9908} & \textbf{\num{0.9919}} & \num{0.9745} & \num{0.9661} & \num{0.9676} & \num{0.9680} \\
 Mice\allowbreak Protein$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9997} & \num{0.9999} \\
 mnist\_\allowbreak 784$^{*}$ & \textbf{\num{0.9999}} & \textbf{\num{0.9999}} & \num{0.9993} & \num{0.9995} & \num{0.9996} & \num{0.9990} \\
-nomao$^{*}$ & \textbf{\num{0.9967}} & \num{0.9965} & \num{0.9954} & \num{0.9950} & \num{0.9957} & \num{0.9942} \\
-numerai28.6 & \num{0.5312} & \textbf{\num{0.5315}} & \num{0.5196} & \num{0.5228} & \num{0.5137} & \num{0.5137} \\
+nomao$^{*}$ & \textbf{\num{0.9979}} & \num{0.9967} & \num{0.9954} & \num{0.9950} & \num{0.9957} & \num{0.9942} \\
+numerai28.6 & \textbf{\num{0.5379}} & \num{0.5312} & \num{0.5196} & \num{0.5228} & \num{0.5137} & \num{0.5137} \\
 optdigits$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9998} & \num{0.9996} & \num{0.9995} & \num{0.9996} \\
-ozone-level-8hr & \num{0.9405} & \textbf{\num{0.9429}} & \num{0.9263} & \num{0.9200} & \num{0.9213} & \num{0.9099} \\
-pc1 & \textbf{\num{0.8929}} & \num{0.8843} & \num{0.8759} & \num{0.8576} & \num{0.8463} & \num{0.8461} \\
-pc3 & \textbf{\num{0.8706}} & \num{0.8622} & \num{0.8433} & \num{0.8208} & \num{0.8146} & \num{0.8377} \\
-pc4 & \textbf{\num{0.9610}} & \num{0.9588} & \num{0.9524} & \num{0.9454} & \num{0.9445} & \num{0.9427} \\
+ozone-level-8hr & \textbf{\num{0.9435}} & \num{0.9404} & \num{0.9263} & \num{0.9200} & \num{0.9213} & \num{0.9099} \\
+pc1 & \textbf{\num{0.8955}} & \num{0.8929} & \num{0.8759} & \num{0.8576} & \num{0.8463} & \num{0.8461} \\
+pc3 & \textbf{\num{0.8728}} & \num{0.8706} & \num{0.8433} & \num{0.8208} & \num{0.8146} & \num{0.8377} \\
+pc4 & \textbf{\num{0.9647}} & \num{0.9610} & \num{0.9524} & \num{0.9454} & \num{0.9445} & \num{0.9427} \\
 pendigits$^{*}$ & \textbf{\num{0.9999}} & \textbf{\num{0.9999}} & \num{0.9998} & \num{0.9997} & \num{0.9997} & \num{0.9997} \\
-Phishing\allowbreak Websites$^{*}$ & \num{0.9983} & \textbf{\num{0.9984}} & \num{0.9954} & \num{0.9959} & \num{0.9966} & \num{0.9956} \\
-phoneme & \num{0.9759} & \textbf{\num{0.9777}} & \num{0.9535} & \num{0.9535} & \num{0.9552} & \num{0.9616} \\
-qsar-biodeg & \textbf{\num{0.9478}} & \num{0.9455} & \num{0.9371} & \num{0.9360} & \num{0.9313} & \num{0.9340} \\
-satimage$^{*}$ & \num{0.9958} & \textbf{\num{0.9963}} & \num{0.9917} & \num{0.9911} & \num{0.9908} & \num{0.9897} \\
-segment$^{*}$ & \textbf{\num{0.9977}} & \num{0.9975} & \num{0.9957} & \num{0.9952} & \num{0.9947} & \num{0.9952} \\
-semeion$^{*}$ & \textbf{\num{0.9993}} & \num{0.9990} & \num{0.9978} & \num{0.9968} & \num{0.9956} & \num{0.9961} \\
-sick$^{*}$ & \num{0.9979} & \textbf{\num{0.9981}} & \textbf{\num{0.9981}} & \num{0.9977} & \num{0.9965} & \num{0.9966} \\
-spambase & \textbf{\num{0.9924}} & \num{0.9914} & \num{0.9883} & \num{0.9894} & \num{0.9879} & \num{0.9864} \\
-splice$^{*}$ & \textbf{\num{0.9964}} & \num{0.9956} & \num{0.9949} & \num{0.9946} & \num{0.9943} & \num{0.9923} \\
-steel-plates-fault & \textbf{\num{0.9760}} & \num{0.9753} & \num{0.9661} & \num{0.9666} & \num{0.9655} & \num{0.9606} \\
+Phishing\allowbreak Websites$^{*}$ & \num{0.9981} & \textbf{\num{0.9983}} & \num{0.9954} & \num{0.9959} & \num{0.9966} & \num{0.9956} \\
+phoneme & \textbf{\num{0.9784}} & \num{0.9759} & \num{0.9535} & \num{0.9535} & \num{0.9552} & \num{0.9616} \\
+qsar-biodeg & \num{0.9451} & \textbf{\num{0.9478}} & \num{0.9371} & \num{0.9360} & \num{0.9313} & \num{0.9340} \\
+satimage$^{*}$ & \textbf{\num{0.9964}} & \num{0.9958} & \num{0.9917} & \num{0.9911} & \num{0.9908} & \num{0.9897} \\
+segment$^{*}$ & \textbf{\num{0.9978}} & \num{0.9977} & \num{0.9957} & \num{0.9952} & \num{0.9947} & \num{0.9952} \\
+semeion$^{*}$ & \num{0.9992} & \textbf{\num{0.9993}} & \num{0.9978} & \num{0.9968} & \num{0.9956} & \num{0.9961} \\
+sick$^{*}$ & \textbf{\num{0.9989}} & \num{0.9979} & \num{0.9981} & \num{0.9977} & \num{0.9965} & \num{0.9966} \\
+spambase & \textbf{\num{0.9930}} & \num{0.9924} & \num{0.9883} & \num{0.9894} & \num{0.9879} & \num{0.9864} \\
+splice$^{*}$ & \num{0.9960} & \textbf{\num{0.9964}} & \num{0.9949} & \num{0.9946} & \num{0.9943} & \num{0.9923} \\
+steel-plates-fault & \textbf{\num{0.9801}} & \num{0.9760} & \num{0.9661} & \num{0.9666} & \num{0.9655} & \num{0.9606} \\
 texture$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9999} & \num{0.9998} & \num{0.9998} & \num{0.9996} \\
-tic-tac-toe$^{*}$ & \num{0.9996} & \num{0.9997} & \textbf{\num{1.0000}} & \num{0.9992} & \textbf{\num{1.0000}} & \num{0.9961} \\
-vehicle & \num{0.9782} & \textbf{\num{0.9783}} & \num{0.9356} & \num{0.9301} & \num{0.9300} & \num{0.9274} \\
+tic-tac-toe$^{*}$ & \num{0.9992} & \num{0.9996} & \textbf{\num{1.0000}} & \num{0.9992} & \textbf{\num{1.0000}} & \num{0.9961} \\
+vehicle & \textbf{\num{0.9834}} & \num{0.9782} & \num{0.9356} & \num{0.9301} & \num{0.9300} & \num{0.9274} \\
 vowel$^{*}$ & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9992} & \num{0.9970} & \num{0.9952} & \num{0.9989} \\
-wall-robot-navigation$^{*}$ & \num{0.9999} & \num{0.9998} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9999} \\
-wdbc$^{*}$ & \num{0.9973} & \textbf{\num{0.9974}} & \num{0.9937} & \num{0.9926} & \num{0.9935} & \num{0.9895} \\
-wilt$^{*}$ & \textbf{\num{0.9960}} & \num{0.9951} & \num{0.9915} & \num{0.9885} & \num{0.9891} & \num{0.9868} \\
+wall-robot-navigation$^{*}$ & \num{0.9999} & \num{0.9999} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \textbf{\num{1.0000}} & \num{0.9999} \\
+wdbc$^{*}$ & \num{0.9970} & \textbf{\num{0.9973}} & \num{0.9937} & \num{0.9926} & \num{0.9935} & \num{0.9895} \\
+wilt$^{*}$ & \num{0.9958} & \textbf{\num{0.9960}} & \num{0.9915} & \num{0.9885} & \num{0.9891} & \num{0.9868} \\
 \end{longtable}
 }

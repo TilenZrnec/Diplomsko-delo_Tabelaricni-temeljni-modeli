@@ -1,7 +1,7 @@
-% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v2/summary/overall.csv, results/runs/cc18_v2/results.csv (zagon cc18_v2, commit dc1aeb2). Ne urejaj na roko.
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/summary/overall.csv, results/runs/cc18_v3/results.csv (zagon cc18_v3, commit 69cc51e). Ne urejaj na roko.
 \begin{table}[htbp]
 \centering
-\caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh 1080 učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi.}
+\caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh 1080 učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi; temeljna modela sta tekla na dveh izvedbah grafične procesne enote (H100 80GB HBM3 in H100 PCIe), drevesni ansambli pa na procesorjih različnih vozlišč gruče.}
 \label{tab:casi}
 \footnotesize
 \begin{tabular}{llrrr}
@@ -9,12 +9,12 @@
  & & \multicolumn{2}{c}{mediana na učenje [s]} & skupni čas \\
 Algoritem & naprava & učenje & napovedovanje & [h] \\
 \hline
-CatBoost & CPU (8 jeder) & \num{4.784} & \num{0.0043} & \num{55.1} \\
-XGBoost & CPU (8 jeder) & \num{0.191} & \num{0.0039} & \num{6.6} \\
-TabICL & GPU (H100) & \num{0.536} & \num{0.2347} & \num{3.1} \\
-LightGBM & CPU (8 jeder) & \num{0.225} & \num{0.0056} & \num{2.9} \\
-TabPFN & GPU (H100) & \num{0.547} & \num{0.6754} & \num{1.0} \\
-Naključni gozd & CPU (8 jeder) & \num{0.168} & \num{0.0259} & \num{0.6} \\
+CatBoost & CPU (8 jeder) & \num{4.584} & \num{0.0043} & \num{47.8} \\
+XGBoost & CPU (8 jeder) & \num{0.218} & \num{0.0040} & \num{5.5} \\
+TabICL & GPU (H100) & \num{0.487} & \num{0.2000} & \num{4.0} \\
+LightGBM & CPU (8 jeder) & \num{0.252} & \num{0.0057} & \num{2.5} \\
+TabPFN-3.5 & GPU (H100) & \num{0.211} & \num{0.4870} & \num{2.5} \\
+Naključni gozd & CPU (8 jeder) & \num{0.180} & \num{0.0261} & \num{0.5} \\
 \hline
 \end{tabular}
 \end{table}

@@ -1,0 +1,21 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/results.csv, results/runs/cc18_v3/summary/overall.csv (zagon cc18_v3, commit 69cc51e; cc18_v2 iz gita, commit 5a14045). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Primerjava z zagonom s prejšnjo zamrznitvijo različic knjižnic, v katerem je bil namesto modela TabPFN-3.5 uporabljen TabPFN-3, preostali algoritmi, podatkovne množice, delitve in semena pa so bili enaki. Razlike ROC-AUC so izračunane na posameznih učenjih (novi minus prejšnji zagon), na katerih sta uspela oba zagona (6450 od 6480). V prejšnjem zagonu modela TabPFN-3 in TabICL na množici CIFAR\_10 nista uspela, kar je v njegovih povprečnih rangih upoštevano z najslabšim rangom.}
+\label{tab:zagona}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrr}
+\hline
+ & \multicolumn{2}{c}{povprečni rang} & \multicolumn{3}{c}{razlika ROC-AUC na učenje} \\
+Algoritem & prejšnji & novi & povprečje & največja $|\cdot|$ & spremenjenih \\
+\hline
+TabPFN-3 $\rightarrow$ TabPFN-3.5 & \num{1.90} & \num{1.43} & \num{0.0033} & \num{0.0638} & 968/1065 \\
+TabICL & \num{1.58} & \num{1.88} & \num{-3.7e-06} & \num{0.0037} & 147/1065 \\
+CatBoost & \num{3.33} & \num{3.37} & 0 & 0 & 0/1080 \\
+LightGBM & \num{4.42} & \num{4.46} & 0 & 0 & 0/1080 \\
+XGBoost & \num{4.62} & \num{4.66} & 0 & 0 & 0/1080 \\
+Naključni gozd & \num{5.17} & \num{5.21} & \num{-3.8e-08} & \num{2.3e-05} & 31/1080 \\
+\hline
+\end{tabular}
+\end{table}
