@@ -4,9 +4,9 @@ Viri (repozitorij s kodo, results/runs/; kaj je kateri zagon: CLAUDE.md, Run reg
   cc18_v4/combined         rezultat diplome na OpenML-CC18: naključni gozd in XGBoost iz
                            cc18_v4 (popravljena predobdelava, commit 8b601d1), LightGBM,
                            CatBoost, TabPFN-3.5 in TabICL iz cc18_v3 (commit 69cc51e)
-  cc18_v3 / cc18_v4        učinek popravka predobdelave (naključni gozd, XGBoost)
-  cc18_v3 / cc18_v2        primerjava TabPFN-3 in TabPFN-3.5 pri sicer enaki kodi
-                           (cc18_v2 iz gita, commit V2_COMMIT)
+  cc18_v3 / cc18_v2        primerjava TabPFN-3 in TabPFN-3.5 (samo številke v besedilu;
+                           TabPFN-3.5 in TabICL v končnih rezultatih sta iz cc18_v3;
+                           cc18_v2 iz gita, commit V2_COMMIT)
   medic3_raw_v2/combined,  Medic3 z vsemi 220 razredi oziroma s 160 najpogostejšimi
   medic3_160_v2/combined   (naključni gozd in XGBoost iz *_v2, ostali iz medic3_raw/_160)
   medic3_raw/diagnostics,  diagnostika LightGBM na Medic3 (fold 0)
@@ -33,8 +33,6 @@ OUT = sys.argv[1]; SLIKE = sys.argv[2]
 IME = {'random_forest': 'Naključni gozd', 'xgboost': 'XGBoost', 'lightgbm': 'LightGBM',
        'catboost': 'CatBoost', 'tabpfn': 'TabPFN-3.5', 'tabicl': 'TabICL'}
 TREES = ['catboost', 'lightgbm', 'xgboost', 'random_forest']
-# OpenML: podatkovne množice CC18 z manjkajočimi vrednostmi (CLAUDE.md, Preprocessing policy -> Audit)
-NAN_IDS = {1590, 38, 40966, 6332, 23381, 188, 29, 1053, 15}
 
 sources = json.load(open(R + '/sources.json'))
 C_NEW, C_BASE = sources['new']['git_commit'], sources['base']['git_commit']
@@ -174,71 +172,15 @@ write('tab_mnozice.tex', t)
 assert json.load(open(V3 + '/manifest.json'))['pip_freeze'] == json.load(open(V4 + '/manifest.json'))['pip_freeze']
 shutil.copyfile(V3 + '/summary/razlicice.tex', os.path.join(OUT, 'tab_razlicice.tex'))
 
-# 6. Učinek popravka predobdelave (cc18_v3 -> cc18_v4, naključni gozd in XGBoost) ---------
-a3 = pd.read_csv(V3 + '/results.csv'); a4 = pd.read_csv(V4 + '/results.csv')
-k = ['dataset_id', 'algorithm', 'fold']
-pp = a4.merge(a3[k + ['roc_auc']], on=k, suffixes=('', '_v3'))
-pp['d'] = pp.roc_auc - pp.roc_auc_v3
-pp['affected'] = np.where(pp.algorithm == 'xgboost', pp.n_categorical > 0, pp.dataset_id.isin(NAN_IDS))
-popr = {}
-t = src([V3 + '/results.csv', V4 + '/results.csv'], what=f"cc18_v3, commit {C_BASE}, proti cc18_v4, commit {C_NEW}")
-t += r"""\begin{table}[htbp]
-\centering
-\caption{Učinek popravka predobdelave na zbirki OpenML-CC18. Pri XGBoost se je vhod spremenil le na podatkovnih množicah s kategoričnimi atributi, pri naključnem gozdu le na tistih z manjkajočimi vrednostmi. Razlike so izračunane na istih 15 delitvah (po popravku minus pred njim); boljši, slabši in enak se nanaša na povprečni ROC-AUC podatkovne množice, primerjan na štiri decimalke.}
-\label{tab:popravek}
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrrrr}
-\hline
- & \multicolumn{2}{c}{nespremenjen vhod} & \multicolumn{3}{c}{spremenjen vhod} \\
- & & največja $|\cdot|$ & & boljši: & povprečna \\
-Algoritem & množice & na učenje & množice & slabši:enak & razlika \\
-\hline
-"""
-for algo in ('xgboost', 'random_forest'):
-    x = pp[pp.algorithm == algo]
-    un, af = x[~x.affected], x[x.affected]
-    g = af.groupby('dataset').agg(new=('roc_auc', 'mean'), old=('roc_auc_v3', 'mean'))
-    ch = (g.new - g.old).round(4)
-    popr[algo] = dict(n_un=un.dataset_id.nunique(), max_un=un.d.abs().max(), n_un_fits_changed=int((un.d != 0).sum()),
-                      n_un_fits=len(un), n_af=af.dataset_id.nunique(), better=int((ch > 0).sum()),
-                      worse=int((ch < 0).sum()), equal=int((ch == 0).sum()), mean=(g.new - g.old).mean(),
-                      extremes=(g.new - g.old).sort_values().iloc[[0, 1, -2, -1]].round(4).to_dict())
-    q = popr[algo]
-    t += (f"{IME[algo]} & {q['n_un']} & {nd(q['max_un'])} & {q['n_af']} & {q['better']}:{q['worse']}:{q['equal']} & "
-          f"{nd(q['mean'])} \\\\\n")
-t += "\\hline\n\\end{tabular}\n\\end{table}\n"
-write('tab_popravek.tex', t)
-
 # 7. Primerjava TabPFN-3 / TabPFN-3.5: cc18_v3 proti cc18_v2 (ista koda, le drug TabPFN) -----
+a3 = pd.read_csv(V3 + '/results.csv')
 ov3 = pd.read_csv(V3 + '/summary/overall.csv').set_index('algorithm')
 a = v2('results.csv'); ov2 = v2('summary/overall.csv').set_index('algorithm')
 kk = ['dataset', 'algorithm', 'fold']
 mm = a3.merge(a[kk + ['roc_auc']], on=kk, suffixes=('', '_v2'))
 mm['d'] = mm.roc_auc - mm.roc_auc_v2
 both = mm.dropna(subset=['roc_auc', 'roc_auc_v2'])
-ORDER3 = list(ov3.index)
-t = src([V3 + '/results.csv', V3 + '/summary/overall.csv'],
-        what=f"glavni zagon cc18_v3, commit {C_BASE}; cc18_v2 iz gita, commit {V2_COMMIT}")
-t += r"""\begin{table}[htbp]
-\centering
-\caption{Primerjava glavnega zagona z zagonom s prejšnjo zamrznitvijo različic knjižnic, v katerem je bil namesto modela TabPFN-3.5 uporabljen TabPFN-3; koda, podatkovne množice, delitve in semena so bili enaki. Oba zagona sta tekla pred popravkom predobdelave naključnega gozda in modela XGBoost (razdelek~\ref{sec:rez-popravek}), zato primerjava kaže le učinek zamenjave knjižnic. Razlike ROC-AUC so izračunane na posameznih učenjih (novi minus prejšnji zagon), na katerih sta uspela oba zagona (""" + f"{len(both)} od {len(mm)}" + r"""). V prejšnjem zagonu modela TabPFN-3 in TabICL na množici CIFAR\_10 nista uspela, kar je v njegovih povprečnih rangih upoštevano z najslabšim rangom.}
-\label{tab:zagona}
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{lrrrrr}
-\hline
- & \multicolumn{2}{c}{povprečni rang} & \multicolumn{3}{c}{razlika ROC-AUC na učenje} \\
-Algoritem & prejšnji & novi & povprečje & največja $|\cdot|$ & spremenjenih \\
-\hline
-"""
-for algo in ORDER3:
-    x = both[both.algorithm == algo]
-    label = 'TabPFN-3 $\\rightarrow$ TabPFN-3.5' if algo == 'tabpfn' else IME[algo]
-    t += (f"{label} & {n(ov2.loc[algo, 'mean_rank'], 2)} & {n(ov3.loc[algo, 'mean_rank'], 2)} & "
-          f"{nd(x.d.mean())} & {nd(x.d.abs().max())} & {int((x.d != 0).sum())}/{len(x)} \\\\\n")
-t += "\\hline\n\\end{tabular}\n\\end{table}\n"
-write('tab_zagona.tex', t)
+# (tabele ni več; besedilo navaja le številke, ki jih skript izpiše spodaj)
 
 # 8. Medic3 -----------------------------------------------------------------------
 def medic(path):
@@ -361,15 +303,6 @@ print('tabicl-tabpfn |d| mediana', round(dd.abs().median(), 5), 'ekstremi', dd.s
 print('skupaj h', round(ov.total_h.sum(), 1), ov.set_index('algorithm').total_h.round(2).to_dict())
 print('mediane', ov.set_index('algorithm')[['train_time_median_s', 'inference_time_median_s']].round(4).to_dict())
 print('CIFAR_10', pv.loc['CIFAR_10', ORDER].round(4).to_dict())
-print('vozlisca RF/XGB v cc18_v4:', a4.hostname.value_counts().to_dict())
-print('== popravek (cc18_v3 -> cc18_v4) ==')
-for algo, q in popr.items():
-    print(algo, {k: (round(v, 6) if isinstance(v, float) else v) for k, v in q.items()})
-for f in ('wilcoxon_holm.csv', 'wilcoxon_holm_nonsaturated.csv'):
-    w3 = pd.read_csv(V3 + '/summary/' + f).set_index(['a', 'b']); w4 = pd.read_csv(S + '/' + f).set_index(['a', 'b'])
-    ch = w3.join(w4, lsuffix='_v3', rsuffix='_v4'); ch = ch[ch.significant_v3 != ch.significant_v4]
-    print('popravek spremenil znacilnost', f, [(i, round(r.p_holm_v3, 4), round(r.p_holm_v4, 4)) for i, r in ch.iterrows()])
-print('popravek: vrstni red rangov v3', list(ov3.index), 'combined', ORDER)
 print('== TabPFN-3 / 3.5 (cc18_v3 proti cc18_v2) ==')
 pd2 = a[a.error.isna()].groupby(['dataset', 'algorithm']).roc_auc.mean().unstack()
 pv3 = pd.read_csv(V3 + '/summary/pivot.csv').set_index('dataset')
@@ -397,9 +330,3 @@ for lab, path in (('raw', RUNS + '/medic3_raw'), ('160', RUNS + '/medic3_160')):
           '| 4.6.0 default', old.loc['default', ['roc_auc', 'train_logloss_last']].round(4).to_dict())
     rr = pd.read_csv(path + '/results.csv'); lg = rr[rr.algorithm == 'lightgbm'].roc_auc
     print('   LightGBM vseh 15 ucenj: min', round(lg.min(), 4), 'max', round(lg.max(), 4))
-for lab, old, new in (('raw', RUNS + '/medic3_raw', RUNS + '/medic3_raw_v2'), ('160', RUNS + '/medic3_160', RUNS + '/medic3_160_v2')):
-    o = pd.read_csv(old + '/results.csv'); w = pd.read_csv(new + '/results.csv')
-    j = w.merge(o, on=['algorithm', 'fold'], suffixes=('', '_old'))
-    for algo in ('random_forest', 'xgboost'):
-        s = j[j.algorithm == algo]; d = s.roc_auc - s.roc_auc_old
-        print(f'popravek Medic3 {lab} {algo}: {s.roc_auc_old.mean():.4f} -> {s.roc_auc.mean():.4f}, boljsi {int((d > 0).sum())}/15, max|d| {d.abs().max():.2e}')
