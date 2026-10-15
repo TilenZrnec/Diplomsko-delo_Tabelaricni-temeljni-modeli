@@ -1,4 +1,4 @@
-% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/summary/overall.csv, results/runs/cc18_v3/summary/overall_nonsaturated.csv (zagon cc18_v3, commit 69cc51e). Ne urejaj na roko.
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v4/combined/summary/overall.csv, results/runs/cc18_v4/combined/summary/overall_nonsaturated.csv (zbirka cc18_v4/combined: naključni gozd in XGBoost iz cc18_v4, commit 8b601d1, ostali iz cc18_v3, commit 69cc51e). Ne urejaj na roko.
 \begin{table}[htbp]
 \centering
 \caption{Skupna primerjava algoritmov na zbirki OpenML-CC18. Vsi algoritmi so uspeli na vseh podatkovnih množicah, zato sta povprečni ROC-AUC in povprečni rang izračunana na vseh 72 oziroma 37 množicah. Zmage štejejo prvo mesto, vključno z izenačitvami.}
@@ -10,12 +10,12 @@
  & \multicolumn{4}{c}{vseh 72 množic} & \multicolumn{3}{c}{37 nenasičenih množic} \\
 Algoritem & ROC-AUC & rang & zmage & neuspehi & ROC-AUC & rang & zmage \\
 \hline
-TabPFN-3.5 & \num{0.9416} & \num{1.43} & 48 & 0 & \num{0.8877} & \num{1.24} & 29 \\
-TabICL & \num{0.9391} & \num{1.88} & 26 & 0 & \num{0.8836} & \num{2.03} & 8 \\
-CatBoost & \num{0.9283} & \num{3.37} & 1 & 0 & \num{0.8657} & \num{3.30} & 0 \\
-LightGBM & \num{0.9222} & \num{4.46} & 0 & 0 & \num{0.8552} & \num{4.49} & 0 \\
-XGBoost & \num{0.9209} & \num{4.66} & 2 & 0 & \num{0.8519} & \num{4.92} & 0 \\
-Naključni gozd & \num{0.9185} & \num{5.21} & 0 & 0 & \num{0.8514} & \num{5.03} & 0 \\
+TabPFN-3.5 & \num{0.9416} & \num{1.42} & 48 & 0 & \num{0.8877} & \num{1.24} & 29 \\
+TabICL & \num{0.9391} & \num{1.86} & 26 & 0 & \num{0.8836} & \num{2.03} & 8 \\
+CatBoost & \num{0.9283} & \num{3.39} & 1 & 0 & \num{0.8657} & \num{3.32} & 0 \\
+LightGBM & \num{0.9222} & \num{4.47} & 0 & 0 & \num{0.8552} & \num{4.49} & 0 \\
+XGBoost & \num{0.9208} & \num{4.67} & 1 & 0 & \num{0.8516} & \num{4.97} & 0 \\
+Naključni gozd & \num{0.9184} & \num{5.19} & 0 & 0 & \num{0.8511} & \num{4.95} & 0 \\
 \hline
 \end{tabular}
 \end{table}

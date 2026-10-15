@@ -1,0 +1,22 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/medic3_raw_v2/combined/summary/per_dataset.csv, results/runs/medic3_160_v2/combined/summary/per_dataset.csv (naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Rezultati na podatkovnem naboru Medic3 z vsemi 220 razredi in s 160 najpogostejšimi razredi: povprečni ROC-AUC $\pm$ standardni odklon čez 15 učenj ter mediani časa učenja in napovedovanja na učenje. -- označuje neuspeh vseh učenj (TabPFN-3.5 sprejme največ 160 razredov). Časi primerjajo kombinacijo algoritma in strojne opreme (razdelek~\ref{sec:rez-casi}).}
+\label{tab:medic3}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrr}
+\hline
+ & \multicolumn{3}{c}{220 razredov} & \multicolumn{3}{c}{160 razredov} \\
+ & & \multicolumn{2}{c}{mediana [s]} & & \multicolumn{2}{c}{mediana [s]} \\
+Algoritem & ROC-AUC & učenje & napoved. & ROC-AUC & učenje & napoved. \\
+\hline
+TabPFN-3.5 & \multicolumn{1}{c}{--} & -- & -- & \num{0.9614} $\pm$ \num{0.0007} & \num{2.3} & \num{74.4} \\
+CatBoost & \num{0.9551} $\pm$ \num{0.0010} & \num{8142.6} & \num{0.3} & \num{0.9599} $\pm$ \num{0.0009} & \num{5549.8} & \num{0.2} \\
+TabICL & \num{0.9499} $\pm$ \num{0.0016} & \num{10.3} & \num{79.8} & \num{0.9543} $\pm$ \num{0.0011} & \num{10.0} & \num{76.6} \\
+XGBoost & \num{0.9306} $\pm$ \num{0.0023} & \num{303.5} & \num{3.9} & \num{0.9400} $\pm$ \num{0.0019} & \num{129.6} & \num{1.8} \\
+Naključni gozd & \num{0.8394} $\pm$ \num{0.0025} & \num{13.6} & \num{0.5} & \num{0.8726} $\pm$ \num{0.0014} & \num{11.1} & \num{0.3} \\
+LightGBM & \num{0.5028} $\pm$ \num{0.0048} & \num{59.8} & \num{1.2} & \num{0.5057} $\pm$ \num{0.0063} & \num{49.7} & \num{1.3} \\
+\hline
+\end{tabular}
+\end{table}

@@ -1,4 +1,4 @@
-% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/summary/overall.csv, results/runs/cc18_v3/results.csv (zagon cc18_v3, commit 69cc51e). Ne urejaj na roko.
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v4/combined/summary/overall.csv, results/runs/cc18_v4/combined/results.csv (zbirka cc18_v4/combined: naključni gozd in XGBoost iz cc18_v4, commit 8b601d1, ostali iz cc18_v3, commit 69cc51e). Ne urejaj na roko.
 \begin{table}[htbp]
 \centering
 \caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh 1080 učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi; temeljna modela sta tekla na dveh izvedbah grafične procesne enote (H100 80GB HBM3 in H100 PCIe), drevesni ansambli pa na procesorjih različnih vozlišč gruče.}
@@ -10,11 +10,11 @@
 Algoritem & naprava & učenje & napovedovanje & [h] \\
 \hline
 CatBoost & CPU (8 jeder) & \num{4.584} & \num{0.0043} & \num{47.8} \\
-XGBoost & CPU (8 jeder) & \num{0.218} & \num{0.0040} & \num{5.5} \\
+XGBoost & CPU (8 jeder) & \num{0.176} & \num{0.0037} & \num{5.3} \\
 TabICL & GPU (H100) & \num{0.487} & \num{0.2000} & \num{4.0} \\
 LightGBM & CPU (8 jeder) & \num{0.252} & \num{0.0057} & \num{2.5} \\
 TabPFN-3.5 & GPU (H100) & \num{0.211} & \num{0.4870} & \num{2.5} \\
-Naključni gozd & CPU (8 jeder) & \num{0.180} & \num{0.0261} & \num{0.5} \\
+Naključni gozd & CPU (8 jeder) & \num{0.121} & \num{0.0151} & \num{0.3} \\
 \hline
 \end{tabular}
 \end{table}

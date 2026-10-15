@@ -1,7 +1,7 @@
-% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/results.csv, results/runs/cc18_v3/summary/overall.csv (zagon cc18_v3, commit 69cc51e; cc18_v2 iz gita, commit 5a14045). Ne urejaj na roko.
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v3/results.csv, results/runs/cc18_v3/summary/overall.csv (glavni zagon cc18_v3, commit 69cc51e; cc18_v2 iz gita, commit 5a14045). Ne urejaj na roko.
 \begin{table}[htbp]
 \centering
-\caption{Primerjava z zagonom s prejšnjo zamrznitvijo različic knjižnic, v katerem je bil namesto modela TabPFN-3.5 uporabljen TabPFN-3, preostali algoritmi, podatkovne množice, delitve in semena pa so bili enaki. Razlike ROC-AUC so izračunane na posameznih učenjih (novi minus prejšnji zagon), na katerih sta uspela oba zagona (6450 od 6480). V prejšnjem zagonu modela TabPFN-3 in TabICL na množici CIFAR\_10 nista uspela, kar je v njegovih povprečnih rangih upoštevano z najslabšim rangom.}
+\caption{Primerjava glavnega zagona z zagonom s prejšnjo zamrznitvijo različic knjižnic, v katerem je bil namesto modela TabPFN-3.5 uporabljen TabPFN-3; koda, podatkovne množice, delitve in semena so bili enaki. Oba zagona sta tekla pred popravkom predobdelave naključnega gozda in modela XGBoost (razdelek~\ref{sec:rez-popravek}), zato primerjava kaže le učinek zamenjave knjižnic. Razlike ROC-AUC so izračunane na posameznih učenjih (novi minus prejšnji zagon), na katerih sta uspela oba zagona (6450 od 6480). V prejšnjem zagonu modela TabPFN-3 in TabICL na množici CIFAR\_10 nista uspela, kar je v njegovih povprečnih rangih upoštevano z najslabšim rangom.}
 \label{tab:zagona}
 \footnotesize
 \setlength{\tabcolsep}{4pt}

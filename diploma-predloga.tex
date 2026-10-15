@@ -193,14 +193,18 @@ razdelku~\ref{sec:predobdelava}.
 
 Vse algoritme uporabljamo s privzetimi hiperparametri. Edina nastavitev, ki jo
 podamo eksplicitno, je naključno seme (\texttt{random\_state=42}); razlogi za
-tako zasnovo so navedeni v razdelku~\ref{sec:protokol}. Ker so pri takem
+tako zasnovo so navedeni v razdelku~\ref{sec:protokol}. Da so vse druge
+nastavitve res privzete in da vsak algoritem prejme le predobdelavo, brez katere
+knjižnica podatkov ne sprejme, smo za vseh šest algoritmov preverili s samodejno
+revizijo (razdelek~\ref{sec:rez-popravek}). Ker so pri takem
 protokolu privzete vrednosti dejanski del metode, jih pri vsakem algoritmu
 posebej navedemo skupaj z virom, iz katerega so povzete. Različice knjižnic so
 zbrane v tabeli~\ref{tab:razlicice} in pripete v datoteki
 \texttt{requirements.txt} repozitorija s kodo.
 
 % Tabela je generirana iz manifest.json zagona cc18_v3 (scripts/gen_version_table.py
-% v repozitoriju s kodo, kopira jo rezultati/generiraj_iz_cc18_v3.py).
+% v repozitoriju s kodo, kopira jo rezultati/generiraj_rezultate.py); ponovni zagon
+% cc18_v4 je tekel v okolju z enakim izpisom pip freeze (skript to preveri).
 \input{rezultati/tab_razlicice.tex}
 
 \subsection{Naključni gozd}
@@ -226,16 +230,24 @@ drevesa so neodvisna, zato so naučena drevesa bitno identična zaporednemu
 izračunu. Pri vzporednem napovedovanju pa se verjetnosti posameznih dreves
 seštevajo v vrstnem redu, ki se med izvedbami razlikuje, zato se napovedane
 verjetnosti med ponovljenimi izvedbami razlikujejo na ravni zaokrožitvene
-napake, ROC-AUC pa na posameznem učenju največ na peti decimalki
-(razdelek~\ref{sec:rez-zagona}). Brez te nastavitve bi naključni gozd kot edini
+napake. ROC-AUC se zato na posameznem učenju lahko razlikuje, največ za
+\num{1.3e-4} (razdelka~\ref{sec:rez-popravek} in~\ref{sec:rez-zagona}); večje
+razlike nastanejo na majhnih testnih delih, kjer zaokrožitev drugače uredi par
+primerov z enako napovedano verjetnostjo. Brez te nastavitve bi naključni gozd kot edini
 od štirih ansamblov tekel na enem samem procesorskem jedru in izmerjeni časi ne
 bi bili primerljivi.
 % Preverjeno 2026-10-08 na množici cmc (okolji tabular3 in tabular3.5): pet
 % vzporednih učenj da bitno enaka drevesa (enaka zaporednemu učenju), deset
 % vzporednih klicev predict_proba na istem modelu pa ne; zaporedni klici so
-% bitno enaki. Nativne podpore za manjkajoče vrednosti in kategorične atribute ta
-implementacija nima, zato je edini od šestih algoritmov, ki surovih podatkovnih
-množic sploh ne more sprejeti.
+% bitno enaki. Največja razlika 1.3e-4 (blood-transfusion-service-center, 150
+% testnih primerov) je natanko 1/(2*35*114): en drugače urejen izenačen par.
+% Manjkajoče vrednosti: preverjeno z Diplomsko-delo_Koda/scripts/audit_defaults.py
+% (scikit-learn 1.9.1 sprejme NaN; nizov ne sprejme, parametra za kategorične nima).
+Manjkajoče vrednosti uporabljena različica sprejme in obravnava sama, zato jih
+ne nadomeščamo. Kategoričnih atributov pa ne sprejme in zanje nima posebnega
+parametra, zato jih pred učenjem ordinalno kodiramo
+(razdelek~\ref{sec:predobdelava}); naključni gozd je edini od šestih
+algoritmov, ki kategoričnih atributov ne obravnava nativno.
 
 \subsection{XGBoost}
 \label{sec:xgboost}
@@ -258,13 +270,17 @@ Uporabljamo razred \texttt{XGBClassifier} iz knjižnice xgboost~3.4.1.
 Pomembnejše privzete vrednosti so: 100 krogov pospeševanja, stopnja učenja
 \num{0.3}, največja globina drevesa 6, koeficient L2 regularizacije 1 in
 izklopljeno podvzorčenje primerov ter atributov; drevesa privzeto rastejo po
-histogramski metodi~\cite{xgboostdocs}. Manjkajoče vrednosti algoritem obravnava
-sam. Kategorične atribute pred učenjem ordinalno kodiramo v številske kode
-(razdelek~\ref{sec:predobdelava}), zato jih XGBoost obravnava kot številske. V
-uporabljeni različici je parameter \texttt{enable\_categorical} sicer privzeto
-vklopljen, vendar nativno obravnavo sproži le pri stolpcih, podanih kot
-kategorični podatkovni tip, česar naš protokol ne počne.
-\todo{Odloči: v xgboost 3.4.1 je \texttt{enable\_categorical} privzeto \texttt{True}, zato prejšnja utemeljitev (»poskusna, privzeto izklopljena«) ne velja več. Ali je ordinalno kodiranje še »najmanjša potrebna predobdelava«, če XGBoost tako kot LightGBM sprejme stolpce tipa \texttt{category}? Vir \texttt{xgboostdocs} se nanaša na različico 2.1.0.}
+histogramski metodi~\cite{xgboostdocs}. Manjkajoče vrednosti in kategorične
+atribute algoritem obravnava sam: v uporabljeni različici je parameter
+\texttt{enable\_categorical} privzeto vklopljen, zato knjižnica stolpce
+kategoričnega podatkovnega tipa knjižnice pandas obravnava kot kategorične.
+Kategorične atribute mu podamo v tem tipu, številske pa pretvorimo v zapis s
+plavajočo vejico, saj stolpcev splošnega tipa ne sprejme
+(razdelek~\ref{sec:predobdelava}).
+% Privzeta vrednost enable_categorical=True in zavrnitev stolpcev tipa object:
+% preverjeno v nameščeni knjižnici xgboost 3.4.1 (Diplomsko-delo_Koda/scripts/
+% audit_defaults.py). Do popravka (razdelek sec:rez-popravek) smo kategorične
+% atribute ordinalno kodirali. Vir xgboostdocs se nanaša na različico 2.1.0.
 
 \subsection{LightGBM}
 \label{sec:lightgbm}
@@ -289,7 +305,14 @@ ne vključujejo obeh tehnik iz izvirnega članka: združevanje atributov je
 vklopljeno, GOSS pa ne, saj je privzeta strategija vzorčenja navadno
 vrečenje~\cite{lightgbmdocs}. Poleg naključnega semena podajamo še
 \texttt{verbosity=-1}, kar zgolj izklopi izpisovanje. Manjkajoče vrednosti in
-kategorične atribute LightGBM obravnava nativno.
+kategorične atribute LightGBM obravnava nativno. Kategorične atribute mu
+naštejemo s parametrom \texttt{categorical\_feature}, ker jih knjižnica, s
+katero naložimo zbirko OpenML-CC18, označi kot urejene, privzeta nastavitev
+LightGBM pa samodejno upošteva le neurejene kategorične stolpce. Rezultat je
+enak privzetemu klicu na pravilno označenih atributih, kar smo preverili s
+samodejno revizijo (razdelek~\ref{sec:rez-popravek}).
+% Preverjeno na množicah credit-g in sick: največja razlika napovedanih
+% verjetnosti 0 (Diplomsko-delo_Koda/scripts/audit_defaults.py).
 
 \subsection{CatBoost}
 \label{sec:catboost}
@@ -480,62 +503,75 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 %  - Odvisnost uspešnosti od velikosti podatkovne množice in od deleža
 %    kategoričnih atributov.
 %  - Neuspela učenja in njihovi vzroki.
+%  - Popravek predobdelave naključnega gozda in modela XGBoost.
+%  - Podatkovni nabor Medic3.
 
-% Vse številke v tem poglavju izvirajo iz zagona cc18_v3 v repozitoriju s kodo
-% (Diplomsko-delo_Koda/results/runs/cc18_v3, commit 69cc51e). Tabele v mapi
-% rezultati/ in sliki slike/cc18_cd*.pdf so generirane iz datotek summary/*.csv
-% in results.csv s skriptom rezultati/generiraj_iz_cc18_v3.py, ki izpiše tudi
-% številke iz besedila (vir je naveden v komentarju ob odstavku). Prejšnji zagon
-% cc18_v2 (TabPFN-3) skript bere iz zgodovine gita, commit 5a14045.
+% Vse številke v tem poglavju izvirajo iz repozitorija s kodo
+% (Diplomsko-delo_Koda/results/runs; kaj je kateri zagon, pove razdelek
+% "Run registry" v njegovem CLAUDE.md). Zbirka OpenML-CC18: sestavljeni nabor
+% cc18_v4/combined - naključni gozd in XGBoost iz zagona cc18_v4 (commit 8b601d1,
+% po popravku predobdelave), LightGBM, CatBoost, TabPFN-3.5 in TabICL iz glavnega
+% zagona cc18_v3 (commit 69cc51e), katerega koda za te štiri algoritme se ni
+% spremenila. Nabor Medic3: medic3_raw_v2/combined in medic3_160_v2/combined,
+% sestavljena enako. Tabele v mapi rezultati/ in sliki slike/cc18_cd*.pdf
+% generira skript rezultati/generiraj_rezultate.py, ki izpiše tudi številke iz
+% besedila (vir je naveden v komentarju ob odstavku). Prejšnji zagon cc18_v2
+% (TabPFN-3) skript bere iz zgodovine gita, commit 5a14045.
 % OPOMBA: angleške izvirnike statističnih izrazov ob prvi pojavitvi prestavi v
 % razdelek Protokol vrednotenja, ko bo napisan.
 
 V tem poglavju predstavimo rezultate primerjave šestih algoritmov na
-72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml}. Vsak
-algoritem smo na vsaki podatkovni množici ovrednotili s petkratnim
-stratificiranim prečnim preverjanjem (angl. \emph{stratified cross-validation}),
-ponovljenim trikrat z različnim mešanjem primerov. Na vsak par podatkovne
-množice in algoritma tako pride 15 učenj, skupaj pa 6480 učenj. Protokol je
-podrobneje opisan v razdelku~\ref{sec:protokol}. Model TabPFN smo vrednotili v
-različici TabPFN-3.5 (razdelek~\ref{sec:tabpfn}), zato ga v tabelah in besedilu
-tega poglavja imenujemo s tem imenom. V tem poglavju meritve zgolj
+72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml} in na
+podatkovnem naboru Medic3. Vsak algoritem smo na vsaki podatkovni množici
+ovrednotili s petkratnim stratificiranim prečnim preverjanjem (angl.
+\emph{stratified cross-validation}), ponovljenim trikrat z različnim mešanjem
+primerov. Na vsak par podatkovne množice in algoritma tako pride 15 učenj, na
+zbirki OpenML-CC18 skupaj 6480 učenj. Protokol je podrobneje opisan v
+razdelku~\ref{sec:protokol}. Model TabPFN smo vrednotili v različici TabPFN-3.5
+(razdelek~\ref{sec:tabpfn}), zato ga v tabelah in besedilu tega poglavja
+imenujemo s tem imenom. Rezultati naključnega gozda in modela XGBoost izvirajo
+iz ponovnega zagona po popravku njune predobdelave, rezultati preostalih štirih
+algoritmov pa iz glavnega zagona; oba zagona uporabljata enake delitve in
+semena (razdelek~\ref{sec:rez-popravek}). V tem poglavju meritve zgolj
 predstavimo, njihovo razlago in omejitve pa obravnavamo v
 poglavju~\ref{ch:zakljucek}.
 
 Podatkovno množico imenujemo \emph{nasičena}, če najboljši algoritem na njej
 doseže ROC-AUC vsaj \num{0.995}. Takih je 35 od 72 podatkovnih množic. Ker so
 razlike med algoritmi na nasičenih množicah blizu zgornje meje metrike, vse
-povzetke in statistične teste podamo dvakrat: na vseh 72 podatkovnih množicah in
-na 37 nenasičenih.
+povzetke in statistične teste na zbirki OpenML-CC18 podamo dvakrat: na vseh 72
+podatkovnih množicah in na 37 nenasičenih.
 
 \section{Skupna primerjava}
 \label{sec:rez-skupno}
-% Vir: summary/overall.csv, summary/overall_nonsaturated.csv
+% Vir: summary/overall.csv, summary/overall_nonsaturated.csv (cc18_v4/combined)
 
 Tabela~\ref{tab:skupno} povzema uspešnost algoritmov. Za vsako podatkovno
 množico algoritme razvrstimo po povprečnem ROC-AUC čez 15 učenj; najboljši
 prejme rang 1, izenačeni algoritmi si delijo povprečje rangov, algoritem, ki na
 podatkovni množici ni uspel, pa prejme najslabši rang. Povprečni ROC-AUC
 računamo le na podatkovnih množicah, na katerih so uspeli vsi algoritmi, da so
-povprečja izračunana na isti podmnožici. V opisanem zagonu so vsi algoritmi
+povprečja izračunana na isti podmnožici. Na zbirki OpenML-CC18 so vsi algoritmi
 uspeli na vseh podatkovnih množicah, zato so povprečja izračunana na vseh.
 
 \input{rezultati/tab_skupno.tex}
 
-Najnižji povprečni rang doseže TabPFN-3.5 (\num{1.43}), ki je bil najboljši na
-48 podatkovnih množicah, sledi mu TabICL (\num{1.88}, 26 zmag). Med drevesnimi
-ansambli je najuspešnejši CatBoost s povprečnim rangom \num{3.37}, sledijo mu
-LightGBM (\num{4.46}), XGBoost (\num{4.66}) in naključni gozd (\num{5.21}). Enak
+Najnižji povprečni rang doseže TabPFN-3.5 (\num{1.42}), ki je bil najboljši na
+48 podatkovnih množicah, sledi mu TabICL (\num{1.86}, 26 zmag). Med drevesnimi
+ansambli je najuspešnejši CatBoost s povprečnim rangom \num{3.39}, sledijo mu
+LightGBM (\num{4.47}), XGBoost (\num{4.67}) in naključni gozd (\num{5.19}). Enak
 vrstni red se pokaže v povprečnem ROC-AUC, ki se giblje od \num{0.9416} pri
-TabPFN-3.5 do \num{0.9185} pri naključnem gozdu. Brez nasičenih podatkovnih
-množic vrstni red po povprečnem rangu ostane enak, razlike v povprečnem ROC-AUC
-pa se povečajo: TabPFN-3.5 doseže \num{0.8877}, CatBoost \num{0.8657} in
-naključni gozd \num{0.8514}.
+TabPFN-3.5 do \num{0.9184} pri naključnem gozdu. Brez nasičenih podatkovnih
+množic se razlike v povprečnem ROC-AUC povečajo: TabPFN-3.5 doseže \num{0.8877},
+CatBoost \num{0.8657} in naključni gozd \num{0.8511}. Vrstni red po povprečnem
+rangu ostane enak z eno izjemo: na nenasičenih podatkovnih množicah je naključni
+gozd (\num{4.95}) pred modelom XGBoost (\num{4.97}), čeprav ima XGBoost višji
+povprečni ROC-AUC (\num{0.8516} proti \num{0.8511}).
 
 \section{Statistična značilnost razlik}
 \label{sec:rez-znacilnost}
 % Vir: summary/friedman.csv, summary/nemenyi.csv, summary/wilcoxon_holm.csv
-% in njihove različice *_nonsaturated.csv
+% in njihove različice *_nonsaturated.csv (cc18_v4/combined)
 
 Razlike med algoritmi smo preverili po postopku za primerjavo več
 klasifikatorjev na več podatkovnih množicah, ki ga
@@ -550,10 +586,10 @@ O zavrnitvi ničelne domneve Friedmanovega testa odločimo na podlagi statistike
 $F_F$, ki sta jo predlagala Iman in Davenport in jo Demšar priporoča namesto
 preveč konservativne statistike $\chi^2_F$~\cite{demsar2006statistical}.
 Friedmanov test ničelno domnevo zavrne tako na vseh 72 podatkovnih množicah
-($\chi^2_F = \num{249.38}$, $F_F = \num{160.05}$ s $(5, 355)$ prostostnimi
-stopnjami, $p = \num{1.1e-88}$) kot na 37 nenasičenih ($\chi^2_F =
-\num{133.43}$, $F_F = \num{93.15}$ s $(5, 180)$ prostostnimi stopnjami, $p =
-\num{4.7e-48}$). Kritična razdalja
+($\chi^2_F = \num{251.30}$, $F_F = \num{164.15}$ s $(5, 355)$ prostostnimi
+stopnjami, $p = \num{5.1e-90}$) kot na 37 nenasičenih ($\chi^2_F =
+\num{132.43}$, $F_F = \num{90.68}$ s $(5, 180)$ prostostnimi stopnjami, $p =
+\num{2.7e-47}$). Kritična razdalja
 (angl. \emph{critical difference}) Nemenyijevega testa znaša \num{0.889} na vseh
 in \num{1.240} na nenasičenih podatkovnih množicah; povprečna ranga dveh
 algoritmov, ki se razlikujeta za manj od kritične razdalje, se značilno ne
@@ -590,39 +626,41 @@ se značilno razlikuje od vseh preostalih algoritmov, LightGBM, XGBoost in
 naključni gozd pa tvorijo skupino brez značilnih razlik. Na nenasičenih
 podatkovnih množicah se zaradi večje kritične razdalje v skupino brez značilne
 razlike združita tudi CatBoost in LightGBM (razlika povprečnih rangov
-\num{1.19}).
+\num{1.16}).
 
 \input{rezultati/tab_wilcoxon.tex}
 
 Parni Wilcoxonovi testi v tabeli~\ref{tab:wilcoxon} potrdijo razlike med
 temeljnima modeloma in vsemi drevesnimi ansambli ter med CatBoostom in
-preostalimi tremi ansambli, tudi na nenasičenih podatkovnih množicah.
-Neznačilni ostaneta para LightGBM--XGBoost in XGBoost--naključni gozd, na
-nenasičenih množicah pa še par LightGBM--naključni gozd. Parni test pokaže
-značilno razliko pri nekaterih parih, pri katerih je Nemenyijev test ne. Na
-vseh podatkovnih množicah sta to para TabPFN-3.5--TabICL in
-LightGBM--naključni gozd ($p_\mathrm{Holm} = \num{0.0018}$ oziroma
-\num{0.0419}), na nenasičenih pa para TabPFN-3.5--TabICL ($p_\mathrm{Holm} =
-\num{0.0026}$) in CatBoost--LightGBM ($p_\mathrm{Holm} = \num{4.5e-5}$).
-TabPFN-3.5 je od TabICL na vseh podatkovnih množicah boljši na 45 in slabši na
-23, povprečna razlika ROC-AUC pa znaša zgolj \num{0.0025}.
+preostalimi tremi ansambli, tudi na nenasičenih podatkovnih množicah. Med
+LightGBM, modelom XGBoost in naključnim gozdom na vseh podatkovnih množicah
+noben par ni značilen (najmanjši $p_\mathrm{Holm} = \num{0.0570}$ pri paru
+LightGBM--naključni gozd). Na nenasičenih množicah je LightGBM značilno boljši od
+modela XGBoost ($p_\mathrm{Holm} = \num{0.0262}$), para z naključnim gozdom pa
+ostaneta neznačilna. Parni test tako pokaže značilno razliko pri nekaterih
+parih, pri katerih je Nemenyijev test ne: na vseh podatkovnih množicah pri paru
+TabPFN-3.5--TabICL ($p_\mathrm{Holm} = \num{0.0018}$), na nenasičenih pa pri
+parih TabPFN-3.5--TabICL ($p_\mathrm{Holm} = \num{0.0026}$), CatBoost--LightGBM
+($p_\mathrm{Holm} = \num{4.9e-5}$) in LightGBM--XGBoost. TabPFN-3.5 je od TabICL
+na vseh podatkovnih množicah boljši na 45 in slabši na 23, povprečna razlika
+ROC-AUC pa znaša zgolj \num{0.0025}.
 
 \section{Rezultati po podatkovnih množicah}
 \label{sec:rez-mnozice}
-% Vir: summary/pivot.csv, summary/ranks.csv; razlike so izračunane iz
-% vrednosti v tabeli \ref{tab:mnozice}.
+% Vir: summary/pivot.csv, summary/ranks.csv (cc18_v4/combined); razlike so
+% izračunane iz vrednosti v tabeli \ref{tab:mnozice}.
 
 Povprečni ROC-AUC vseh algoritmov na posameznih podatkovnih množicah je zbran v
 tabeli~\ref{tab:mnozice}. Najvišji ROC-AUC je drevesni ansambel dosegel le na
-dveh podatkovnih množicah, obe pa sta nasičeni: na množici tic-tac-toe sta
-CatBoost in XGBoost (\num{1.0000}) presegla TabICL (\num{0.9996}), na množici
+dveh podatkovnih množicah, obe pa sta nasičeni: na množici tic-tac-toe je
+CatBoost (\num{1.0000}) presegel TabICL (\num{0.9996}), na množici
 wall-robot-navigation pa je XGBoost najboljši temeljni model presegel za manj kot
 \num{0.0001}. Na preostalih 70 podatkovnih množicah je najboljši temeljni model
 presegel najboljši drevesni ansambel, na množicah MiceProtein in
 banknote-authentication za manj kot \num{0.0001}. Največja razlika v prid
 temeljnih modelov je na množicah GesturePhaseSegmentationProcessed
-(\num{0.0767}), cylinder-bands (\num{0.0555}), madelon (\num{0.0499}),
-balance-scale (\num{0.0489}) in vehicle (\num{0.0478}).
+(\num{0.0767}), madelon (\num{0.0499}), balance-scale (\num{0.0489}), vehicle
+(\num{0.0478}) in cylinder-bands (\num{0.0476}).
 
 Razlike med temeljnima modeloma so praviloma majhne: mediana absolutne razlike
 ROC-AUC med TabPFN-3.5 in TabICL čez podatkovne množice je \num{0.0011}.
@@ -635,29 +673,33 @@ climate-model-simulation-crashes (\num{0.0111}) in analcatdata\_dmft
 
 \section{Časovna zahtevnost}
 \label{sec:rez-casi}
-% Vir: summary/overall.csv (mediane in vsote časov), results.csv (stolpec device)
+% Vir: summary/overall.csv (mediane in vsote časov), results.csv (stolpca device
+% in hostname), oboje cc18_v4/combined
 
 Čase učenja in napovedovanja povzema tabela~\ref{tab:casi}. Pri branju je treba
 upoštevati, da so drevesni ansambli tekli na osmih procesorskih jedrih,
 temeljna modela pa na grafični procesni enoti NVIDIA H100 v dveh izvedbah
 (stolpec \texttt{device} v datoteki z rezultati), zato izmerjeni časi
-primerjajo kombinacijo algoritma in strojne opreme. Z izjemo množice CIFAR\_10
-(razdelek~\ref{sec:rez-pomnilnik}) so vsa učenja posamezne podatkovne množice
-tekla na istem vozlišču gruče, različne podatkovne množice pa na različnih
-vozliščih, zato časi med podatkovnimi množicami niso strogo primerljivi. Pri
-temeljnih modelih klic učenja ne posodobi uteži (razdelek~\ref{sec:tabpfn}),
-zato večji del njune računske zahtevnosti odpade na napovedovanje.
+primerjajo kombinacijo algoritma in strojne opreme. V glavnem zagonu so z
+izjemo množice CIFAR\_10 (razdelek~\ref{sec:rez-pomnilnik}) vsa učenja
+posamezne podatkovne množice tekla na istem vozlišču gruče, različne podatkovne
+množice pa na različnih vozliščih. Naključni gozd in XGBoost sta tekla v
+ločenem ponovnem zagonu (razdelek~\ref{sec:rez-popravek}), na 70 od 72
+podatkovnih množic na istem vozlišču, zato njuni časi s časi preostalih
+algoritmov niso strogo primerljivi. Pri temeljnih modelih klic učenja ne
+posodobi uteži (razdelek~\ref{sec:tabpfn}), zato večji del njune računske
+zahtevnosti odpade na napovedovanje.
 
 \input{rezultati/tab_casi.tex}
 
-Skupni čas vseh 6480 učenj je znašal \num{62.7} ure, od tega \num{47.8} ure
-CatBoost. Njegova mediana časa učenja (\num{4.584} s) je od 18- do 25-krat
-večja od median preostalih treh drevesnih ansamblov (od \num{0.180} do
+Skupni čas vseh 6480 učenj je znašal \num{62.3} ure, od tega \num{47.8} ure
+CatBoost. Njegova mediana časa učenja (\num{4.584} s) je od 18- do 38-krat
+večja od median preostalih treh drevesnih ansamblov (od \num{0.121} do
 \num{0.252} s), kar je skladno z njegovim privzetim številom iteracij
 (razdelek~\ref{sec:catboost}). Mediani časa učenja temeljnih modelov sta
 \num{0.211} s (TabPFN-3.5) in \num{0.487} s (TabICL), mediani časa
 napovedovanja pa \num{0.487} s in \num{0.200} s, medtem ko drevesni ansambli
-napovedujejo v največ \num{0.026} s.
+napovedujejo v največ \num{0.015} s.
 
 \section{Neuspela in pomnilniško zahtevna učenja}
 \label{sec:rez-pomnilnik}
@@ -671,27 +713,71 @@ sprejela surove podatke, zato minimalni popravek iz politike predobdelave
 
 Računsko najzahtevnejša je bila podatkovna množica CIFAR\_10 s 3072 atributi.
 TabPFN-3.5 jo je sprejel, čeprav je predhodna različica na njej zaradi števila
-atributov odpovedala (razdelek~\ref{sec:rez-zagona}), in na njej dosegel najvišji povprečni ROC-AUC (\num{0.9158}, pred CatBoostom s
-\num{0.9104}). TabICL je na tej množici porabil do 394~GiB delovnega
-pomnilnika (največja velikost rezidentnega pomnilnika, ki jo je zabeležil
-razporejevalnik opravil). Prvi poskus z dodeljenimi 240~GiB je razporejevalnik
-zato prekinil; TabICL je uspel šele na vozlišču z več pomnilnika in z
-dodeljenimi 480~GiB, kjer je dosegel povprečni ROC-AUC \num{0.9050}. Ker se
-rezultati shranjujejo po vsakem učenju, so učenja preostalih algoritmov na tej
-množici ostala ohranjena in ponovni zagon je nadaljeval pri modelu TabICL.
+atributov odpovedala (razdelek~\ref{sec:rez-zagona}), in na njej dosegel
+najvišji povprečni ROC-AUC (\num{0.9158}, pred CatBoostom s \num{0.9104}).
+TabICL je na tej množici porabil do 394~GiB delovnega pomnilnika (največja
+velikost rezidentnega pomnilnika, ki jo je zabeležil razporejevalnik opravil).
+Prvi poskus z dodeljenimi 240~GiB je razporejevalnik zato prekinil; TabICL je
+uspel šele na vozlišču z več pomnilnika in z dodeljenimi 480~GiB, kjer je
+dosegel povprečni ROC-AUC \num{0.9050}. Ker se rezultati shranjujejo po vsakem
+učenju, so učenja preostalih algoritmov na tej množici ostala ohranjena in
+ponovni zagon je nadaljeval pri modelu TabICL.
+
+\section{Popravek predobdelave naključnega gozda in modela XGBoost}
+\label{sec:rez-popravek}
+% Vir: tab_popravek.tex in izpis skripta generiraj_rezultate.py (cc18_v3 proti
+% cc18_v4 na istih 15 delitvah). Revizija: Diplomsko-delo_Koda/scripts/
+% audit_defaults.py, izpis v results/runs/subset_v4_local/diagnostics/
+% audit_defaults.txt; prejšnji p_Holm iz cc18_v3/summary/wilcoxon_holm*.csv.
+
+Po glavnem zagonu smo s samodejno revizijo preverili, ali vsak algoritem prejme
+le predobdelavo, brez katere knjižnica podatkov ne sprejme
+(razdelek~\ref{sec:predobdelava}). Revizija je za vseh šest algoritmov potrdila,
+da so vsi hiperparametri privzeti; od privzetih vrednosti odstopajo le naključno
+seme ter nastavitve računanja in izpisovanja, ki modela ne spremenijo. Pokazala
+pa je dve odstopanji pri predobdelavi: XGBoost je kategorične atribute prejel kot
+ordinalne kode, čeprav jih uporabljena različica knjižnice privzeto obravnava
+sama, naključni gozd pa je prejel nadomeščene manjkajoče vrednosti, čeprav jih
+uporabljena različica knjižnice scikit-learn obravnava sama
+(razdelka~\ref{sec:rf} in~\ref{sec:xgboost}). Oba algoritma smo zato ponovno
+zagnali na vseh 72 podatkovnih množicah z enakimi delitvami in semeni, rezultate
+preostalih štirih algoritmov pa smo prevzeli iz glavnega zagona, saj se njihova
+koda ni spremenila.
+
+\input{rezultati/tab_popravek.tex}
+
+Učinek popravka povzema tabela~\ref{tab:popravek}. Na podatkovnih množicah, na
+katerih se vhod ni spremenil, je XGBoost dal bitno enake rezultate kot v
+glavnem zagonu (49 množic, 735 učenj), naključni gozd pa enake do razlik,
+ki jih povzroči vzporedno napovedovanje (razdelek~\ref{sec:rf}): ROC-AUC se
+razlikuje na 22 od 945 učenj, največ za \num{1.3e-4}. Na podatkovnih množicah s
+spremenjenim vhodom se rezultati obeh algoritmov spremenijo v obe smeri in v
+povprečju malo: pri modelu XGBoost na 23 množicah s kategoričnimi atributi za
+\num{-3.1e-4} (največ na množicah credit-g, \num{-0.0112}, in dresses-sales,
+\num{0.0100}), pri naključnem gozdu na 9 množicah z manjkajočimi vrednostmi za
+\num{-0.0010} (največ na množicah dresses-sales, \num{-0.0198}, in
+cylinder-bands, \num{0.0079}). Vrstni red algoritmov po povprečnem rangu se
+zaradi popravka ni spremenil. Spremenila sta se izida dveh parnih testov med
+drevesnimi ansambli: par LightGBM--naključni gozd na vseh podatkovnih množicah
+ni več značilen ($p_\mathrm{Holm}$ pred popravkom \num{0.0419}, po njem
+\num{0.0570}), par LightGBM--XGBoost na nenasičenih množicah pa je postal
+značilen (\num{0.0825} oziroma \num{0.0262}). Učinek popravka na naboru Medic3
+opišemo v razdelku~\ref{sec:rez-medic3}.
 
 \section{Primerjava s prejšnjim zagonom z modelom TabPFN-3}
 \label{sec:rez-zagona}
-% Vir: tabela tab_zagona.tex in izpis skripta generiraj_iz_cc18_v3.py
-% (cc18_v2 iz gita, commit 5a14045: results.csv, summary/overall.csv,
-% summary/wilcoxon_holm.csv); sporočilo o napaki TabPFN-3 na CIFAR_10 je v
-% stolpcu error zagona cc18_v2 in v njegovem PROVENANCE.md.
+% Vir: tabela tab_zagona.tex in izpis skripta generiraj_rezultate.py
+% (glavni zagon cc18_v3 proti cc18_v2 iz gita, commit 5a14045: results.csv,
+% summary/overall.csv, summary/wilcoxon_holm.csv); sporočilo o napaki TabPFN-3 na
+% CIFAR_10 je v stolpcu error zagona cc18_v2 in v njegovem PROVENANCE.md.
 
-Pred opisanim zagonom smo primerjavo izvedli s prejšnjo zamrznitvijo različic
+Pred glavnim zagonom smo primerjavo izvedli s prejšnjo zamrznitvijo različic
 knjižnic, v kateri je bil namesto modela TabPFN-3.5 uporabljen TabPFN-3 (paket
 tabpfn~8.5.0). Koda, podatkovne množice, delitve in semena so bili enaki,
-preostale knjižnice pa so se razlikovale le v popravnih izdajah. Oba zagona
-primerja tabela~\ref{tab:zagona}.
+preostale knjižnice pa so se razlikovale le v popravnih izdajah. Ker je tudi
+glavni zagon tekel pred popravkom predobdelave (razdelek~\ref{sec:rez-popravek}),
+primerjamo glavni zagon s prejšnjim, da je edina razlika zamenjava knjižnic. Oba
+zagona primerja tabela~\ref{tab:zagona}.
 
 \input{rezultati/tab_zagona.tex}
 
@@ -731,6 +817,89 @@ ansamblov se ni spremenil.
 \label{sec:rez-lastnosti}
 
 \todo{Odvisnost prednosti temeljnih modelov od števila primerov, števila atributov, števila razredov in deleža kategoričnih atributov. Pred pisanjem dodaj v repozitorij s kodo skript, ki to izračuna (npr. Spearmanov koeficient in razbitje po velikosti), da bo imela vsaka številka generiran vir.}
+
+\section{Podatkovni nabor Medic3}
+\label{sec:rez-medic3}
+% Vir: tab_medic3.tex, tab_medic3_test.tex in izpis skripta
+% generiraj_rezultate.py (medic3_raw_v2/combined, medic3_160_v2/combined;
+% primerjava z medic3_raw in medic3_160 pred popravkom). Diagnostika LightGBM:
+% medic3_raw/diagnostics in medic3_160/diagnostics, datoteke
+% lightgbm_4.7.0_independent.csv in lightgbm_4.6.0_independent.csv, ki jih
+% ustvari scripts/diagnose_lightgbm_medic3.py (prva delitev, seme 42).
+
+Na podatkovnem naboru Medic3 (razdelek~\ref{sec:medic3}) smo vseh šest
+algoritmov ovrednotili v dveh različicah: z vsemi 220 razredi (\num{122093}
+primerov in 275 atributov) in s 160 najpogostejšimi razredi (\num{117825}
+primerov). Druga različica obstaja zato, ker TabPFN-3.5 sprejme največ 160
+razredov; primere preostalih razredov smo zavrgli. Protokol je enak kot na
+zbirki OpenML-CC18, torej 15 učenj na algoritem in različico. Tudi tu izvirajo
+rezultati naključnega gozda in modela XGBoost iz ponovnega zagona po popravku
+predobdelave. Rezultate povzema tabela~\ref{tab:medic3}.
+
+\input{rezultati/tab_medic3.tex}
+
+Na različici z vsemi 220 razredi TabPFN-3.5 ni uspel v nobenem od 15 učenj:
+knjižnica je učenje zavrnila s sporočilom, da število razredov presega uradno
+podprtih 160. Najvišji povprečni ROC-AUC je dosegel CatBoost (\num{0.9551}),
+sledijo mu TabICL (\num{0.9499}), XGBoost (\num{0.9306}), naključni gozd
+(\num{0.8394}) in LightGBM (\num{0.5028}). Na različici s 160 razredi je bil
+najboljši TabPFN-3.5 (\num{0.9614}), tesno pred CatBoostom (\num{0.9599}),
+sledijo TabICL (\num{0.9543}), XGBoost (\num{0.9400}), naključni gozd
+(\num{0.8726}) in LightGBM (\num{0.5057}). Standardni odklon čez 15 učenj je
+pri vseh algoritmih največ \num{0.0063}.
+
+Ker gre za en sam podatkovni nabor, testov za primerjavo na več podatkovnih
+množicah ne moremo uporabiti~\cite{demsar2006statistical}. Pare algoritmov smo
+zato primerjali s popravljenim t-testom za ponovljeno prečno
+preverjanje~\cite{bouckaert2004evaluating}, ki pri oceni variance razlik
+upošteva, da se učni deli zaporednih učenj prekrivajo~\cite{nadeau2003inference}.
+Statistika $t = \bar{d} \,/\, \sqrt{(1/k + n_2/n_1)\,\hat{\sigma}^2}$ ima
+$k - 1 = 14$ prostostnih stopenj; pri tem sta $\bar{d}$ in $\hat{\sigma}^2$
+povprečje in vzorčna varianca razlik ROC-AUC čez $k = 15$ učenj, $n_1$ in $n_2$ pa
+velikosti učnega in testnega dela. P-vrednosti smo popravili s Holmovim
+postopkom čez vse pare. Rezultate prikazuje tabela~\ref{tab:medic3-test}.
+
+\input{rezultati/tab_medic3_test.tex}
+
+Na obeh različicah so značilne vse razlike: vseh 10 parov na različici z 220
+razredi, kjer je TabPFN-3.5 izključen, in vseh 15 parov na različici s 160
+razredi. Najmanj izrazit je na prvi različici par CatBoost--TabICL (razlika
+\num{0.0052}, CatBoost boljši v vseh 15 učenjih, $p_\mathrm{Holm} =
+\num{5.2e-6}$), na drugi pa par TabPFN-3.5--CatBoost (razlika \num{0.0015},
+TabPFN-3.5 boljši v vseh 15 učenjih, $p_\mathrm{Holm} = \num{0.0050}$).
+
+Časovno najzahtevnejši je bil CatBoost z mediano \num{8143} s na učenje pri 220
+razredih in \num{5550} s pri 160 razredih. Temeljna modela sta za napovedovanje
+potrebovala od \num{74} do \num{80} s na učenje, drevesni ansambli pa največ
+\num{3.9} s.
+
+LightGBM je na obeh različicah v vseh učenjih dosegel ROC-AUC blizu \num{0.5},
+torej raven naključnega ugibanja (od \num{0.4994} do \num{0.5125} pri 220 in od
+\num{0.4999} do \num{0.5193} pri 160 razredih), ne da bi knjižnica javila
+napako. Da vzrok ni v naši kodi, smo preverili z ločeno potjo brez nje: na prvi
+delitvi smo podatke prebrali in razdelili neposredno s knjižnicama pandas in
+scikit-learn, LightGBM pa učili z njegovim izvornim vmesnikom in privzetimi
+parametri. Pokazal se je enak propad. Učna izguba, ki jo izračuna LightGBM sam,
+je po prvi iteraciji znašala \num{4.91} pri 220 oziroma \num{3.91} pri 160
+razredih in do konca učenja narasla na \num{32.6} oziroma \num{32.7}. Največja
+absolutna vrednost lista je narasla s \num{129} oziroma \num{73} na
+\num{2.4e6} oziroma \num{4.4e6}, točnost (\num{0.057} oziroma \num{0.050}) pa ni
+presegla deleža največjega razreda v testnem delu (\num{0.061} oziroma
+\num{0.063}). Enako se je obnašala tudi starejša različica LightGBM~4.6.0. Že ena
+sama sprememba privzete vrednosti je učenje ustalila: s koeficientom L2
+regularizacije listov \texttt{reg\_lambda=1} je ROC-AUC na isti delitvi znašal
+\num{0.938} oziroma \num{0.948}, z najmanjšo vsoto hesiana v listu
+\texttt{min\_child\_weight=1} pa \num{0.938} oziroma \num{0.945}; obe vrednosti
+sta privzeti vrednosti knjižnice XGBoost. Ker protokol predvideva privzete
+nastavitve, kot rezultat LightGBM poročamo propadle vrednosti; vzrok obravnavamo
+v poglavju~\ref{ch:zakljucek}.
+
+Ker nabor Medic3 nima kategoričnih atributov, je XGBoost v ponovnem zagonu dal
+bitno enake rezultate kot pred popravkom predobdelave. Naključni gozd, ki je
+pred popravkom prejel nadomeščene manjkajoče vrednosti, je z njihovo nativno
+obravnavo izboljšal ROC-AUC v vseh 15 učenjih obeh različic, v povprečju s
+\num{0.8149} na \num{0.8394} pri 220 in s \num{0.8530} na \num{0.8726} pri 160
+razredih.
 
 %=========================================================================
 \chapter{Diskusija in zaključek}

@@ -1,0 +1,30 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/medic3_raw_v2/combined/summary/corrected_ttest_holm.csv, results/runs/medic3_160_v2/combined/summary/corrected_ttest_holm.csv (naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Popravljeni t-test za ponovljeno prečno preverjanje s Holmovim popravkom na naboru Medic3. Razlika je povprečna razlika ROC-AUC (prvi minus drugi algoritem) čez 15 učenj, zmage pa število učenj, v katerih je boljši prvi oziroma drugi. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$; -- označuje par z algoritmom, ki ni uspel.}
+\label{tab:medic3-test}
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lrrlrrl}
+\hline
+ & \multicolumn{3}{c}{220 razredov} & \multicolumn{3}{c}{160 razredov} \\
+Par algoritmov & razlika & zmage & $p_\mathrm{Holm}$ & razlika & zmage & $p_\mathrm{Holm}$ \\
+\hline
+TabPFN-3.5 -- CatBoost & -- & -- & -- & \num{0.0015} & 15:0 & \num{0.0050}$^{*}$ \\
+TabPFN-3.5 -- TabICL & -- & -- & -- & \num{0.0071} & 15:0 & \num{1.3e-09}$^{*}$ \\
+TabPFN-3.5 -- XGBoost & -- & -- & -- & \num{0.0214} & 15:0 & \num{1.6e-11}$^{*}$ \\
+TabPFN-3.5 -- Naključni gozd & -- & -- & -- & \num{0.0888} & 15:0 & \num{9.0e-21}$^{*}$ \\
+TabPFN-3.5 -- LightGBM & -- & -- & -- & \num{0.4557} & 15:0 & \num{1.1e-21}$^{*}$ \\
+CatBoost -- TabICL & \num{0.0052} & 15:0 & \num{5.2e-06}$^{*}$ & \num{0.0056} & 15:0 & \num{4.9e-07}$^{*}$ \\
+CatBoost -- XGBoost & \num{0.0245} & 15:0 & \num{3.7e-11}$^{*}$ & \num{0.0199} & 15:0 & \num{2.9e-11}$^{*}$ \\
+CatBoost -- Naključni gozd & \num{0.1157} & 15:0 & \num{3.0e-19}$^{*}$ & \num{0.0873} & 15:0 & \num{4.0e-20}$^{*}$ \\
+CatBoost -- LightGBM & \num{0.4524} & 15:0 & \num{2.4e-23}$^{*}$ & \num{0.4542} & 15:0 & \num{8.1e-22}$^{*}$ \\
+TabICL -- XGBoost & \num{0.0193} & 15:0 & \num{8.4e-10}$^{*}$ & \num{0.0143} & 15:0 & \num{1.7e-09}$^{*}$ \\
+TabICL -- Naključni gozd & \num{0.1105} & 15:0 & \num{2.4e-19}$^{*}$ & \num{0.0817} & 15:0 & \num{1.1e-19}$^{*}$ \\
+TabICL -- LightGBM & \num{0.4472} & 15:0 & \num{3.5e-23}$^{*}$ & \num{0.4487} & 15:0 & \num{2.0e-21}$^{*}$ \\
+XGBoost -- Naključni gozd & \num{0.0911} & 15:0 & \num{8.4e-18}$^{*}$ & \num{0.0674} & 15:0 & \num{1.2e-16}$^{*}$ \\
+XGBoost -- LightGBM & \num{0.4278} & 15:0 & \num{1.7e-22}$^{*}$ & \num{0.4344} & 15:0 & \num{5.2e-22}$^{*}$ \\
+Naključni gozd -- LightGBM & \num{0.3367} & 15:0 & \num{2.0e-21}$^{*}$ & \num{0.3670} & 15:0 & \num{9.9e-21}$^{*}$ \\
+\hline
+\end{tabular}
+\end{table}
