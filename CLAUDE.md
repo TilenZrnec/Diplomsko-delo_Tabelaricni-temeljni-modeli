@@ -27,6 +27,19 @@ ne opozori posebej.
   meritve bodisi z navedbo vira. Trditev, ki ni ne eno ne drugo, iz besedila
   odstranimo.
 
+## Obseg in poudarki (uporabnik po napotku mentorja, 2026-10-15)
+
+- **Obseg okoli 50 strani** od uvoda do zaključka.
+- **Česar ne raziskujemo neposredno in kar komisija pozna, le na kratko:**
+  drevesni ansambli (naključni gozd, XGBoost, LightGBM, CatBoost) največ pol
+  strani na algoritem — zamisel, privzete vrednosti z virom, predobdelava.
+  Temeljna modela (TabPFN, TabICL), ki sta bralcem lahko nova, podrobneje.
+- **Poročamo končne rezultate kot en nabor.** Zgodovine razvoja (ponovni
+  zagoni, popravki med delom) v besedilu ne opisujemo; izvor vsake številke
+  ostane v komentarjih LaTeX in v repozitoriju s kodo. Besedilo pa ne sme trditi
+  ničesar, kar ne drži (npr. da so vsi algoritmi tekli v istem zagonu ali na
+  istem vozlišču).
+
 ## Citiranje
 
 - **Kdaj citiramo:** vsakič, ko uporabimo tujo idejo, ugotovitev, sliko ali
