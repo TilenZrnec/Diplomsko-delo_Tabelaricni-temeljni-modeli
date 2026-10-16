@@ -146,18 +146,266 @@ morda bo zapisal tudi ključno literaturo.}
 \chapter{Sorodni pristopi}
 \label{ch:sorodni}
 %=========================================================================
-% Vsebina poglavja:
-%  - Klasični pristopi k tabelaričnim podatkom: ansambli odločitvenih dreves
-%    kot dolgoletno privzeto orodje.
-%  - Globoko učenje na tabelaričnih podatkih in ugotovitve primerjalnih
-%    študij, da drevesni modeli pogosto ostajajo boljši.
-%  - Temeljni modeli in učenje iz konteksta; prenos ideje na tabelarične
-%    podatke (TabPFN, TabICL in sorodni modeli).
-%  - Zbirke za primerjalno vrednotenje tabelaričnih modelov (OpenML-CC18,
-%    TabArena) in metodološke kritike obstoječih primerjav.
-%  - Umestitev: v čem se naša primerjava razlikuje od objavljenih.
+% Vse trditve o virih so preverjene v celotnem besedilu članka (2026-10-15);
+% kratek zapis o doprinosu vsakega vira je kot komentar ob vnosu v
+% literatura.bib. Angleški izvirniki izrazov so navedeni tu, ker se izrazi
+% prvič pojavijo v tem poglavju; ko bo napisan uvod, jih prestavi tja.
 
-\todo{Napiši pregled sorodnih pristopov in umesti nalogo v obstoječi kontekst.}
+V tem poglavju nalogo umestimo v obstoječe delo. Najprej povzamemo primerjalne
+študije, ki so ansamble odločitvenih dreves (angl. \emph{decision tree
+ensembles}) primerjale z drugimi družinami algoritmov in z globokim učenjem.
+Nato opišemo razvoj tabelaričnih temeljnih modelov, v tretjem razdelku pa
+zbirke podatkovnih množic in protokole, s katerimi se ti modeli vrednotijo,
+skupaj z metodološkimi kritikami takih primerjav. Poglavje sklenemo z opisom,
+v čem se naša primerjava razlikuje od objavljenih.
+
+\section{Ansambli odločitvenih dreves in globoko učenje}
+\label{sec:sor-drevesa}
+
+Obsežna primerjava 179 klasifikatorjev iz 17 družin na 121 podatkovnih
+množicah je za najuspešnejšo družino po točnosti (angl. \emph{accuracy})
+razglasila naključne gozdove~\cite{fernandez2014we}. Poznejši odziv je
+pokazal, da so rezultati te študije pristranski, ker ni uporabila ločene
+testne množice in je izpustila poskuse, ki so se končali z napako; po lastnih
+statističnih testih študije naključni gozd tudi ni bil značilno boljši od
+metode podpornih vektorjev in nevronskih mrež~\cite{wainberg2016random}. Obe
+pomanjkljivosti sta za zasnovo naše primerjave poučni: vsi algoritmi pri nas
+uporabljajo iste testne delitve, neuspelih učenj pa iz povzetkov ne izpustimo,
+temveč jih kaznujemo z najslabšim rangom (razdelek~\ref{sec:rez-skupno}).
+
+Po uspehih globokega učenja (angl. \emph{deep learning}) na slikah in
+besedilu je nastalo veliko arhitektur nevronskih mrež, zasnovanih posebej za
+tabelarične podatke. Pregled teh pristopov ugotavlja, da ansambli na podlagi
+gradientnega pospeševanja (angl. \emph{gradient boosting}) pri nadzorovanem
+učenju še vedno večinoma prekašajo modele globokega
+učenja~\cite{borisov2024deep}. Gorishniy in sodelavci so številne arhitekture
+primerjali pod enotnim protokolom učenja in uglaševanja hiperparametrov
+(angl. \emph{hyperparameter tuning}) in sklenili, da med gradientnim
+pospeševanjem in globokim učenjem splošno boljše rešitve
+ni~\cite{gorishniy2021revisiting}. Shwartz-Ziv in Armon sta na enajstih
+podatkovnih množicah pokazala, da XGBoost prekaša nove globoke modele tudi na
+množicah iz člankov, ki so te modele predlagali, in da potrebuje precej manj
+uglaševanja~\cite{shwartzziv2022tabular}. Grinsztajn in sodelavci so na 45
+podatkovnih množicah z enotnim postopkom iskanja hiperparametrov potrdili, da
+drevesni modeli na množicah srednje velikosti (okoli \num{10000} primerov)
+ostajajo najboljši, razliko pa pripisali induktivnim pristranskostim (angl.
+\emph{inductive bias}): drevesa so robustna na neinformativne atribute,
+ohranjajo usmerjenost podatkov in zlahka opišejo nepravilne
+funkcije~\cite{grinsztajn2022why}.
+
+Najobsežnejša tovrstna primerjava, 19 algoritmov na 176 podatkovnih množicah,
+je pokazala, da je vprašanje, ali so boljše nevronske mreže ali gradientno
+pospeševanje, precenjeno: na presenetljivo veliko množicah je razlika med
+družinama zanemarljiva ali pa je rahlo uglaševanje gradientnega pospeševanja
+pomembnejše od izbire družine~\cite{mcelfresh2023neural}. Izjema je bil
+TabPFN, ki je bil kljub omejitvi na približno 3000 učnih primerov v povprečju
+najboljši od vseh algoritmov, tudi ko so večje učne množice naključno
+podvzorčili na 3000 primerov~\cite{mcelfresh2023neural}. Študija na več kot
+300 podatkovnih množicah zbirke TALENT ugotavlja, da gradientno pospeševanje
+ostaja zelo močna referenčna točka, da pa predhodno naučeni tabelarični modeli
+na mnogih nalogah zdaj dosežejo ali presežejo njegovo
+uspešnost~\cite{ye2024closer}.
+
+\section{Tabelarični temeljni modeli}
+\label{sec:sor-temeljni}
+
+Izraz temeljni model (angl. \emph{foundation model}) označuje model, ki je
+naučen na obsežnih in raznolikih podatkih in ga je mogoče prilagoditi
+širokemu naboru nalog~\cite{bommasani2021opportunities}. Pri velikih jezikovnih
+modelih se je pokazalo, da model novo nalogo reši zgolj iz nekaj primerov,
+podanih v vhodnem besedilu, brez kakršne koli posodobitve uteži; temu pravimo
+učenje iz konteksta (angl. \emph{in-context learning})~\cite{brown2020language}.
+Poskusi, da bi velike jezikovne modele neposredno uporabili za učenje iz
+konteksta na tabelaričnih podatkih, so bili omejeno uspešni, zato se je
+raziskovanje usmerilo v temeljne modele, zasnovane posebej za tabelarične
+podatke~\cite{ma2025tabdpt}. Te imenujemo tabelarični temeljni modeli
+(angl. \emph{tabular foundation models}).
+
+Prevladujoča smer izhaja iz mrež, prilagojenih apriornim podatkom (angl.
+\emph{prior-data fitted networks}, PFN)~\cite{muller2022transformers}, katerih
+delovanje podrobneje opišemo v razdelku~\ref{sec:tabpfn}. Prvo različico
+modela TabPFN so avtorji ovrednotili na 30 manjših podatkovnih množicah zbirke
+OpenML-CC18, v glavnem besedilu pa le na 18 med njimi, ki imajo samo številske
+atribute in nimajo manjkajočih vrednosti~\cite{hollmann2023tabpfn}. Drugo
+različico so ovrednotili na 29 klasifikacijskih in 28 regresijskih množicah
+zbirk AutoML Benchmark in OpenML-CTR23 z do \num{10000}
+primeri~\cite{hollmann2025tabpfn}. Različica TabPFN-2.5 je meje razširila na
+\num{50000} primerov in 2000 atributov; avtorji poročajo, da privzeti
+TabPFN-2.5 v njihovi primerjavi premaga privzeti model XGBoost na vseh
+klasifikacijskih množicah z do \num{10000} primeri in 500 atributi ter na
+\SI{87}{\percent} večjih množic z do \num{100000} primeri in 2000
+atributi~\cite{grinsztajn2025tabpfn25}. Tehnično poročilo za TabPFN-3 model
+vrednoti na zbirkah TabArena in TALENT ter na lastnih zbirkah z veliko
+primeri, razredi ali atributi, zbirke OpenML-CC18 pa ne
+vključuje~\cite{grinsztajn2026tabpfn3}.
+
+Vzporedno se razvijajo modeli TabICL. Prvo različico so avtorji ovrednotili na
+200 klasifikacijskih množicah zbirke TALENT, pri čemer so izločili 15 množic,
+ki so jih razvijalci modela TabPFN v2 uporabili pri uglaševanju in izbiri
+modela~\cite{qu2025tabicl}; različico TabICLv2 so ovrednotili na zbirkah
+TabArena in TALENT~\cite{qu2026tabiclv2}. TabPFN-3 in obe različici TabICL so
+predhodno naučeni izključno na sintetičnih
+podatkih~\cite{grinsztajn2026tabpfn3,qu2025tabicl,qu2026tabiclv2}. Drugačno
+pot ubere TabDPT, ki je predhodno naučen na 123 realnih podatkovnih množicah s
+platforme OpenML in ovrednoten prav na zbirki OpenML-CC18; avtorji so zato vse
+pare učnih in testnih množic primerjali po metapodatkih in statistikah
+atributov ter sorodne množice izločili iz učenja~\cite{ma2025tabdpt}. Tudi za
+različico Real-TabPFN-2.5, dodatno naučeno na realnih podatkih, avtorji
+navajajo, da so iz učnih podatkov odstranili množice zbirke
+TabArena~\cite{grinsztajn2025tabpfn25}. Izločanje razvojnih množic pri TabICL
+in odstranjevanje prekrivanj pri TabDPT kažeta, da je ločitev podatkov, na
+katerih je bil model razvit, od podatkov, na katerih ga vrednotimo, pri
+temeljnih modelih samostojno metodološko vprašanje, tudi kadar je predhodno
+učenje sintetično.
+
+\section{Zbirke in protokoli vrednotenja}
+\label{sec:sor-zbirke}
+
+Zbirka OpenML-CC18 združuje 72 klasifikacijskih podatkovnih množic, izbranih po
+vnaprej določenih merilih~\cite{bischl2021openml}; podrobneje jo opišemo v
+razdelku~\ref{sec:cc18}. AutoML Benchmark obsega 71 klasifikacijskih in 33
+regresijskih nalog~\cite{gijsbers2024amlb}. TabArena je zasnovana kot živa
+zbirka, ki jo skrbniki sproti dopolnjujejo: avtorji so ročno izbrali 51
+podatkovnih množic in vsak model ovrednotili v treh režimih --- s privzetimi
+hiperparametri, z uglaševanjem prek 200 naključnih konfiguracij in z naknadnim
+ansambliranjem konfiguracij~\cite{erickson2025tabarena}. V režimu z
+uglaševanjem je bil najboljši CatBoost, po naknadnem ansambliranju so ga
+prehitele nevronske mreže, temeljni modeli pa so se najbolje izkazali na
+manjših podatkovnih množicah; TabICL in TabDPT so ovrednotili le s privzetimi
+nastavitvami, ker njuni avtorji uglaševanja ne
+predvidevajo~\cite{erickson2025tabarena}.
+
+Tabela~\ref{tab:sorodni} povzema, na katerih podatkovnih množicah, s kakšnim
+uglaševanjem primerjalnih modelov in s katerimi metrikami so bile zasnovane
+opisane primerjave. Ploščino pod krivuljo ROC (angl. \emph{area under the
+receiver operating characteristic curve}, ROC-AUC) je pri več razredih mogoče
+posplošiti na dva načina: kot povprečje čez vse pare razredov, ki ga
+imenujemo en proti enemu (angl. \emph{one-vs-one}, OvO)~\cite{hand2001simple},
+ali kot povprečje čez razrede, pri katerem vsak razred primerjamo z vsemi
+ostalimi, kar imenujemo en proti ostalim (angl. \emph{one-vs-rest},
+OvR)~\cite{fawcett2006introduction}.
+
+\begin{table}[htbp]
+\centering
+\caption{Zasnova sorodnih primerjav: podatkovne množice, uglaševanje
+primerjalnih modelov in metrike za klasifikacijo. Kjer delo obravnava tudi
+regresijo, so navedene le klasifikacijske metrike.}
+\label{tab:sorodni}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.21\linewidth}
+                >{\raggedright\arraybackslash}p{0.23\linewidth}
+                >{\raggedright\arraybackslash}p{0.2\linewidth}
+                >{\raggedright\arraybackslash}p{0.28\linewidth}}
+\hline
+Delo & Podatkovne množice & Uglaševanje & Metrike \\
+\hline
+Grinsztajn in sod.~\cite{grinsztajn2022why} & 45 (z regresijskimi) & naključno iskanje & točnost (normirana) \\
+Shwartz-Ziv in Armon~\cite{shwartzziv2022tabular} & 11 & da & logaritemska izguba \\
+McElfresh in sod.~\cite{mcelfresh2023neural} & 176 & do 30 konfiguracij & točnost, logaritemska izguba \\
+Ye in sod.~\cite{ye2024closer} & več kot 300 (z regresijskimi) & 100 konfiguracij & točnost \\
+Gijsbers in sod.~\cite{gijsbers2024amlb} & 71 & sistemi AutoML, 1 h ali 4 h & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabPFN~\cite{hollmann2023tabpfn} & 30 iz OpenML-CC18 & od 30 s do 1 h & ROC-AUC (OvO) \\
+TabPFN v2~\cite{hollmann2025tabpfn} & 29 iz AutoML Benchmark & od 30 s do 4 h & ROC-AUC (OvR), točnost \\
+TabICL~\cite{qu2025tabicl} & 185 iz TALENT & po zbirki TALENT & točnost, logaritemska izguba \\
+TabDPT~\cite{ma2025tabdpt} & 72 iz OpenML-CC18 & do 30 konfiguracij & ROC-AUC, točnost \\
+TabArena~\cite{erickson2025tabarena} & 51 (z regresijskimi) & privzeto; 200 konfiguracij; ansambliranje & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabICLv2~\cite{qu2026tabiclv2} & TabArena, TALENT & po zbirkah & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabPFN-3~\cite{grinsztajn2026tabpfn3} & TabArena, TALENT, lastne zbirke & po zbirkah & po zbirkah; ROC-AUC (OvR) in točnost pri veliko razredih \\
+Ta naloga & 72 iz OpenML-CC18, Medic3 & brez (privzete vrednosti) & ROC-AUC (OvR); točnost, logaritemska izguba \\
+\hline
+\end{tabular}
+\end{table}
+% Viri za vrstice: grinsztajn2022why razd. 3 (točnost, R2, naključno iskanje);
+% shwartzziv2022tabular razd. 3 (cross-entropy pri binarni klasifikaciji);
+% mcelfresh2023neural razd. 3 (do 30 konfiguracij, točnost, log loss, F1 in AUC
+% v prilogi D); ye2024closer razd. o protokolu (Optuna, 100 poskusov; točnost,
+% F1 in AUC dodatno); gijsbers2024amlb razd. 5.1.2; hollmann2023tabpfn razd. 5
+% (AUC OVO, proračuni 30 s do 1 h); hollmann2025tabpfn Methods (ROC AUC OvR in
+% točnost, normirano, 30 s do 4 h); qu2025tabicl razd. 5.1 (200 - 15 = 185,
+% 171 z največ 10 razredi); ma2025tabdpt razd. 4 (tabela 1); erickson2025tabarena
+% razd. 3; qu2026tabiclv2 razd. 5; grinsztajn2026tabpfn3 (Elo, izboljšljivost;
+% ROC-AUC OvR in točnost na sintetični zbirki z veliko razredi).
+
+Tabela pokaže, da je izbira metrike odvisna predvsem od izvora študije.
+Primerjave globokega učenja z drevesnimi ansambli kot glavno metriko večinoma
+uporabljajo točnost~\cite{grinsztajn2022why,mcelfresh2023neural,ye2024closer}.
+Članka o modelu TabPFN uporabljata ROC-AUC, prvi v različici
+OvO~\cite{hollmann2023tabpfn}, drugi v različici
+OvR~\cite{hollmann2025tabpfn}. Novejše zbirke AutoML Benchmark in TabArena ter
+poročilo o modelu TabICLv2 pa ločijo vrsto naloge: pri binarni klasifikaciji
+uporabljajo ROC-AUC, pri klasifikaciji z več razredi logaritemsko izgubo
+(angl. \emph{log
+loss})~\cite{gijsbers2024amlb,erickson2025tabarena,qu2026tabiclv2}. Avtorji
+zbirke AutoML Benchmark izrecno opozarjajo, da ROC-AUC ni občutljiv na
+kalibracijo (angl. \emph{calibration}) napovedanih
+verjetnosti~\cite{gijsbers2024amlb}. Logaritemska
+izguba je nasprotno pravilno pravilo točkovanja (angl. \emph{proper scoring
+rule}): njena pričakovana vrednost je najmanjša, kadar napovedana porazdelitev
+razredov ustreza pravi~\cite{gneiting2007strictly}. S tem argumentom so avtorji
+modela TabICL poleg točnosti poročali logaritemsko izgubo in ugotovili, da
+TabICL in TabPFN v2 na njej značilno prekašata primerjalne modele, uglaševane
+za točnost~\cite{qu2025tabicl}. Podobno zasnovo z eno glavno in več dodatnimi
+metrikami uporabljajo Probst in sodelavci, ki v študiji uglaševanja
+hiperparametrov na 38 podatkovnih množicah s platforme OpenML izračunajo
+ROC-AUC, točnost in Brierjevo oceno, razpravljajo pa predvsem o
+ROC-AUC~\cite{probst2019tunability}.
+
+Razlikuje se tudi združevanje rezultatov čez podatkovne množice. Nekateri
+avtorji metriko na vsaki množici normirajo na interval med najslabšim in
+najboljšim algoritmom~\cite{grinsztajn2022why,hollmann2025tabpfn}, TabArena
+algoritme razvršča z oceno Elo~\cite{erickson2025tabarena}, poročili o modelih
+TabPFN-3 in TabICLv2 pa dodajata izboljšljivost (angl. \emph{improvability}),
+ki meri relativno zaostajanje za najboljšim
+modelom~\cite{grinsztajn2026tabpfn3,qu2026tabiclv2}. Prva različica TabPFN poroča povprečne
+range in parne Wilcoxonove teste predznačenih rangov (angl. \emph{Wilcoxon
+signed-rank test}) s Holmovim popravkom~\cite{hollmann2023tabpfn},
+TabICL pa povprečne range s statističnimi testi nad njimi~\cite{qu2025tabicl}.
+
+Za statistično primerjavo več algoritmov na več podatkovnih množicah Demšar
+priporoča Friedmanov test z naknadnim testom (angl. \emph{post-hoc test}) nad
+povprečnimi rangi~\cite{demsar2006statistical}. Benavoli in sodelavci so pokazali, da je
+izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri drugi
+algoritmi so vključeni v primerjavo, in zato predlagajo parne teste, katerih
+izid je odvisen le od obeh primerjanih algoritmov, na primer Wilcoxonov test
+predznačenih rangov~\cite{benavoli2016should}. Tschalzev in sodelavci so pokazali, da so
+primerjave s poenoteno predobdelavo podatkov pristranske: po predobdelavi,
+prilagojeni posamezni podatkovni množici, se rangi modelov znatno spremenijo,
+razlike med njimi pa zmanjšajo~\cite{tschalzev2024data}. Avtorji zbirke
+TabArena opozarjajo, da statične zbirke ostanejo nespremenjene, tudi ko se v
+njih odkrijejo napake~\cite{erickson2025tabarena}; tudi avtorji zbirke
+OpenML-CC18 sami navajajo nekaj množic, ki njenih meril ne izpolnjujejo
+povsem~\cite{bischl2021openml}.
+
+\section{Umestitev naloge}
+\label{sec:sor-umestitev}
+
+Naša primerjava se od opisanih razlikuje v štirih pogledih. Prvič, vseh šest
+algoritmov vrednotimo s privzetimi hiperparametri in le s predobdelavo, brez
+katere knjižnica podatkov ne sprejme. Privzete nastavitve vrednoti tudi
+TabArena, vendar kot enega od treh režimov in na drugačnem izboru podatkovnih
+množic~\cite{erickson2025tabarena}; pri nas so privzete nastavitve osrednji
+protokol, ki ustreza uporabi algoritma brez uglaševanja.
+% Ko bo v nalogi razdelek o uglaševanju modela XGBoost (poskus 4, zagon
+% cc18_xgb_tuned), tu dodaj stavek s sklicem nanj.
+Drugič, oba temeljna modela vrednotimo na celotni zbirki OpenML-CC18, vključno z
+množicami, ki po velikosti presegajo razpon, na katerem sta bila predstavljena.
+Prva različica TabPFN je bila ovrednotena le na 30 manjših množicah te
+zbirke~\cite{hollmann2023tabpfn}, poročilo o TabPFN-3 je ne
+vključuje~\cite{grinsztajn2026tabpfn3}, poročilo o TabICLv2 prav
+tako ne~\cite{qu2026tabiclv2}, za TabPFN-3.5 pa tehničnega poročila v času
+pisanja nismo imeli na voljo (razdelek~\ref{sec:tabpfn}).
+% TabICLv2 in TabPFN-3: niz »CC18« se v besedilu poročil ne pojavi (preverjeno
+% 2026-10-15 v besedilu PDF z arXiv).
+Tretjič, poleg javne zbirke vključimo nejavni podatkovni nabor Medic3 s
+\num{122093} primeri in 220 razredi, ki presega razredno omejitev modela
+TabPFN-3.5; ker ni del nobene javne zbirke, ga razvijalci modelov pri razvoju
+niso mogli uporabiti. Četrtič, kot glavno metriko uporabljamo ROC-AUC v
+različici OvR, enako kot drugi članek o modelu TabPFN~\cite{hollmann2025tabpfn},
+kot dodatni metriki pa točnost in logaritemsko izgubo; s tem pokrijemo
+metrike, ki v tabeli~\ref{tab:sorodni} prevladujejo, razlike med algoritmi pa
+preverimo s Friedmanovim testom in s parnimi
+testi~\cite{demsar2006statistical,benavoli2016should}.
 
 %=========================================================================
 \chapter{Metode in testna metodologija}
@@ -172,18 +420,16 @@ morda bo zapisal tudi ključno literaturo.}
 
 V primerjavo smo vključili šest algoritmov za nadzorovano klasifikacijo
 tabelaričnih podatkov. Prvi štirje --- naključni gozd, XGBoost, LightGBM in
-CatBoost --- so ansambli odločitvenih dreves (angl. \emph{decision tree
-ensembles}). Ti že dve desetletji veljajo za privzeto orodje na tabelaričnih
+CatBoost --- so ansambli odločitvenih dreves. Ti že dve desetletji veljajo za privzeto orodje na tabelaričnih
 podatkih; primerjalne študije kažejo, da na tipičnih tabelaričnih množicah
 srednje velikosti še vedno prekašajo arhitekture globokega učenja, zasnovane
 posebej za tabelarične podatke~\cite{grinsztajn2022why}. Zadnja dva, TabPFN in
-TabICL, sta tabelarična temeljna modela (angl. \emph{tabular foundation
-models}): predhodno naučena modela, ki ciljne podatkovne množice ne vidita med
+TabICL, sta tabelarična temeljna modela: predhodno naučena modela, ki ciljne podatkovne množice ne vidita med
 učenjem, temveč jo ob napovedovanju prejmeta kot kontekst.
 
 Izbor pokriva obe uveljavljeni družini drevesnih ansamblov --- vrečenje
 (angl. \emph{bagging}) pri naključnem gozdu in gradientno pospeševanje
-(angl. \emph{gradient boosting}) pri preostalih treh --- in znotraj
+pri preostalih treh --- in znotraj
 gradientnega pospeševanja tri implementacije, ki se med seboj razlikujejo po
 načinu rasti dreves in po obravnavi kategoričnih atributov. Prav zadnje je za
 našo nalogo bistveno, saj se algoritmi zelo razlikujejo po tem, koliko
@@ -305,8 +551,8 @@ kategoričnem atributu ne sprejme.
 \label{sec:tabpfn}
 
 TabPFN je predstavnik nove družine modelov za tabelarične podatke, ki temelji na
-zamisli mreže, prilagojene apriornim podatkom (angl. \emph{prior-data fitted
-network}, PFN)~\cite{muller2022transformers}. Namesto da bi se model učil na
+zamisli mreže, prilagojene apriornim podatkom
+(PFN)~\cite{muller2022transformers}. Namesto da bi se model učil na
 ciljni podatkovni množici, ga enkrat in vnaprej naučimo na velikem številu
 sintetičnih podatkovnih množic, vzorčenih iz vnaprej določene apriorne
 porazdelitve nad nalogami. Naučeni transformer~\cite{vaswani2017attention} se
@@ -317,8 +563,7 @@ je bil naučen~\cite{muller2022transformers}.
 Posledica je nenavaden potek uporabe: klic metode za učenje ne izvede nobene
 posodobitve uteži. Učna množica se skupaj s testnimi primeri poda modelu kot
 vhodno zaporedje in napovedi za celotno testno množico nastanejo v enem samem
-prehodu naprej. Temu pravimo učenje iz konteksta (angl. \emph{in-context
-learning}); ciljna podatkovna množica je za model zgolj vhod, nikoli učni signal.
+prehodu naprej. Temu pravimo učenje iz konteksta; ciljna podatkovna množica je za model zgolj vhod, nikoli učni signal.
 
 Prva različica TabPFN~\cite{hollmann2023tabpfn} je to zamisel prenesla na
 tabelarične podatke, a z ozkim območjem uporabnosti: do 1000 učnih primerov, do
@@ -400,7 +645,74 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 \section{Protokol vrednotenja}
 \label{sec:protokol}
 
-\todo{5-fold stratified CV, identical splits, \texttt{random\_state=42}, ROC-AUC binary vs.\ macro-OVR. This is the spine everything else hangs off.}
+\todo{5-fold stratified CV, identical splits, \texttt{random\_state=42}, 3 ponovitve s semenom modela 42 + ponovitev. Metrike so opisane v podrazdelku~\ref{sec:metrike}.}
+
+\subsection{Metrike uspešnosti}
+\label{sec:metrike}
+
+Glavna metrika naše primerjave je ROC-AUC. Pri binarni klasifikaciji je to
+verjetnost, da model naključno izbranemu primeru pozitivnega razreda pripiše
+višjo oceno kot naključno izbranemu primeru negativnega razreda; vrednost
+\num{0.5} ustreza naključnemu ugibanju, vrednost 1 pa popolni
+razvrstitvi~\cite{fawcett2006introduction}. Metrika je odvisna le od vrstnega
+reda napovedanih verjetnosti, zato ne zahteva izbire praga za odločitev o
+razredu, krivulja ROC pa je neobčutljiva na spremembe razmerja med
+razredoma~\cite{fawcett2006introduction}. Bradley je ROC-AUC priporočil kot
+enoštevilsko mero namesto točnosti~\cite{bradley1997use}, Ling in sodelavci pa
+so pokazali, da je s točnostjo statistično konsistentna in od nje bolj
+razločevalna~\cite{ling2003auc}. Pri več razredih uporabljamo različico OvR z
+neuteženim povprečjem: za vsak razred izračunamo ROC-AUC naloge, v kateri ta
+razred ločujemo od vseh ostalih, in vrednosti povprečimo, tako da ima vsak
+razred enako težo ne glede na pogostost. Enako različico uporablja drugi
+članek o modelu TabPFN~\cite{hollmann2025tabpfn}, prvi pa različico
+OvO~\cite{hollmann2023tabpfn,hand2001simple}. Dokumentacija knjižnice
+scikit-learn opozarja, da je različica OvR za razliko od različice OvO
+občutljiva na neuravnoteženost razredov tudi pri neuteženem povprečju, saj ta
+vpliva na sestavo skupine ostalih razredov~\cite{sklearndocsroc}. Hand je
+ROC-AUC kritiziral kot nekoherentno mero stroškov napačne klasifikacije, ker za
+različne klasifikatorje implicitno predpostavi različne porazdelitve
+stroškov~\cite{hand2009measuring}; ker v naši primerjavi stroški napak niso
+znani, ROC-AUC kljub temu uporabljamo kot splošno mero ločevanja med razredi.
+% Implementacija: Diplomsko-delo_Koda/src/utils.py (compute_roc_auc). Povprečje
+% teče le čez razrede, prisotne v testnem foldu; na vseh naših množicah so v
+% vsakem foldu prisotni vsi razredi, zato je izid enak klicu
+% roc_auc_score(..., multi_class="ovr", average="macro").
+
+Ker ROC-AUC upošteva le vrstni red napovedi, ne pa njihovih vrednosti, poročamo
+še dve dodatni metriki. Izbor sledi delitvi metrik na tri družine, ki jo
+predlagajo Ferri in sodelavci: metrike, ki temeljijo na pragu in štejejo
+napake, metrike, ki merijo kakovost razvrščanja, in verjetnostne metrike, ki
+merijo odstopanje napovedanih verjetnosti od pravih~\cite{ferri2009experimental}.
+Iz vsake družine uporabimo po eno metriko: točnost, ROC-AUC in logaritemsko
+izgubo. Točnost je delež testnih primerov, pri katerih je razred z največjo
+napovedano verjetnostjo pravi. Logaritemska izguba je povprečje vrednosti
+$-\log \hat{p}_i$ čez testne primere, kjer je $\hat{p}_i$ verjetnost, ki jo
+model pripiše pravemu razredu $i$-tega primera. Kot pravilno pravilo
+točkovanja nagradi napovedi, katerih verjetnosti ustrezajo dejanskim
+pogostostim~\cite{gneiting2007strictly}, in tako zajame kalibracijo, na katero
+ROC-AUC ni občutljiv~\cite{gijsbers2024amlb}. Napoved, ki pravemu razredu
+pripiše verjetnost 0, bi imela neskončno izgubo; funkcija \texttt{log\_loss}
+knjižnice scikit-learn zato verjetnosti omeji na interval $[\varepsilon, 1 -
+\varepsilon]$, kjer je $\varepsilon$ strojna natančnost podatkovnega
+tipa~\cite{sklearndocslogloss}. Pri dvojni natančnosti je $\varepsilon \approx
+\num{2.2e-16}$, zato en primer k izgubi prispeva največ $-\log \varepsilon
+\approx \num{36.04}$.
+
+Obe dodatni metriki izračunamo iz napovedanih verjetnosti, ki smo jih ob
+vsakem učenju shranili, zato zanju učenja ni bilo treba ponoviti. Pri
+dodatnih metrikah algoritme na vsaki podatkovni množici razvrstimo enako kot
+pri glavni metriki, le da pri logaritemski izgubi rang 1 dobi najnižja
+vrednost. Nasičenost podatkovnih množic je pri vseh treh metrikah določena po
+ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
+% Implementacija: Diplomsko-delo_Koda/src/metrics.py in
+% scripts/compute_metrics.py. Shranjene verjetnosti so v zapisu float32; pred
+% izračunom jih pretvorimo v dvojno natančnost in vsako vrstico normiramo na
+% vsoto 1 (največje odstopanje vsote je bilo 3,6e-7). Kot kontrolo skript iz
+% istih datotek ponovno izračuna ROC-AUC: od vrednosti, izračunane ob učenju, se
+% razlikuje za največ 3,2e-4 na zbirki OpenML-CC18 in 7,5e-4 na naboru Medic3
+% (samo LightGBM, katerega verjetnosti so skoraj 0 ali 1, zato zaokrožitev na
+% float32 ustvari izenačitve); metrics_info.json ob vsakem naboru. Metrike so
+% izračunane s kodo commita ed2cafc (čisto drevo), rezultati v commitu 783f705.
 
 \section{Politika predobdelave}
 \label{sec:predobdelava}
@@ -456,6 +768,7 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 %  - Skupna primerjava: povprečni ROC-AUC in povprečni rang po algoritmih.
 %  - Tabela z rezultati po posameznih podatkovnih množicah.
 %  - Statistična značilnost razlik med pari algoritmov.
+%  - Dodatni metriki: točnost in logaritemska izguba.
 %  - Časovna učinkovitost: čas učenja in čas sklepanja.
 %  - Odvisnost uspešnosti od velikosti podatkovne množice in od deleža
 %    kategoričnih atributov.
@@ -475,7 +788,9 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 % besedila (vir je naveden v komentarju ob odstavku). Prejšnji zagon cc18_v2
 % (TabPFN-3) skript bere iz zgodovine gita, commit 5a14045.
 % OPOMBA: angleške izvirnike statističnih izrazov ob prvi pojavitvi prestavi v
-% razdelek Protokol vrednotenja, ko bo napisan.
+% razdelek Protokol vrednotenja, ko bo napisan. Naknadni test, Wilcoxonov test
+% predznačenih rangov, ROC-AUC, točnost in logaritemska izguba so že vpeljani v
+% poglavju Sorodni pristopi.
 
 V tem poglavju predstavimo rezultate primerjave šestih algoritmov na
 72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml} in na
@@ -531,9 +846,8 @@ Razlike med algoritmi smo preverili po postopku za primerjavo več
 klasifikatorjev na več podatkovnih množicah, ki ga
 priporoča Demšar~\cite{demsar2006statistical}: s Friedmanovim testom, ki
 preveri ničelno domnevo, da so vsi algoritmi enakovredni, z Nemenyijevim testom
-kot naknadnim testom (angl. \emph{post-hoc test}) nad povprečnimi rangi ter s
-parnimi Wilcoxonovimi testi predznačenih rangov (angl. \emph{Wilcoxon
-signed-rank test}) s Holmovim popravkom za večkratno primerjanje. Stopnja
+kot naknadnim testom nad povprečnimi rangi ter s parnimi Wilcoxonovimi testi
+predznačenih rangov s Holmovim popravkom za večkratno primerjanje. Stopnja
 značilnosti je povsod $\alpha = 0{,}05$.
 
 O zavrnitvi ničelne domneve Friedmanovega testa odločimo na podlagi statistike
@@ -598,6 +912,48 @@ parih TabPFN-3.5--TabICL ($p_\mathrm{Holm} = \num{0.0026}$), CatBoost--LightGBM
 ($p_\mathrm{Holm} = \num{4.9e-5}$) in LightGBM--XGBoost. TabPFN-3.5 je od TabICL
 na vseh podatkovnih množicah boljši na 45 in slabši na 23, povprečna razlika
 ROC-AUC pa znaša zgolj \num{0.0025}.
+
+\section{Točnost in logaritemska izguba}
+\label{sec:rez-metrike}
+% Vir: summary/accuracy/ in summary/log_loss/ zbirke cc18_v4/combined
+% (overall*.csv, friedman*.csv, wilcoxon_holm*.csv; src.summary in src.stats z
+% --metric), metrike iz shranjenih napovedi (metrics.csv, metrics_info.json,
+% scripts/compute_metrics.py). Številke izpiše generiraj_rezultate.py, razdelek 11.
+
+Tabela~\ref{tab:metrike} povzema dodatni metriki (podrazdelek~\ref{sec:metrike}).
+Prva tri mesta so pri vseh treh metrikah enaka: TabPFN-3.5 doseže najnižji
+povprečni rang tudi po točnosti (\num{1.43}) in po logaritemski izgubi
+(\num{1.35}), sledita mu TabICL (\num{1.99} oziroma \num{1.86}) in CatBoost
+(\num{3.66} oziroma \num{3.36}). Preostali trije ansambli si mesta razdelijo
+različno: po točnosti je vrstni red LightGBM, XGBoost, naključni gozd, po
+logaritemski izgubi pa XGBoost, LightGBM, naključni gozd, pri čemer ima LightGBM
+nižjo povprečno izgubo kot XGBoost (\num{0.3709} proti \num{0.3807}), a slabši
+povprečni rang. Naključni gozd je po logaritemski izgubi z rangom \num{5.42} in
+povprečno izgubo \num{0.5144} izrazito zadnji. Na nenasičenih podatkovnih
+množicah prva tri mesta ostanejo enaka, po točnosti pa je naključni gozd
+(\num{4.61}) pred modelom XGBoost (\num{5.01}).
+
+\input{rezultati/tab_metrike.tex}
+
+Friedmanov test ničelno domnevo zavrne pri obeh metrikah, tako na vseh 72
+podatkovnih množicah (točnost: $F_F = \num{110.06}$, logaritemska izguba: $F_F =
+\num{208.39}$, obakrat s $(5, 355)$ prostostnimi stopnjami in $p < 10^{-69}$) kot
+na 37 nenasičenih ($F_F = \num{64.26}$ oziroma $F_F = \num{127.22}$ s $(5, 180)$
+prostostnimi stopnjami, $p < 10^{-37}$). Parni Wilcoxonovi testi s Holmovim
+popravkom pri obeh metrikah in na obeh podmnožicah potrdijo, da sta oba
+temeljna modela značilno boljša od vseh štirih drevesnih ansamblov (največji
+$p_\mathrm{Holm} = \num{1.8e-5}$) in da je TabPFN-3.5 značilno boljši od TabICL:
+po točnosti je na vseh podatkovnih množicah boljši na 49 in slabši na 19
+($p_\mathrm{Holm} = \num{4.4e-4}$), po logaritemski izgubi boljši na 51 in slabši
+na 21 ($p_\mathrm{Holm} = \num{7.8e-4}$). CatBoost je pri obeh metrikah značilno
+boljši od preostalih treh ansamblov. Med LightGBM, modelom XGBoost in
+naključnim gozdom so značilne le nekatere razlike: na vseh podatkovnih množicah
+ni značilen par naključni gozd--XGBoost pri točnosti in par LightGBM--XGBoost
+pri logaritemski izgubi, na nenasičenih pa pri nobeni od obeh metrik ni
+značilen noben par med njimi. Nemenyijev test pri logaritemski izgubi na
+nenasičenih množicah modela TabICL in CatBoosta ne loči, saj je razlika
+povprečnih rangov (\num{1.11}) manjša od kritične razdalje (\num{1.24}), parni
+Wilcoxonov test pa ju loči ($p_\mathrm{Holm} = \num{1.4e-6}$).
 
 \section{Rezultati po podatkovnih množicah}
 \label{sec:rez-mnozice}
@@ -755,6 +1111,28 @@ razredi. Najmanj izrazit je na prvi različici par CatBoost--TabICL (razlika
 \num{5.2e-6}$), na drugi pa par TabPFN-3.5--CatBoost (razlika \num{0.0015},
 TabPFN-3.5 boljši v vseh 15 učenjih, $p_\mathrm{Holm} = \num{0.0050}$).
 
+Tabela~\ref{tab:medic3-metrike} prikazuje še dodatni metriki. Najvišjo
+točnost in najnižjo logaritemsko izgubo na obeh različicah doseže CatBoost; na
+različici s 160 razredi (točnost \num{0.4991}, izguba \num{1.9135}) tesno pred
+modelom TabPFN-3.5 (\num{0.4961} oziroma \num{1.9281}). Vrstni red prvih dveh
+algoritmov je tako obraten kot pri ROC-AUC. Razlika v točnosti med CatBoostom
+in modelom TabPFN-3.5 ni značilna (CatBoost boljši v 13 od 15 učenj,
+$p_\mathrm{Holm} = \num{0.0835}$), razlika v logaritemski izgubi pa je (CatBoost
+boljši v vseh 15 učenjih, $p_\mathrm{Holm} = \num{0.0085}$). Vsi preostali pari so
+pri obeh metrikah in na obeh različicah značilni. Točnost najboljših algoritmov
+je okoli \num{0.5}, ROC-AUC pa nad \num{0.95}: ROC-AUC v različici OvR meri, kako
+dobro model loči vsak razred od vseh ostalih, točnost pa, kako pogosto je pravi
+razred med 160 oziroma 220 razredi na prvem mestu. Naključni gozd ima pri
+podobni točnosti kot XGBoost skoraj dvakrat višjo logaritemsko izgubo
+(\num{4.2027} proti \num{2.3138} pri 160 razredih). Logaritemska izguba modela
+LightGBM (\num{34.12} pri 160 razredih) je blizu zgornje meje \num{36.04}, ki jo
+določa omejitev verjetnosti (podrazdelek~\ref{sec:metrike}).
+% Vir: tab_medic3_metrike.tex; testi: summary/accuracy/corrected_ttest_holm.csv
+% in summary/log_loss/corrected_ttest_holm.csv obeh naborov Medic3 (izpis
+% generiraj_rezultate.py, razdelek 11).
+
+\input{rezultati/tab_medic3_metrike.tex}
+
 Časovno najzahtevnejši je bil CatBoost z mediano \num{8143} s na učenje pri 220
 razredih in \num{5550} s pri 160 razredih. Temeljna modela sta za napovedovanje
 potrebovala od \num{74} do \num{80} s na učenje, drevesni ansambli pa največ
@@ -789,8 +1167,12 @@ v poglavju~\ref{ch:zakljucek}.
 %  - Razlaga rezultatov in odgovori na raziskovalna vprašanja iz uvoda.
 %  - Primerjava naših ugotovitev z objavljenimi rezultati.
 %  - Praktična priporočila: kdaj se splača uporabiti temeljni model.
-%  - Omejitve dela (privzeti hiperparametri, ena metrika, omejitve
-%    strojne opreme, zgolj klasifikacija).
+%  - Omejitve dela (privzeti hiperparametri, omejitve strojne opreme,
+%    zgolj klasifikacija). Metrike: glavna ROC-AUC, dodatni točnost in
+%    logaritemska izguba (sec:metrike); na CC18 se prva tri mesta ne
+%    spremenijo, na Medic3-160 se vrstni red TabPFN-3.5 in CatBoost obrne
+%    (sec:rez-medic3). Visoka log. izguba naključnega gozda: verjetnosti so
+%    deleži dreves, pogosto točno 0 (razloži z virom ali meritvijo).
 %  - Nadaljnje delo: optimizacija hiperparametrov, podatkovni nabor
 %    Medic3, dodatne zbirke za primerjalno vrednotenje.
 

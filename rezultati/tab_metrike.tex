@@ -1,0 +1,22 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v4/combined/summary/accuracy/overall.csv, results/runs/cc18_v4/combined/summary/accuracy/overall_nonsaturated.csv, results/runs/cc18_v4/combined/summary/log_loss/overall.csv, results/runs/cc18_v4/combined/summary/log_loss/overall_nonsaturated.csv, results/runs/cc18_v4/combined/metrics.csv (zbirka cc18_v4/combined: naključni gozd in XGBoost iz cc18_v4, commit 8b601d1, ostali iz cc18_v3, commit 69cc51e). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Dodatni metriki na zbirki OpenML-CC18: povprečna točnost in povprečna logaritemska izguba čez podatkovne množice ter povprečni rang algoritma po posamezni metriki. Pri logaritemski izgubi je boljša nižja vrednost in rang 1 dobi najnižja izguba. Nasičenost množic je določena po ROC-AUC. Algoritmi so urejeni po povprečnem rangu po ROC-AUC (tabela~\ref{tab:skupno}).}
+\label{tab:metrike}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrr}
+\hline
+ & \multicolumn{4}{c}{vseh 72 množic} & \multicolumn{4}{c}{37 nenasičenih množic} \\
+ & \multicolumn{2}{c}{točnost} & \multicolumn{2}{c}{log. izguba} & \multicolumn{2}{c}{točnost} & \multicolumn{2}{c}{log. izguba} \\
+Algoritem & povpr. & rang & povpr. & rang & povpr. & rang & povpr. & rang \\
+\hline
+TabPFN-3.5 & \num{0.8959} & \num{1.43} & \num{0.2417} & \num{1.35} & \num{0.8156} & \num{1.27} & \num{0.4157} & \num{1.14} \\
+TabICL & \num{0.8911} & \num{1.99} & \num{0.2499} & \num{1.86} & \num{0.8094} & \num{2.09} & \num{0.4292} & \num{2.05} \\
+CatBoost & \num{0.8716} & \num{3.66} & \num{0.3123} & \num{3.36} & \num{0.7862} & \num{3.66} & \num{0.4963} & \num{3.16} \\
+LightGBM & \num{0.8652} & \num{4.31} & \num{0.3709} & \num{4.58} & \num{0.7791} & \num{4.35} & \num{0.5849} & \num{4.65} \\
+XGBoost & \num{0.8646} & \num{4.78} & \num{0.3807} & \num{4.43} & \num{0.7774} & \num{5.01} & \num{0.6170} & \num{4.89} \\
+Naključni gozd & \num{0.8599} & \num{4.83} & \num{0.5144} & \num{5.42} & \num{0.7727} & \num{4.61} & \num{0.7512} & \num{5.11} \\
+\hline
+\end{tabular}
+\end{table}

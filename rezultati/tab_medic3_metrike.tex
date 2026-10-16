@@ -1,0 +1,21 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/medic3_raw_v2/combined/summary/accuracy/per_dataset.csv, results/runs/medic3_raw_v2/combined/summary/log_loss/per_dataset.csv, results/runs/medic3_160_v2/combined/summary/accuracy/per_dataset.csv, results/runs/medic3_160_v2/combined/summary/log_loss/per_dataset.csv (naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160; metrike iz shranjenih napovedi, scripts/compute_metrics.py). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Dodatni metriki na podatkovnem naboru Medic3: povprečna točnost in povprečna logaritemska izguba $\pm$ standardni odklon čez 15 učenj. Pri logaritemski izgubi je boljša nižja vrednost. -- označuje neuspeh vseh učenj. Algoritmi so urejeni kot v tabeli~\ref{tab:medic3}.}
+\label{tab:medic3-metrike}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr}
+\hline
+ & \multicolumn{2}{c}{220 razredov} & \multicolumn{2}{c}{160 razredov} \\
+Algoritem & točnost & log. izguba & točnost & log. izguba \\
+\hline
+TabPFN-3.5 & \multicolumn{1}{c}{--} & \multicolumn{1}{c}{--} & \num{0.4961} $\pm$ \num{0.0022} & \num{1.9281} $\pm$ \num{0.0105} \\
+CatBoost & \num{0.4824} $\pm$ \num{0.0020} & \num{2.0452} $\pm$ \num{0.0101} & \num{0.4991} $\pm$ \num{0.0021} & \num{1.9135} $\pm$ \num{0.0089} \\
+TabICL & \num{0.4670} $\pm$ \num{0.0026} & \num{2.1438} $\pm$ \num{0.0148} & \num{0.4806} $\pm$ \num{0.0023} & \num{2.0216} $\pm$ \num{0.0119} \\
+XGBoost & \num{0.4600} $\pm$ \num{0.0034} & \num{2.4889} $\pm$ \num{0.0173} & \num{0.4761} $\pm$ \num{0.0026} & \num{2.3138} $\pm$ \num{0.0210} \\
+Naključni gozd & \num{0.4540} $\pm$ \num{0.0024} & \num{4.7694} $\pm$ \num{0.0589} & \num{0.4695} $\pm$ \num{0.0016} & \num{4.2027} $\pm$ \num{0.0512} \\
+LightGBM & \num{0.0512} $\pm$ \num{0.0196} & \num{34.1980} $\pm$ \num{0.7054} & \num{0.0532} $\pm$ \num{0.0194} & \num{34.1245} $\pm$ \num{0.7017} \\
+\hline
+\end{tabular}
+\end{table}

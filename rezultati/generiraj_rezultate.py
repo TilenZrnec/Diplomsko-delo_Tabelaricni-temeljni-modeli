@@ -330,3 +330,92 @@ for lab, path in (('raw', RUNS + '/medic3_raw'), ('160', RUNS + '/medic3_160')):
           '| 4.6.0 default', old.loc['default', ['roc_auc', 'train_logloss_last']].round(4).to_dict())
     rr = pd.read_csv(path + '/results.csv'); lg = rr[rr.algorithm == 'lightgbm'].roc_auc
     print('   LightGBM vseh 15 ucenj: min', round(lg.min(), 4), 'max', round(lg.max(), 4))
+
+# 11. Dodatni metriki: točnost in logaritemska izguba -----------------------------------
+# metrics.csv naredi scripts/compute_metrics.py iz shranjenih napovedi (brez ponovnega
+# učenja), povzetke in teste pa src.summary / src.stats z --metric v summary/<metrika>/.
+MET = ['accuracy', 'log_loss']
+MLAB = {'roc_auc': 'ROC-AUC', 'accuracy': 'točnost', 'log_loss': 'log. izguba'}
+def msum(metric, f): return pd.read_csv(f"{S}/{metric}/{f}")
+info_m = json.load(open(R + '/metrics_info.json'))
+mov = {m: msum(m, 'overall.csv').set_index('algorithm') for m in MET}
+movn = {m: msum(m, 'overall_nonsaturated.csv').set_index('algorithm') for m in MET}
+assert all(mov[m][f'mean_{m}_complete'].notna().all() for m in MET), 'povprečja le na vseh množicah'
+t = src([S + f'/{m}/{f}' for m in MET for f in ('overall.csv', 'overall_nonsaturated.csv')]
+        + [R + '/metrics.csv'])
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Dodatni metriki na zbirki OpenML-CC18: povprečna točnost in povprečna logaritemska izguba čez podatkovne množice ter povprečni rang algoritma po posamezni metriki. Pri logaritemski izgubi je boljša nižja vrednost in rang 1 dobi najnižja izguba. Nasičenost množic je določena po ROC-AUC. Algoritmi so urejeni po povprečnem rangu po ROC-AUC (tabela~\ref{tab:skupno}).}
+\label{tab:metrike}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrrrrrr}
+\hline
+ & \multicolumn{4}{c}{vseh """ + str(N) + r""" množic} & \multicolumn{4}{c}{""" + str(N_NS) + r""" nenasičenih množic} \\
+ & \multicolumn{2}{c}{točnost} & \multicolumn{2}{c}{log. izguba} & \multicolumn{2}{c}{točnost} & \multicolumn{2}{c}{log. izguba} \\
+Algoritem & povpr. & rang & povpr. & rang & povpr. & rang & povpr. & rang \\
+\hline
+"""
+for algo in ORDER:
+    cells = []
+    for tab in (mov, movn):
+        for m in MET:
+            cells += [n(tab[m].loc[algo, f'mean_{m}_complete']), n(tab[m].loc[algo, 'mean_rank'], 2)]
+    t += IME[algo] + ' & ' + ' & '.join(cells) + ' \\\\\n'
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_metrike.tex', t)
+
+def mmed(path, metric):
+    return pd.read_csv(f"{path}/summary/{metric}/per_dataset.csv").set_index('algorithm')
+mraw = {m: mmed(M_RAW, m) for m in MET}; m160 = {m: mmed(M_160, m) for m in MET}
+def mcell(tab, algo, metric):
+    r = tab.loc[algo]
+    if r.n_failed == r.n_folds: return '\\multicolumn{1}{c}{--}'
+    return f"{n(r[f'{metric}_mean'])} $\\pm$ {n(r[f'{metric}_std'])}"
+t = src([M_RAW + f'/summary/{m}/per_dataset.csv' for m in MET] + [M_160 + f'/summary/{m}/per_dataset.csv' for m in MET],
+        what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160; "
+             "metrike iz shranjenih napovedi, scripts/compute_metrics.py")
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Dodatni metriki na podatkovnem naboru Medic3: povprečna točnost in povprečna logaritemska izguba $\pm$ standardni odklon čez 15 učenj. Pri logaritemski izgubi je boljša nižja vrednost. -- označuje neuspeh vseh učenj. Algoritmi so urejeni kot v tabeli~\ref{tab:medic3}.}
+\label{tab:medic3-metrike}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lrrrr}
+\hline
+ & \multicolumn{2}{c}{""" + str(info['raw']['classes']) + r""" razredov} & \multicolumn{2}{c}{""" + str(info['160']['classes']) + r""" razredov} \\
+Algoritem & točnost & log. izguba & točnost & log. izguba \\
+\hline
+"""
+for algo in MORDER:
+    t += (f"{IME[algo]} & {mcell(mraw['accuracy'], algo, 'accuracy')} & {mcell(mraw['log_loss'], algo, 'log_loss')} & "
+          f"{mcell(m160['accuracy'], algo, 'accuracy')} & {mcell(m160['log_loss'], algo, 'log_loss')} \\\\\n")
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_medic3_metrike.tex', t)
+
+print('== Dodatni metriki ==')
+print('metrics_info CC18', {k: info_m[k] for k in ('fits', 'fits_scored', 'max_abs_roc_auc_diff', 'max_row_sum_error')},
+      info_m['computed_by'])
+for path in (M_RAW, M_160):
+    mi = json.load(open(path + '/metrics_info.json'))
+    print('metrics_info', path, {k: mi[k] for k in ('fits', 'fits_scored', 'max_abs_roc_auc_diff')})
+for m in MET:
+    for lab, tab, suf in (('72', mov, ''), ('ns', movn, '_nonsaturated')):
+        o = tab[m].sort_values('mean_rank')
+        print(m, lab, 'rangi', o.mean_rank.round(4).to_dict(), 'povpr', o[f'mean_{m}_complete'].round(4).to_dict(),
+              'zmage', o.n_wins.to_dict())
+        fr = msum(m, f'friedman{suf}.csv').iloc[0]
+        print('  friedman', {k: fr[k] for k in ('chi2_F', 'F_F', 'df1', 'df2', 'p_F', 'CD', 'reject_H0')})
+        w = msum(m, f'wilcoxon_holm{suf}.csv')
+        print('  neznacilni:', [(r.a, r.b, round(r.p_holm, 4)) for r in w.itertuples() if not r.significant])
+        print('  tabicl/tabpfn:', [(r.a, r.b, round(r.mean_diff, 4), r.wins_a, r.wins_b, r.p_holm) for r in w.itertuples() if {r.a, r.b} == {'tabicl', 'tabpfn'}])
+        fmt = w[(w.a.isin(['tabpfn', 'tabicl']) ^ w.b.isin(['tabpfn', 'tabicl']))]
+        print('  FM proti drevesom vsi znacilni:', bool(fmt.significant.all()), 'najvecji p_holm', fmt.p_holm.max())
+        mr = tab[m].mean_rank
+        print('  nemenyi: tabicl-catboost', round(mr['catboost'] - mr['tabicl'], 3), 'CD', round(fr.CD, 3))
+for lab, path, tabs in (('raw', M_RAW, mraw), ('160', M_160, m160)):
+    for m in MET:
+        print('Medic3', lab, m, tabs[m][[f'{m}_mean', f'{m}_std', 'n_failed']].round(4).to_dict('index'))
+        tt = pd.read_csv(f"{path}/summary/{m}/corrected_ttest_holm.csv")
+        print('   neznacilni:', [(r.a, r.b, round(r.mean_diff, 4), r.wins_a, r.wins_b, round(r.p_holm, 4)) for r in tt.itertuples() if not r.significant])
+        print('   tabpfn/catboost:', [(r.a, r.b, round(r.mean_diff, 4), r.wins_a, r.wins_b, round(r.p_holm, 4)) for r in tt.itertuples() if {r.a, r.b} == {'tabpfn', 'catboost'}])
