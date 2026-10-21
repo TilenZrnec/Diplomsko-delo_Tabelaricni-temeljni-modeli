@@ -363,6 +363,36 @@ urldate = {2022-06-14}
   doi = {10.48550/arXiv.2605.13986}
 }
 
+% Doprinos: TabPFN-3.5 (model v naših zagonih). Razd. 3.1 (str. 9): celica vstopi kot
+% standardizirana vrednost (Fourierjeve značilke) in kot rang v stolpcu (ECDF);
+% »midranks are unchanged by any strictly increasing transformation of a column«,
+% »the standardized values are also passed through«. Sl. 8 (str. 10): K = 4 harmoniki
+% ECDF. Razd. 3.2 (str. 11): brez kvantilnih preslikav. Razd. 3.3: sintetični prior
+% »closely follows TabPFN-3«. Dodatek C.5 (str. 29): »the 26 that were used during the
+% development of TabPFN-2 and TabICLv2«. POZOR: »without using LLMs, real data« v
+% razd. 3.4 velja za način Thinking, ne za predhodno učenje.
+% Pomen: vir za TabPFN-3.5 in za zasnovo testa uhajanja. Preverjeno 2026-10-21 iz PDF
+% arXiv 2609.17895v2 (pdftotext), avtorji iz arXiv API.
+@misc{jager2026tabpfn35,
+  title = {{TabPFN-3.5}: Technical Report},
+  author = {J\"{a}ger, Benjamin and Erickson, Nick and Grinsztajn, L\'{e}o and Birkel, Felix and
+            Fl\"{o}ge, Klemens and Key, Oscar and Kaya, K\"{u}r\c{s}at and K\"{u}bler, Jonas and
+            Frankel, Ad\`{e}le and Schr\"{o}der, Tobias and Garg, Anurag and
+            Metzen, Jan Hendrik and Salinas, David and Bing, Simon and Collins, Kristina and
+            \c{C}elik, Tuana and Balazadeh, Vahid and Sidhoum, Lydia and Pereda, Tom\'{a}s and
+            Roof, Brendan and Tschalzev, Andrej and Guo, Siyuan and Singer, Philipp and
+            Purucker, Lennart and Robertson, Jake and Salmon, Marie and Jund, Philipp and
+            Chen, Jerry and Kriuchkova, Diana and Cahu, Arthur and Kalfon, Eliott and
+            Hayler, Adrian and Grab, Georg and Monteiro, Vitor and Wehrhahn, Lilly and
+            Safaric, Dominik and Cornu, Clara and Arazi, Alan and Grace, Rylee and
+            Alessi, Simone and Manium, Mihir and Sch\"{o}lkopf, Bernhard and LeCun, Yann and
+            Hulsebos, Madelon and Gambhir, Sauraj and Hollmann, Noah and Hutter, Frank},
+  year = {2026},
+  eprint = {2609.17895},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2609.17895}
+}
+
 @inproceedings{qu2025tabicl,
   title = {{TabICL}: A Tabular Foundation Model for In-Context Learning on Large Data},
   author = {Qu, Jingang and Holzm\"{u}ller, David and Varoquaux, Ga\"{e}l and
@@ -847,4 +877,56 @@ urldate = {2022-06-14}
   author = {{scikit-learn developers}},
   url = {https://scikit-learn.org/1.9/modules/generated/sklearn.metrics.log_loss.html},
   urldate = {2026-10-15}
+}
+
+% --- Test uhajanja podatkov (poskus 3) ---
+% Vsi trije preverjeni 2026-10-21 iz PDF (pdftotext), metapodatki iz arXiv API.
+% Zasnova testa z vsemi citati in stranmi: ../Diplomsko-delo_Koda/results/runs/
+% cc18_leakage/DESIGN.md.
+
+% Doprinos: testi pomnjenja tabelaričnih podatkov pri LLM; na zapomnjenih naborih
+% uspešnost pade, ko vrednosti rahlo spremenimo (dodatek E, str. 23: »relative error of
+% approximately 1%«), na novih naborih ne (razd. 4.2, str. 7); logistična regresija in
+% GBT potrdita, da spremembe ne spremenijo naloge (tabeli 9-10, str. 30).
+% Pomen: načelo in predhodnik našega testa uhajanja.
+@inproceedings{bordt2024elephants,
+  title = {Elephants Never Forget: Memorization and Learning of Tabular Data in Large
+           Language Models},
+  author = {Bordt, Sebastian and Nori, Harsha and Rodrigues, Vanessa and Nushi, Besmira and
+            Caruana, Rich},
+  booktitle = {Conference on Language Modeling ({COLM} 2024)},
+  year = {2024},
+  eprint = {2404.06209},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2404.06209}
+}
+
+% Doprinos (prednatis): mehanizmi TabPFNv2, TabICLv2 in Mitra; monotone preslikave
+% atributov, med njimi predznačeni kubični koren (tabela 7, str. 16, določeno pred
+% vrednotenjem), padec TabPFNv2 -1,1 o. t., TabICLv2 -0,3 o. t., neznačilno (tabela 3,
+% str. 9); XGBoost pri tej preslikavi 0,0 (dodatek H.5, str. 44); vnaprej določen
+% enostranski Wilcoxonov test in Holm znotraj modela (dodatek H.6, str. 44).
+% Pomen: izbira monotone preslikave in testa v našem testu uhajanja.
+@misc{bilos2026mechanistic,
+  title = {A Mechanistic Study of Tabular Foundation Models},
+  author = {Bilo\v{s}, Marin and Wilson, James T. and Schneider, Anderson and
+            Nevmyvaka, Yuriy},
+  year = {2026},
+  eprint = {2605.21288},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.2605.21288}
+}
+
+% Doprinos (prednatis): drevesa veljajo za nespremenljiva pri strogo monotonih
+% preslikavah atributov (str. 2, s citatom knjige CART, str. 57), razen pri novih
+% vrednostih blizu točke delitve (str. 1).
+% Pomen: utemeljitev CatBoosta kot kontrole v testu uhajanja.
+@misc{galili2016splitting,
+  title = {Splitting matters: how monotone transformation of predictor variables may
+           improve the predictions of decision tree models},
+  author = {Galili, Tal and Meilijson, Isaac},
+  year = {2016},
+  eprint = {1611.04561},
+  eprinttype = {arXiv},
+  doi = {10.48550/arXiv.1611.04561}
 }
