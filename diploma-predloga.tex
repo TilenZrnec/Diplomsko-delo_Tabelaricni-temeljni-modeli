@@ -129,18 +129,83 @@ morda bo zapisal tudi ključno literaturo.}
 \chapter{Uvod}
 \label{ch:uvod}
 %=========================================================================
-% Vsebina poglavja (piši ga med zadnjimi, ko so rezultati znani):
-%  - Zakaj so tabelarični podatki pomembni in zakaj so dolgo veljali za
-%    področje, kjer globoko učenje zaostaja za ansambli odločitvenih dreves.
-%  - Kaj so temeljni modeli in kaj obljubljajo na tabelaričnih podatkih.
-%  - Motivacija: ali napovedni model, ki se ga sploh ne uči na ciljni
-%    podatkovni množici, prekaša uveljavljene ansamble?
-%  - Cilji naloge in raziskovalna vprašanja.
-%  - Prispevki naloge.
-%  - Zemljevid naloge: kratek opis vsebine po poglavjih (z ukazom \ref,
-%    številk poglavij nikoli ne piši ročno).
+% Angleški izvirniki ključnih izrazov so navedeni tu, ob njihovi prvi pojavitvi; v
+% poglavjih 2 in 4 so zato odstranjeni. Raziskovalna vprašanja RV1-RV4 so odgovorjena
+% v razdelku sec:sklep.
 
-\todo{Napiši uvod: motivacija, cilji, raziskovalna vprašanja, prispevki in zemljevid naloge.}
+Na tabelaričnih podatkih (angl. \emph{tabular data}), v katerih vrstice
+predstavljajo primere, stolpci pa njihove atribute, so v strojnem učenju
+(angl. \emph{machine learning}) dolgo prevladovali ansambli odločitvenih dreves
+(angl. \emph{decision tree ensembles}), kot sta naključni gozd (angl.
+\emph{random forest}) in gradientno pospeševanje (angl. \emph{gradient
+boosting}). Primerjalne študije so večkrat
+pokazale, da na tabelaričnih podatkih večinoma prekašajo tudi modele globokega
+učenja (angl. \emph{deep learning}), zasnovane posebej za take
+podatke~\cite{borisov2024deep,grinsztajn2022why,shwartzziv2022tabular}.
+
+Na področju besedila in slik so se medtem uveljavili temeljni modeli (angl.
+\emph{foundation models}), naučeni na obsežnih in raznolikih podatkih ter
+prilagodljivi širokemu naboru nalog~\cite{bommasani2021opportunities}. Za
+tabelarične podatke so nastali tabelarični temeljni modeli (angl.
+\emph{tabular foundation models}), kot sta TabPFN in TabICL. Predhodno so
+naučeni na velikem številu sintetičnih podatkovnih množic, novo nalogo pa
+rešijo z učenjem iz konteksta (angl. \emph{in-context learning}): učne primere
+prejmejo kot del vhoda in napovedi za testne primere vrnejo brez kakršne koli
+posodobitve uteži~\cite{hollmann2025tabpfn,qu2025tabicl}. Razvijalci modela
+TabPFN-3 poročajo, da en sam prehod modela na zbirki TabArena prekaša vse druge
+modele, tudi tiste z uglaševanjem hiperparametrov (angl. \emph{hyperparameter
+tuning})~\cite{grinsztajn2026tabpfn3}. Če to velja splošno, model, ki se ciljne
+podatkovne množice sploh ne uči, prekaša algoritme, ki so na tabelaričnih
+podatkih desetletja veljali za najboljše.
+
+Take trditve pa večinoma izvirajo iz poročil razvijalcev, ki so sami izbrali
+zbirke podatkovnih množic in protokol vrednotenja. Pri temeljnih modelih se
+pojavi še dodatno vprašanje: zbirke za primerjalno
+vrednotenje (angl. \emph{benchmarking suites}) so javne, zato jih je model
+lahko videl že med razvojem. Takemu uhajanju podatkov (angl. \emph{data
+leakage}) iz ocenjevalnih podatkov v model se pri klasičnih algoritmih, ki se
+učijo le na učnem delu ciljne množice, preprosto izognemo, za tabelarične
+temeljne modele pa postopka, ki bi ga zaznal, še ni~\cite{erickson2025tabarena}.
+
+Cilj naloge je neodvisno in ponovljivo primerjati tabelarična temeljna modela
+TabPFN-3.5 in TabICL s štirimi uveljavljenimi drevesnimi ansambli (naključnim
+gozdom, XGBoost, LightGBM in CatBoost) pod enotnim protokolom, v katerem vse
+algoritme uporabimo s privzetimi nastavitvami in z najmanjšo potrebno
+predobdelavo. Zastavimo si štiri raziskovalna vprašanja.
+\begin{enumerate}
+\item Ali tabelarična temeljna modela s privzetimi nastavitvami na 72
+podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml} dosežeta boljšo
+napovedno uspešnost kot drevesni ansambli?
+\item Ali se prednost ohrani na veliki zaupni podatkovni množici z veliko
+razredi in manjkajočimi vrednostmi, ki je modela nista mogla videti?
+\item Kolikšen del razlike med temeljnima modeloma in drevesnimi ansambli zapre
+uglaševanje hiperparametrov enega od ansamblov?
+\item Ali je uspešnost temeljnih modelov na zbirki OpenML-CC18 lahko
+posledica uhajanja podatkov?
+\end{enumerate}
+
+Prispevki naloge so naslednji. Vseh šest algoritmov ovrednotimo na celotni
+zbirki OpenML-CC18, ki je poročila o novejših različicah temeljnih modelov ne
+vključujejo, s tremi metrikami in s statističnimi testi za primerjavo več
+algoritmov na več podatkovnih množicah. Algoritme ovrednotimo tudi na zaupni
+bolnišnični podatkovni množici Medic3 s \num{122093} primeri, 220 razredi in
+\SI{82}{\percent} manjkajočih vrednosti. S poskusom uglaševanja modela XGBoost
+ocenimo, koliko so k razliki prispevale privzete nastavitve. Po zgledu
+testov pomnjenja (angl. \emph{memorization}) za velike jezikovne
+modele~\cite{bordt2024elephants} zasnujemo
+in vnaprej zapišemo test uhajanja podatkov za tabelarična temeljna modela. Koda,
+nastavitve in rezultati so javno dostopni, tako da je mogoče vse poskuse na
+javnih podatkih ponoviti.
+
+Naloga je organizirana takole. V poglavju~\ref{ch:sorodni} pregledamo
+primerjave drevesnih ansamblov z globokim učenjem, razvoj tabelaričnih
+temeljnih modelov in protokole, s katerimi jih vrednotijo. V
+poglavju~\ref{ch:metode} opišemo algoritme, protokol vrednotenja s
+statističnimi testi, politiko predobdelave in izvedbeno okolje, v
+poglavju~\ref{ch:podatki} pa zbirko OpenML-CC18 in podatkovno množico Medic3. V
+poglavju~\ref{ch:rezultati} predstavimo rezultate glavne primerjave in obeh
+dodatnih poskusov, v poglavju~\ref{ch:zakljucek} pa jih razložimo, navedemo
+omejitve naloge in odgovorimo na raziskovalna vprašanja.
 
 %=========================================================================
 \chapter{Sorodni pristopi}
@@ -148,12 +213,12 @@ morda bo zapisal tudi ključno literaturo.}
 %=========================================================================
 % Vse trditve o virih so preverjene v celotnem besedilu članka (2026-10-15);
 % kratek zapis o doprinosu vsakega vira je kot komentar ob vnosu v
-% literatura.bib. Angleški izvirniki izrazov so navedeni tu, ker se izrazi
-% prvič pojavijo v tem poglavju; ko bo napisan uvod, jih prestavi tja.
+% literatura.bib. Angleški izvirniki izrazov, ki se prvič pojavijo v uvodu, so
+% navedeni tam; tu so le izrazi, ki se prvič pojavijo v tem poglavju.
 
 V tem poglavju nalogo umestimo v obstoječe delo. Najprej povzamemo primerjalne
-študije, ki so ansamble odločitvenih dreves (angl. \emph{decision tree
-ensembles}) primerjale z drugimi družinami algoritmov in z globokim učenjem.
+študije, ki so ansamble odločitvenih dreves primerjale z drugimi družinami
+algoritmov in z globokim učenjem.
 Nato opišemo razvoj tabelaričnih temeljnih modelov, v tretjem razdelku pa
 zbirke podatkovnih množic in protokole, s katerimi se ti modeli vrednotijo,
 skupaj z metodološkimi kritikami takih primerjav. Poglavje sklenemo z opisom,
@@ -173,14 +238,14 @@ pomanjkljivosti sta za zasnovo naše primerjave poučni: vsi algoritmi pri nas
 uporabljajo iste testne delitve, neuspelih učenj pa iz povzetkov ne izpustimo,
 temveč jih kaznujemo z najslabšim rangom (razdelek~\ref{sec:rez-skupno}).
 
-Po uspehih globokega učenja (angl. \emph{deep learning}) na slikah in
+Po uspehih globokega učenja na slikah in
 besedilu je nastalo veliko arhitektur nevronskih mrež, zasnovanih posebej za
 tabelarične podatke. Pregled teh pristopov ugotavlja, da ansambli na podlagi
-gradientnega pospeševanja (angl. \emph{gradient boosting}) pri nadzorovanem
+gradientnega pospeševanja pri nadzorovanem
 učenju še vedno večinoma prekašajo modele globokega
 učenja~\cite{borisov2024deep}. Gorishniy in sodelavci so številne arhitekture
-primerjali pod enotnim protokolom učenja in uglaševanja hiperparametrov
-(angl. \emph{hyperparameter tuning}) in sklenili, da med gradientnim
+primerjali pod enotnim protokolom učenja in uglaševanja hiperparametrov in
+sklenili, da med gradientnim
 pospeševanjem in globokim učenjem splošno boljše rešitve
 ni~\cite{gorishniy2021revisiting}. Shwartz-Ziv in Armon sta na enajstih
 podatkovnih množicah pokazala, da XGBoost prekaša nove globoke modele tudi na
@@ -209,17 +274,16 @@ uspešnost~\cite{ye2024closer}.
 \section{Tabelarični temeljni modeli}
 \label{sec:sor-temeljni}
 
-Izraz temeljni model (angl. \emph{foundation model}) označuje model, ki je
+Izraz temeljni model označuje model, ki je
 naučen na obsežnih in raznolikih podatkih in ga je mogoče prilagoditi
 širokemu naboru nalog~\cite{bommasani2021opportunities}. Pri velikih jezikovnih
 modelih se je pokazalo, da model novo nalogo reši zgolj iz nekaj primerov,
 podanih v vhodnem besedilu, brez kakršne koli posodobitve uteži; temu pravimo
-učenje iz konteksta (angl. \emph{in-context learning})~\cite{brown2020language}.
+učenje iz konteksta~\cite{brown2020language}.
 Poskusi, da bi velike jezikovne modele neposredno uporabili za učenje iz
 konteksta na tabelaričnih podatkih, so bili omejeno uspešni, zato se je
 raziskovanje usmerilo v temeljne modele, zasnovane posebej za tabelarične
-podatke~\cite{ma2025tabdpt}. Te imenujemo tabelarični temeljni modeli
-(angl. \emph{tabular foundation models}).
+podatke~\cite{ma2025tabdpt}. Te imenujemo tabelarični temeljni modeli.
 
 Prevladujoča smer izhaja iz mrež, prilagojenih apriornim podatkom (angl.
 \emph{prior-data fitted networks}, PFN)~\cite{muller2022transformers}, katerih
@@ -415,7 +479,7 @@ si jih morda zapomnila med razvojem (razdelek~\ref{sec:rez-uhajanje}). Avtorji
 zbirke TabArena ugotavljajo, da za tabelarične temeljne modele še ni postopka,
 ki bi zaznal, ali je model podatke, na katerih ga vrednotimo, videl že med
 razvojem~\cite{erickson2025tabarena}; temu pojavu v nalogi pravimo uhajanje
-podatkov (angl. \emph{data leakage}).
+podatkov.
 % erickson2025tabarena, dodatek E.6, str. 55-56: »For tabular foundation models,
 % we currently have no way of detecting contamination« (preverjeno 2026-10-21,
 % results/runs/cc18_leakage/DESIGN.md v repozitoriju s kodo).
@@ -457,8 +521,8 @@ namerno eksperimentalno spremenljivko in jo podrobneje opišemo v
 razdelku~\ref{sec:predobdelava}.
 
 Vse algoritme uporabljamo s privzetimi hiperparametri; razlogi za tako zasnovo
-so navedeni v razdelku~\ref{sec:protokol}. Izrecno podamo le naključno seme, ki
-je v treh ponovitvah prečnega preverjanja 42, 43 in 44, ter nastavitve
+so navedeni v razdelku~\ref{sec:protokol}. Izrecno podamo le naključno seme
+(42, 43 ali 44, odvisno od ponovitve) ter nastavitve
 računanja in izpisovanja, ki modela ne spremenijo in jih navedemo pri
 posameznem algoritmu; pri modelu TabPFN poleg tega izrecno izberemo različico
 modela (podrazdelek~\ref{sec:tabpfn}). Da so vse druge nastavitve res privzete
@@ -484,7 +548,7 @@ zbrane v tabeli~\ref{tab:razlicice} in pripete v datoteki
 \subsection{Naključni gozd}
 \label{sec:rf}
 
-Naključni gozd (angl. \emph{random forest}) je ansambel odločitvenih dreves,
+Naključni gozd je ansambel odločitvenih dreves,
 naučenih na vzorcih učne množice, dobljenih z vrečenjem~\cite{breiman1996bagging},
 pri čemer se v vsakem vozlišču delitev izbira le med naključno podmnožico
 atributov; povprečenje napovedi tako razkoreliranih dreves zmanjša varianco
@@ -1021,8 +1085,8 @@ posameznih množic zbirke OpenML-CC18 so zbrane v dodatku~\ref{dod:lastnosti}.
 \section{OpenML-CC18}
 \label{sec:cc18}
 
-Zbirka OpenML-CC18 je zbirka za primerjalno vrednotenje (angl.
-\emph{benchmarking suite}) na platformi OpenML, sestavljena iz 72
+Zbirka OpenML-CC18 je zbirka za primerjalno vrednotenje na platformi OpenML,
+sestavljena iz 72
 klasifikacijskih nalog~\cite{bischl2021openml}. Avtorji so vanjo uvrstili vse
 preverjene in javno licencirane podatkovne množice platforme do sredine leta
 2018, ki izpolnjujejo vnaprej določena merila. Množica mora imeti od 500 do
