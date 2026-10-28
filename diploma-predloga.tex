@@ -1485,6 +1485,129 @@ sta privzeti vrednosti knjižnice XGBoost. Ker protokol predvideva privzete
 nastavitve, kot rezultat LightGBM poročamo propadle vrednosti; vzrok obravnavamo
 v poglavju~\ref{ch:zakljucek}.
 
+\section{Uglaševanje modela XGBoost}
+\label{sec:rez-uglasevanje}
+% Vir: Diplomsko-delo_Koda/results/runs/cc18_xgb_tuned: PROVENANCE.md (zasnova,
+% potrdila SLURM, preverbe), summary/tuning_* in tuning_report.txt
+% (scripts/analyze_tuning.py, koda 428167b, izhodi 92b1941); tabela
+% tab_uglasevanje.tex in izpis generiraj_rezultate.py, razdelek 13. Mreža:
+% config.yaml, razdelek tuning; implementacija src/models/xgboost_tuned.py.
+% Mreža je bila dokončana pred zagonom na Arnesu (commit f7d8366): stopnjo učenja
+% 0,01 smo dodali po pilotu na treh množicah (credit-g, diabetes, sick), v katerem
+% so zmagovalci po notranjih rezultatih pogosto ležali na spodnjem robu mreže; za
+% drugi del zagona mreža ni bila spremenjena (PROVENANCE.md).
+
+Glavni protokol uporablja privzete hiperparametre, ki drevesnih ansamblov ne
+postavijo v najboljšo luč (razdelek~\ref{sec:protokol}). Da bi ocenili, kolikšen
+del razlike med temeljnima modeloma in ansambli bi zaprlo uglaševanje, smo
+hiperparametre enega od ansamblov izbirali z iskanjem po mreži.
+
+\subsection{Zasnova}
+
+Uglaševali smo model XGBoost, ker za njegove hiperparametre Probst in
+sodelavci podajajo uglasljivost in razpone, v katerih ležijo dobre nastavitve,
+zato mreže ni bilo treba sestaviti po občutku~\cite{probst2019tunability}.
+Uglaševali smo pet hiperparametrov iz njihove študije: stopnjo učenja
+($0{,}3$; $0{,}1$; $0{,}03$; $0{,}01$), število dreves (100, 200, 500, 1000),
+najmanjšo vsoto hesiana v listu (1, 4), delež atributov na vsakem nivoju
+drevesa (1; $0{,}5$) in delež primerov za posamezno drevo (1; $0{,}8$). Mreža
+ima 128 nastavitev, med njimi tudi privzeto, ki jo sestavljajo prve vrednosti
+vseh petih hiperparametrov. Največje globine drevesa nismo uglaševali, ker je
+po meritvah Probsta in sodelavcev med hiperparametri modela XGBoost najmanj
+uglasljiva~\cite{probst2019tunability}. Mrežo smo določili pred glavnim
+zagonom in je med poskusom nismo spreminjali.
+% probst2019tunability, tabela 3 (str. 15): uglasljivost max_depth 0,001 (najmanj
+% med parametri xgboost); razponi q0,05-q0,95: eta 0,002-0,355, subsample
+% 0,545-0,958, min_child_weight 1,295-6,984, colsample_bylevel 0,335-0,886, nrounds
+% 920,7-4550,95 (naših 200 in 500 dreves je pod tem razponom). Preverjeno 2026-10-28.
+
+Če bi nastavitev izbrali na istih testnih delih, na katerih poročamo
+uspešnost, bi bila ocena optimistično pristranska~\cite{cawley2010over,varma2006bias},
+zato smo uporabili gnezdeno prečno preverjanje (angl. \emph{nested
+cross-validation}). Zunanje delitve so iste kot v glavnem protokolu, zato je
+uglašeni XGBoost neposredno primerljiv z ostalimi algoritmi. Na učnem delu
+vsake zunanje delitve vseh 128 nastavitev ovrednotimo s trikratnim
+stratificiranim prečnim preverjanjem. Nastavitev z najvišjim povprečnim
+ROC-AUC na notranjih delitvah nato naučimo na celotnem učnem delu in jo enkrat
+ovrednotimo na testnem delu; ob izenačenju zmaga nastavitev, ki je v mreži
+prej, torej privzeta in nastavitev z manj drevesi. Zmagovalna nastavitev se med
+zunanjimi delitvami lahko razlikuje, zato poskus meri uspešnost postopka
+»XGBoost z iskanjem po mreži«, ne ene same
+nastavitve~\cite{bischl2023hyperparameter}. Predobdelava je enaka kot pri
+privzetem modelu XGBoost.
+
+Poskus smo izvedli na 68 podatkovnih množicah zbirke OpenML-CC18; zaradi
+računske zahtevnosti smo izpustili štiri največje slikovne množice
+(mnist\_784, Devnagari-Script, CIFAR\_10 in Fashion-MNIST). Nenasičenih je
+med njimi 36. V vsaki zunanji delitvi smo za kontrolo in kot časovno izhodišče
+naučili še privzeti XGBoost; njegov ROC-AUC je bil v vseh 1020 učenjih enak
+rezultatu glavne primerjave, z razliko največ \num{1.1e-16}.
+
+\subsection{Rezultati}
+
+Uglašeni XGBoost je bil boljši od privzetega na 61 od 68 podatkovnih množic
+(povprečna razlika ROC-AUC \num{0.0083}, mediana \num{0.0016}, Wilcoxonov test
+$p = \num{1.6e-10}$). Dobiček je skoraj ves na nenasičenih množicah, kjer znaša
+povprečno \num{0.0141} (boljši na 33 od 36), na nasičenih pa \num{0.0018} (boljši
+na 28 od 32). Največji je na množicah kc2 (\num{0.0535}),
+blood-transfusion-service-center (\num{0.0493}), diabetes (\num{0.0414}) in cmc
+(\num{0.0392}). Opazno slabši od privzetega je bil uglašeni XGBoost le na
+množici ilpd (\num{-0.0088}): notranje preverjanje je dobiček obetalo v vseh 15
+zunanjih delitvah, na testnih delih pa je bil uglašeni model slabši v 11.
+
+\input{rezultati/tab_uglasevanje.tex}
+
+Tabela~\ref{tab:uglasevanje} postavi uglašeni XGBoost ob privzete algoritme na
+istih 68 množicah. Po povprečnem ROC-AUC se uglašeni XGBoost uvrsti pred
+CatBoost (\num{0.9260} proti \num{0.9255}), po povprečnem rangu pa tik za njim
+(\num{3.85} proti \num{3.81}); razlika med njima ni značilna (30 : 38,
+$p_\mathrm{Holm} = \num{0.52}$). Od modela LightGBM, naključnega gozda in
+privzetega modela XGBoost je uglašeni XGBoost značilno boljši, od obeh
+temeljnih modelov pa značilno slabši: od TabPFN-3.5 na 66 in od TabICL na 62 od
+68 množic. Pred modelom TabPFN-3.5 je le na dveh nasičenih množicah,
+tic-tac-toe in wall-robot-navigation, obakrat za manj kot \num{0.0004}.
+Povprečni zaostanek za TabPFN-3.5 se z uglaševanjem zmanjša z \num{0.0218} na
+\num{0.0135}, torej za \SI{38}{\percent}; na nenasičenih množicah se zmanjša za
+\SI{39}{\percent}.
+
+Uglaševanje je izboljšalo tudi dodatni metriki, čeprav je izbira nastavitev
+upoštevala le ROC-AUC. Povprečna točnost se je povečala z \num{0.8664} na
+\num{0.8731} (boljša na 57 od 68 množic), povprečna logaritemska izguba pa se je
+zmanjšala z \num{0.3745} na \num{0.3016} (boljša na 65 od 68 množic in na vseh
+36 nenasičenih). Uglašeni XGBoost je tudi po teh metrikah izenačen s
+CatBoostom (povprečni rang \num{4.13} proti \num{4.12} pri točnosti in
+\num{3.71} proti \num{3.74} pri logaritemski izgubi); na nenasičenih množicah pa
+ima CatBoost značilno nižjo logaritemsko izgubo (nižjo na 25 od 36 množic,
+$p_\mathrm{Holm} = \num{0.025}$).
+
+Zmagovalne nastavitve kažejo, v katero smer uglaševanje premakne privzete
+vrednosti. Privzeta nastavitev je zmagala le v dveh od 1020 zunanjih delitev,
+mediana njenega ranga med 128 nastavitvami je bila 65. Zmagovalci imajo
+večinoma manjšo stopnjo učenja od privzete ($0{,}01$ ali $0{,}03$ v 696
+delitvah) ter podvzorčenje primerov (781) in atributov (762), kar se ujema s
+smerjo optimalnih privzetih vrednosti, ki jih navajajo Probst in sodelavci
+(stopnja učenja \num{0.018}, delež primerov \num{0.839}, delež atributov na
+nivo \num{0.585})~\cite{probst2019tunability}. Nenasičene in nasičene množice
+pa zahtevajo različno količino učenja. Na nenasičenih je stopnja učenja
+$0{,}01$ zmagala v 284 od 540 delitev, najšibkejša kombinacija mreže (stopnja
+$0{,}01$ in 100 dreves) pa v 73, na nasičenih je 1000 dreves zmagalo v 253 od
+480 delitev, najpogosteje s stopnjo učenja $0{,}03$.
+
+Mreža izbiro na obeh koncih omejuje. Pri 73 zmagah najšibkejše kombinacije je
+zadnji korak z 200 na 100 dreves notranji ROC-AUC izboljšal za mediano
+\num{0.0023}, zato bi optimum na teh množicah lahko ležal pod mrežo. Pri
+zmagovalcih s 1000 drevesi je zadnji korak s 500 na 1000 dreves na nasičenih
+množicah prinesel le mediano \num{0.00007}, na nenasičenih pa mediano
+\num{0.0023}. Koraki na robovih mreže so torej reda nekaj tisočink, kar je
+precej manj od zaostanka \num{0.0135} za modelom TabPFN-3.5. Notranje
+preverjanje je izboljšavo poleg tega precenilo: na nenasičenih množicah je
+obetalo povprečno \num{0.0198}, testni del pa je dal \num{0.0141}, kar je
+pričakovana posledica izbire najboljše med 128 ocenami s
+šumom~\cite{cawley2010over}. Uglaševanje je drago: iskanje in ponovno učenje
+izbrane nastavitve sta v mediani trajala 654-krat (nenasičene množice)
+oziroma 714-krat (nasičene) dlje kot eno učenje privzetega modela na istem
+vozlišču, skupaj \num{197} ur na osmih procesorskih jedrih.
+
 %=========================================================================
 \chapter{Diskusija in zaključek}
 \label{ch:zakljucek}

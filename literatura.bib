@@ -930,3 +930,59 @@ urldate = {2022-06-14}
   eprinttype = {arXiv},
   doi = {10.48550/arXiv.1611.04561}
 }
+
+% --- Uglaševanje hiperparametrov in gnezdeno prečno preverjanje (poskus 4) ---
+% Zapisi preverjeni 2026-10-28: cawley2010over s strani članka na jmlr.org
+% (metapodatki citation_*), varma2006bias in bischl2023hyperparameter prek Crossref
+% (api.crossref.org/works/<doi>). Citati in strani iz celotnih besedil (2026-10-14):
+% Diplomsko-delo_Koda/CLAUDE.md, FRI methodology requirements, Tuning - sources.
+
+% Doprinos: izbiro modela je treba obravnavati kot del učenja in jo ponoviti na vsakem
+% vzorcu (str. 2080); ocena, pri kateri hiperparametre izberemo zunaj prečnega
+% preverjanja, je optimistično pristranska na vseh 13 zbirkah (str. 2102-2103);
+% gnezdeno prečno preverjanje (str. 2080).
+% Pomen: utemeljitev gnezdenega prečnega preverjanja v poskusu uglaševanja.
+@article{cawley2010over,
+  title = {On Over-fitting in Model Selection and Subsequent Selection Bias in Performance
+           Evaluation},
+  author = {Cawley, Gavin C. and Talbot, Nicola L. C.},
+  journal = {Journal of Machine Learning Research},
+  volume = {11},
+  number = {70},
+  pages = {2079--2107},
+  year = {2010},
+  url = {https://jmlr.org/papers/v11/cawley10a.html}
+}
+
+% Doprinos (povzetek): ocena napake s prečnim preverjanjem za klasifikator, uglašen s
+% prečnim preverjanjem, je znatno pristranska; gnezdeno prečno preverjanje da skoraj
+% nepristransko oceno.
+% Pomen: utemeljitev gnezdenega prečnega preverjanja.
+@article{varma2006bias,
+  title = {Bias in error estimation when using cross-validation for model selection},
+  author = {Varma, Sudhir and Simon, Richard},
+  journal = {BMC Bioinformatics},
+  volume = {7},
+  pages = {91},
+  year = {2006},
+  doi = {10.1186/1471-2105-7-91}
+}
+
+% Doprinos: pregled optimizacije hiperparametrov. Razd. 4.4 (str. 22-24 v arXiv
+% 2107.05847v3): ocena uglašenega modela je optimistično pristranska, gnezdeno
+% vzorčenje; zmagovalne nastavitve po delitvah so »temporary objects«. Razd. 4.2.1
+% (str. 9): naključno iskanje pogosto prekaša iskanje po mreži.
+% Pomen: kaj meri poskus uglaševanja (postopek, ne nastavitev) in omejitev mreže.
+@article{bischl2023hyperparameter,
+  title = {Hyperparameter optimization: Foundations, algorithms, best practices, and open
+           challenges},
+  author = {Bischl, Bernd and Binder, Martin and Lang, Michel and Pielok, Tobias and
+            Richter, Jakob and Coors, Stefan and Thomas, Janek and Ullmann, Theresa and
+            Becker, Marc and Boulesteix, Anne-Laure and Deng, Difan and Lindauer, Marius},
+  journal = {WIREs Data Mining and Knowledge Discovery},
+  volume = {13},
+  number = {2},
+  pages = {e1484},
+  year = {2023},
+  doi = {10.1002/widm.1484}
+}

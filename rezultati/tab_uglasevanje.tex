@@ -1,0 +1,22 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_xgb_tuned/summary/tuning_overall.csv, results/runs/cc18_xgb_tuned/summary/tuning_wilcoxon_holm.csv (scripts/analyze_tuning.py: zagon cc18_xgb_tuned proti cc18_v4/combined, isti foldi). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Uglašeni XGBoost in privzeti algoritmi na 68 podatkovnih množicah poskusa uglaševanja (od tega 36 nenasičenih): povprečni ROC-AUC in povprečni rang med sedmimi algoritmi. Zadnja stolpca veljata za vseh 68 množic: število množic, na katerih je uglašeni XGBoost boljši oziroma slabši od algoritma v vrstici, in p-vrednost parnega Wilcoxonovega testa s Holmovim popravkom čez šest primerjav. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$.}
+\label{tab:uglasevanje}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrl}
+\hline
+ & \multicolumn{2}{c}{68 množic} & \multicolumn{2}{c}{36 nenasičenih} & \multicolumn{2}{c}{uglašeni XGBoost proti} \\
+Algoritem & ROC-AUC & rang & ROC-AUC & rang & zmage & $p_\mathrm{Holm}$ \\
+\hline
+TabPFN-3.5 & \num{0.9395} & \num{1.44} & \num{0.8869} & \num{1.25} & 2:66 & \num{8.5e-12}$^{*}$ \\
+TabICL & \num{0.9370} & \num{1.96} & \num{0.8830} & \num{2.08} & 6:62 & \num{1.3e-09}$^{*}$ \\
+CatBoost & \num{0.9255} & \num{3.81} & \num{0.8645} & \num{3.78} & 30:38 & \num{0.5172} \\
+XGBoost (uglašeni) & \num{0.9260} & \num{3.85} & \num{0.8644} & \num{3.92} & -- & -- \\
+LightGBM & \num{0.9193} & \num{5.32} & \num{0.8541} & \num{5.33} & 58:10 & \num{5.9e-08}$^{*}$ \\
+XGBoost (privzeti) & \num{0.9177} & \num{5.63} & \num{0.8503} & \num{5.92} & 61:7 & \num{7.9e-10}$^{*}$ \\
+Naključni gozd & \num{0.9160} & \num{5.99} & \num{0.8511} & \num{5.72} & 57:11 & \num{4.7e-07}$^{*}$ \\
+\hline
+\end{tabular}
+\end{table}

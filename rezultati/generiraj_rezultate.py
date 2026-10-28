@@ -515,3 +515,50 @@ print('ekstremi', {c: (props.loc[props[c].idxmax(), 'dataset'], props[c].max()) 
 print('razmerje razredov min', round(props.imbalance_ratio.min(), 4), props.loc[props.imbalance_ratio.idxmin(), 'dataset'])
 for f in ('medic3', 'medic3_160'):
     print(f, pd.read_csv(f'{DS}/{f}.csv').iloc[0].to_dict())
+
+# 13. Poskus uglaševanja (zagon cc18_xgb_tuned) ------------------------------------------
+# Vse številke iz summary/tuning_* (scripts/analyze_tuning.py, koda 428167b, izhodi 92b1941),
+# ki uglašeni XGBoost primerja z diplomskimi rezultati cc18_v4/combined na istih foldih.
+TU = RUNS + '/cc18_xgb_tuned/summary'
+IME_T = dict(IME, xgboost='XGBoost (privzeti)', xgboost_tuned='XGBoost (uglašeni)')
+tov = pd.read_csv(TU + '/tuning_overall.csv'); twh = pd.read_csv(TU + '/tuning_wilcoxon_holm.csv')
+tpd = pd.read_csv(TU + '/tuning_per_dataset.csv').set_index('dataset')
+def tsub(metric, subset): return tov[(tov.metric == metric) & (tov.subset == subset)].set_index('algorithm')
+a68, a36 = tsub('roc_auc', 'vsi'), tsub('roc_auc', 'nenasičeni')
+w68 = twh[(twh.metric == 'roc_auc') & (twh.subset == 'vsi')].set_index('b')
+N_T, N_T36 = int(a68.n.iloc[0]), int(a36.n.iloc[0])
+t = src([TU + '/tuning_overall.csv', TU + '/tuning_wilcoxon_holm.csv'],
+        what='scripts/analyze_tuning.py: zagon cc18_xgb_tuned proti cc18_v4/combined, isti foldi')
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Uglašeni XGBoost in privzeti algoritmi na """ + str(N_T) + r""" podatkovnih množicah poskusa uglaševanja (od tega """ + str(N_T36) + r""" nenasičenih): povprečni ROC-AUC in povprečni rang med sedmimi algoritmi. Zadnja stolpca veljata za vseh """ + str(N_T) + r""" množic: število množic, na katerih je uglašeni XGBoost boljši oziroma slabši od algoritma v vrstici, in p-vrednost parnega Wilcoxonovega testa s Holmovim popravkom čez šest primerjav. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$.}
+\label{tab:uglasevanje}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrl}
+\hline
+ & \multicolumn{2}{c}{""" + str(N_T) + r""" množic} & \multicolumn{2}{c}{""" + str(N_T36) + r""" nenasičenih} & \multicolumn{2}{c}{uglašeni XGBoost proti} \\
+Algoritem & ROC-AUC & rang & ROC-AUC & rang & zmage & $p_\mathrm{Holm}$ \\
+\hline
+"""
+for algo in a68.sort_values('mean_rank').index:
+    cells = [n(a68.loc[algo, 'mean']), n(a68.loc[algo, 'mean_rank'], 2), n(a36.loc[algo, 'mean']), n(a36.loc[algo, 'mean_rank'], 2)]
+    if algo in w68.index:
+        r = w68.loc[algo]; cells += [f"{int(r.wins_a)}:{int(r.wins_b)}", e(r.p_holm) + ('$^{*}$' if r.significant else '')]
+    else:
+        cells += ['--', '--']
+    t += IME_T[algo] + ' & ' + ' & '.join(cells) + ' \\\\\n'
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_uglasevanje.tex', t)
+
+print('== Uglaševanje (cc18_xgb_tuned/summary) ==')
+for metric in ('roc_auc', 'accuracy', 'log_loss'):
+    for subset in ('vsi', 'nenasičeni', 'nasičeni'):
+        s = tsub(metric, subset)
+        print(metric, subset, 'povprecje', s['mean'].round(4).to_dict(), 'rang', s.mean_rank.round(2).to_dict())
+print(twh[['metric', 'subset', 'b', 'mean_diff', 'wins_a', 'wins_b', 'p_holm']].round(5).to_string())
+d = tpd.xgboost_tuned - tpd.xgboost
+print('uglaseni - privzeti: najvecji', d.sort_values().tail(4).round(4).to_dict(), 'najmanjsi', d.sort_values().head(3).round(4).to_dict())
+print('uglaseni pred TabPFN-3.5:', (tpd.xgboost_tuned - tpd.tabpfn)[tpd.xgboost_tuned > tpd.tabpfn].round(5).to_dict(),
+      'nasicena:', tpd.saturated[tpd.xgboost_tuned > tpd.tabpfn].to_dict())
+print(open(TU + '/tuning_report.txt', encoding='utf-8').read())
