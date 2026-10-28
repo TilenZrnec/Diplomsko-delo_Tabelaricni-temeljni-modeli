@@ -595,3 +595,28 @@ write('tab_uhajanje.tex', t)
 print('== Test uhajanja ==')
 print(open(LK + '/leakage_report.txt', encoding='utf-8').read())
 print(open(LK + '/leakage_exploratory_report.txt', encoding='utf-8').read())
+
+# 15. Odvisnost prednosti temeljnih modelov od lastnosti množic ------------------------------
+# summary/properties_* (scripts/analyze_properties.py, koda 428167b, izhodi 92b1941):
+# prednost = max(TabPFN-3.5, TabICL) - max(štirje ansambli), povprečni ROC-AUC.
+pa = pd.read_csv(S + '/properties_advantage.csv')
+fig, ax = _subplots(figsize=(5.4, 3.0))
+for mask, col, mk, lab in ((~pa.saturated, C1, 'o', 'nenasičene'), (pa.saturated, C2, '^', 'nasičene')):
+    ax.scatter(pa.n_rows[mask], pa.advantage[mask], s=26, c=col, marker=mk, edgecolors='white', linewidths=0.6,
+               label=f'{lab} ({int(mask.sum())})', zorder=3)
+ax.set_xscale('log')
+ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f'{v:,.0f}'.replace(',', ' ')))
+ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f'{v:.2f}'.replace('.', ',')))
+ax.axhline(0, color=AXIS, lw=1.0, zorder=1)
+ax.axvline(10000, color=MUTED, lw=1.0, ls='--', zorder=1)
+ax.text(10000 * 1.08, 0.068, 'TabPFN v2: do 10 000 primerov', color=MUTED, fontsize=7.5, va='top')
+ax.set_xlabel('število primerov'); ax.set_ylabel('prednost (ROC-AUC)')
+ax.set_xlim(350, 2e5)
+ax.grid(True, axis='y', which='major', color=GRID, lw=0.5, zorder=0)
+for s_ in ('top', 'right'): ax.spines[s_].set_visible(False)
+ax.legend(frameon=False, loc='upper left', fontsize=8, handletextpad=0.3)
+fig.tight_layout()
+fig.savefig(os.path.join(SLIKE, 'cc18_prednost.pdf'))
+plt.close(fig)
+print('== Odvisnost od lastnosti ==')
+print(open(S + '/properties_report.txt', encoding='utf-8').read())

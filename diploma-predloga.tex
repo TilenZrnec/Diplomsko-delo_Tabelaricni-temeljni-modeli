@@ -1391,8 +1391,42 @@ obrnjeno (razdelek~\ref{sec:rez-znacilnost}).
 
 \section{Odvisnost od lastnosti podatkovnih množic}
 \label{sec:rez-lastnosti}
+% Vir: summary/properties_advantage.csv, properties_spearman.csv in
+% properties_report.txt (cc18_v4/combined; scripts/analyze_properties.py, koda
+% 428167b, izhodi 92b1941), lastnosti iz results/datasets/cc18.csv. Slika
+% slike/cc18_prednost.pdf iz generiraj_rezultate.py, razdelek 15. Analiza je
+% raziskovalna (narejena po zagonu), ne vnaprej določen test.
 
-\todo{Odvisnost prednosti temeljnih modelov od števila primerov, števila atributov, števila razredov in deleža kategoričnih atributov. Pred pisanjem dodaj v repozitorij s kodo skript, ki to izračuna (npr. Spearmanov koeficient in razbitje po velikosti), da bo imela vsaka številka generiran vir.}
+Ali je prednost temeljnih modelov odvisna od lastnosti podatkovne množice, smo
+preverili z raziskovalno analizo. Prednost na množici je razlika povprečnega
+ROC-AUC med boljšim od obeh temeljnih modelov in najboljšim drevesnim
+ansamblom. S Spearmanovim koeficientom korelacije smo jo povezali s petimi
+lastnostmi iz tabele~\ref{tab:cc18-opis} (številom primerov, atributov in
+razredov, deležem kategoričnih atributov in deležem manjkajočih vrednosti) in
+p-vrednosti popravili s Holmovim postopkom. Na 37 nenasičenih množicah
+prednost z nobeno lastnostjo ni značilno povezana (največja absolutna vrednost
+koeficienta je \num{0.16}, vse popravljene p-vrednosti so 1). Na vseh 72
+množicah je značilna le negativna povezava s številom razredov ($\rho =
+\num{-0.39}$, $p_\mathrm{Holm} = \num{0.004}$), ki pa izvira iz nasičenosti:
+nasičenih je 25 od 37 množic z več razredi in le 10 od 35 binarnih, na
+nasičenih množicah pa je prednost zaradi zgornje meje metrike majhna.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{cc18_prednost.pdf}
+\caption{Prednost temeljnih modelov (razlika povprečnega ROC-AUC med boljšim
+temeljnim modelom in najboljšim drevesnim ansamblom) v odvisnosti od števila
+primerov podatkovne množice (logaritemska os). Črtkana črta označuje mejo, do
+katere je bil ovrednoten TabPFN v2~\cite{hollmann2025tabpfn}.}
+\label{fig:prednost}
+\end{figure}
+
+Slika~\ref{fig:prednost} kaže, da prednost ostane tudi na množicah, ki so
+večje od območja, na katerem je bil ovrednoten TabPFN v2. Na vseh 16 množicah z
+več kot \num{10000} primeri je bil temeljni model boljši od vseh drevesnih
+ansamblov, mediana prednosti pa je bila \num{0.0031} (na množicah do
+\num{10000} primerov \num{0.0077}); na nenasičenih množicah je mediana
+\num{0.0119} nad mejo in \num{0.0174} pod njo.
 
 \section{Podatkovna množica Medic3}
 \label{sec:rez-medic3}
