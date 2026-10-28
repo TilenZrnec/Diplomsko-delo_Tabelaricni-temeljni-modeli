@@ -1303,7 +1303,7 @@ Wilcoxonov test pa ju loči ($p_\mathrm{Holm} = \num{1.4e-6}$).
 % izračunane iz vrednosti v tabeli \ref{tab:mnozice}.
 
 Povprečni ROC-AUC vseh algoritmov na posameznih podatkovnih množicah je zbran v
-tabeli~\ref{tab:mnozice}. Najvišji ROC-AUC je drevesni ansambel dosegel le na
+tabeli~\ref{tab:mnozice} v dodatku~\ref{dod:rezultati}. Najvišji ROC-AUC je drevesni ansambel dosegel le na
 dveh podatkovnih množicah, obe pa sta nasičeni: na množici tic-tac-toe je
 CatBoost (\num{1.0000}) presegel TabICL (\num{0.9996}), na množici
 wall-robot-navigation pa je XGBoost najboljši temeljni model presegel za manj kot
@@ -1320,8 +1320,6 @@ Največji razliki v prid TabPFN-3.5 sta na množicah cylinder-bands
 (\num{0.0322}) in Bioresponse (\num{0.0232}), v prid TabICL pa na množicah
 climate-model-simulation-crashes (\num{0.0111}) in analcatdata\_dmft
 (\num{0.0072}).
-
-\input{rezultati/tab_mnozice.tex}
 
 \section{Časovna zahtevnost}
 \label{sec:rez-casi}
@@ -1352,8 +1350,9 @@ napovedujejo v največ \num{0.015} s.
 \section{Neuspela in pomnilniško zahtevna učenja}
 \label{sec:rez-pomnilnik}
 % Vir: results.csv (stolpci error, raw_error), summary/pivot.csv (CIFAR_10),
-% results/runs/cc18_v3/PROVENANCE.md in sacct.txt (MaxRSS, dodeljeni pomnilnik,
-% ponovna oddaja opravila 20176087).
+% results/runs/cc18_v3/PROVENANCE.md in sacct.txt (MaxRSS 394,1 GiB na gwn10,
+% 512 GB, --mem=480G; opravilo 20176087). Prvi poskus z 240 GiB je bil prekinjen
+% (OOM) - zgodovine razvoja besedilo ne opisuje.
 
 Vseh 6480 učenj je uspelo. Oba temeljna modela sta na vseh podatkovnih množicah
 sprejela surove podatke, zato minimalni popravek iz politike predobdelave
@@ -1364,10 +1363,9 @@ TabPFN-3.5 jo je sprejel, čeprav je predhodna različica na njej zaradi števil
 atributov odpovedala (razdelek~\ref{sec:rez-zagona}), in na njej dosegel
 najvišji povprečni ROC-AUC (\num{0.9158}, pred CatBoostom s \num{0.9104}).
 TabICL je na tej množici porabil do 394~GiB delovnega pomnilnika (največja
-velikost rezidentnega pomnilnika, ki jo je zabeležil razporejevalnik opravil).
-Prvi poskus z dodeljenimi 240~GiB je razporejevalnik zato prekinil; TabICL je
-uspel šele na vozlišču z več pomnilnika in z dodeljenimi 480~GiB, kjer je
-dosegel povprečni ROC-AUC \num{0.9050}.
+velikost rezidentnega pomnilnika, ki jo je zabeležil razporejevalnik opravil),
+zato je opravilo za to množico teklo na vozlišču s 512~GB pomnilnika. Dosegel
+je povprečni ROC-AUC \num{0.9050}.
 
 \section{Primerjava z modelom TabPFN-3}
 \label{sec:rez-zagona}
@@ -1380,24 +1378,16 @@ dosegel povprečni ROC-AUC \num{0.9050}.
 Protokol smo izvedli tudi s prejšnjo zamrznitvijo različic knjižnic, v kateri je
 bil namesto modela TabPFN-3.5 uporabljen TabPFN-3 (paket tabpfn~8.5.0).
 TabPFN-3.5 je imel višji povprečni ROC-AUC kot TabPFN-3 na 56 od 71 podatkovnih
-množic, na katerih sta uspela oba (mediana razlike \num{0.0007}). Največje
-izboljšanje je na množicah cylinder-bands (\num{0.0357}) in connect-4
-(\num{0.0164}), največje poslabšanje pa na množicah
-climate-model-simulation-crashes (\num{-0.0038}) in
-blood-transfusion-service-center (\num{-0.0035}). TabPFN-3 je poleg tega
-zavrnil množico CIFAR\_10, ker število atributov presega uradno podprtih 2000;
-omejitev je sicer mogoče izklopiti z nastavitvijo
+množic, na katerih sta uspela oba (mediana razlike \num{0.0007}, največ
+\num{0.0357} na množici cylinder-bands, največje poslabšanje \num{0.0038}).
+TabPFN-3 je zavrnil množico CIFAR\_10, ker število atributov presega uradno
+podprtih 2000; omejitev bi bilo mogoče izklopiti z nastavitvijo
 \texttt{ignore\_pretraining\_limits=True}, ki je zaradi protokola s privzetimi
-nastavitvami nismo uporabili.
-
-Sprememba modela je zamenjala vrstni red temeljnih modelov. S TabPFN-3 je bil
-prvi TabICL (povprečni rang \num{1.58}, 49 zmag) pred modelom TabPFN-3
-(\num{1.90}, 22 zmag), parni Wilcoxonov test pa je pokazal, da je TabICL
-značilno boljši (boljši na 47 in slabši na 20 podatkovnih množicah,
-$p_\mathrm{Holm} = \num{0.0046}$). S TabPFN-3.5 je razmerje obrnjeno
-(razdelek~\ref{sec:rez-znacilnost}). Rezultati modela TabICL, katerega paket se
-med zamrznitvama ni spremenil, so ostali skoraj enaki: ROC-AUC se razlikuje na
-147 od 1065 učenj, ki so uspela pri obeh zamrznitvah, največ za \num{0.0037}.
+nastavitvami nismo uporabili. Sprememba modela je zamenjala vrstni red
+temeljnih modelov: s TabPFN-3 je bil TabICL značilno boljši (povprečni rang
+\num{1.58} proti \num{1.90}, boljši na 47 in slabši na 20 podatkovnih
+množicah, $p_\mathrm{Holm} = \num{0.0046}$), s TabPFN-3.5 pa je razmerje
+obrnjeno (razdelek~\ref{sec:rez-znacilnost}).
 
 \section{Odvisnost od lastnosti podatkovnih množic}
 \label{sec:rez-lastnosti}
@@ -1536,5 +1526,11 @@ v poglavju~\ref{ch:zakljucek}.
 % Vir: Diplomsko-delo_Koda/results/datasets/cc18.csv (scripts/describe_datasets.py).
 
 \input{rezultati/tab_cc18_lastnosti.tex}
+
+\chapter{Rezultati po podatkovnih množicah}
+\label{dod:rezultati}
+% Vir: summary/pivot.csv (cc18_v4/combined), tabela iz generiraj_rezultate.py.
+
+\input{rezultati/tab_mnozice.tex}
 
 \end{document}
