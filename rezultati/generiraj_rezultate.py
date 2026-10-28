@@ -20,6 +20,9 @@ Zagon (iz korena repozitorija s kodo, v okolju tabular3.5):
 Na koncu izpiše številke, ki so povzete v besedilu poglavja.
 """
 import io, json, os, re, shutil, subprocess, sys
+# Stalen datum v metapodatkih PDF (matplotlib ga bere iz SOURCE_DATE_EPOCH; 2026-10-28),
+# da ponoven zagon ne spremeni slik, ki se po vsebini niso spremenile.
+os.environ.setdefault('SOURCE_DATE_EPOCH', '1793145600')
 import numpy as np, pandas as pd
 sys.path.insert(0, '.')
 from src.stats import cd_diagram
@@ -419,3 +422,96 @@ for lab, path, tabs in (('raw', M_RAW, mraw), ('160', M_160, m160)):
         tt = pd.read_csv(f"{path}/summary/{m}/corrected_ttest_holm.csv")
         print('   neznacilni:', [(r.a, r.b, round(r.mean_diff, 4), r.wins_a, r.wins_b, round(r.p_holm, 4)) for r in tt.itertuples() if not r.significant])
         print('   tabpfn/catboost:', [(r.a, r.b, round(r.mean_diff, 4), r.wins_a, r.wins_b, round(r.p_holm, 4)) for r in tt.itertuples() if {r.a, r.b} == {'tabpfn', 'catboost'}])
+
+# 12. Materiali: lastnosti podatkovnih množic ----------------------------------------------
+# results/datasets/<nabor>.csv naredi scripts/describe_datasets.py iz podatkov, kot jih
+# naloži benchmark (koda 428167b, izhodi 92b1941).
+DS = 'results/datasets'
+props = pd.read_csv(DS + '/cc18.csv', dtype={'dataset_id': str})
+props['categorical_share'] = props.n_categorical / props.n_features
+assert len(props) == N and set(props.dataset) == set(pv.index)
+def num(x, d):
+    return f"\\num{{{int(round(x))}}}" if d == 0 and float(x).is_integer() else f"\\num{{{x:.{max(d, 1)}f}}}"
+DESC = [('število primerov', 'n_rows', 0, 1), ('število atributov', 'n_features', 0, 1),
+        ('število razredov', 'n_classes', 0, 1), ('delež kategoričnih atributov', 'categorical_share', 2, 1),
+        ('delež manjkajočih vrednosti [\\%]', 'missing_share', 1, 100),
+        ('razmerje najmanjšega in največjega razreda', 'imbalance_ratio', 3, 1)]
+t = src([DS + '/cc18.csv'], what='scripts/describe_datasets.py, podatki, kot jih naloži benchmark')
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Lastnosti """ + str(N) + r""" podatkovnih množic zbirke OpenML-CC18: najmanjša vrednost, mediana in največja vrednost čez množice. Razmerje razredov je število primerov najmanjšega razreda, deljeno s številom primerov največjega. Lastnosti vseh množic so v dodatku~\ref{dod:lastnosti}.}
+\label{tab:cc18-opis}
+\small
+\begin{tabular}{lrrr}
+\hline
+Lastnost & najmanj & mediana & največ \\
+\hline
+"""
+for label, col, d, scale in DESC:
+    s = props[col] * scale
+    t += f"{label} & {num(s.min(), d)} & {num(s.median(), d)} & {num(s.max(), d)} \\\\\n"
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_cc18_opis.tex', t)
+
+# Priloga: lastnosti vseh 72 množic.
+t = src([DS + '/cc18.csv'], what='scripts/describe_datasets.py, podatki, kot jih naloži benchmark')
+head = "Podatkovna množica & ID & primeri & atributi & kat. & razredi & manjk.\\ [\\%] \\\\\n"
+t += r"""{\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{4.6cm}rrrrrr}
+\caption{Lastnosti podatkovnih množic zbirke OpenML-CC18: identifikator OpenML, število primerov, atributov, kategoričnih atributov in razredov ter delež manjkajočih vrednosti (celic) v odstotkih.}
+\label{tab:cc18-lastnosti} \\
+\hline
+""" + head + "\\hline\n\\endfirsthead\n\\hline\n" + head + "\\hline\n\\endhead\n\\hline\n\\endfoot\n"
+for _, r in props.sort_values('dataset', key=lambda s: s.str.lower()).iterrows():
+    name = re.sub(r'(?<=[a-z])(?=[A-Z])', r'\\allowbreak ', r.dataset).replace('_', r'\_\allowbreak ')
+    miss = '0' if r.missing_share == 0 else f"\\num{{{100 * r.missing_share:.2f}}}"
+    t += (f"{name} & {r.dataset_id} & \\num{{{r.n_rows}}} & \\num{{{r.n_features}}} & {r.n_categorical} & "
+          f"{r.n_classes} & {miss} \\\\\n")
+t += "\\end{longtable}\n}\n"
+write('tab_cc18_lastnosti.tex', t)
+
+# Slika: velikost množic. Barvi sta reži 1 in 2 kategorične palete (modra, oranžna), ki
+# sta preverjeni za razsevne diagrame; obliki znaka vrsto množice ločita tudi v sivinah.
+C1, C2, INK, MUTED, GRID, AXIS = '#2a78d6', '#eb6834', '#0b0b0b', '#52514e', '#e1e0d9', '#c3c2b7'
+from matplotlib.ticker import FuncFormatter
+plt.rcParams.update({'font.size': 9, 'axes.edgecolor': AXIS, 'axes.labelcolor': INK,
+                     'xtick.color': MUTED, 'ytick.color': MUTED})
+fig, ax = _subplots(figsize=(5.4, 3.3))
+binary = props.n_classes == 2
+for mask, col, mk, lab in ((binary, C1, 'o', 'binarne'), (~binary, C2, '^', 'z več razredi')):
+    ax.scatter(props.n_rows[mask], props.n_features[mask], s=26, c=col, marker=mk, edgecolors='white',
+               linewidths=0.6, label=f'{lab} ({int(mask.sum())})', zorder=3)
+ax.set_xscale('log'); ax.set_yscale('log')
+fmt = FuncFormatter(lambda v, _: f'{v:,.0f}'.replace(',', ' '))
+ax.xaxis.set_major_formatter(fmt); ax.yaxis.set_major_formatter(fmt)
+ax.axvline(10000, color=MUTED, lw=1.0, ls='--', zorder=1); ax.axhline(500, color=MUTED, lw=1.0, ls='--', zorder=1)
+ax.text(10000 * 1.08, 2.6, 'TabPFN v2: do 10 000 primerov', color=MUTED, fontsize=7.5, va='bottom')
+ax.text(420, 500 * 1.12, 'TabPFN v2: do 500 atributov', color=MUTED, fontsize=7.5, va='bottom')
+for name, dx, dy, ha in (('CIFAR_10', -0.12, 0, 'right'), ('numerai28.6', 0, 0.16, 'center')):
+    r = props.set_index('dataset').loc[name]
+    ax.annotate(name, (r.n_rows, r.n_features), fontsize=7.5, color=INK,
+                xytext=(r.n_rows * 10 ** dx, r.n_features * 10 ** dy), ha=ha, va='center')
+ax.set_xlabel('število primerov'); ax.set_ylabel('število atributov')
+ax.set_xlim(350, 2e5); ax.set_ylim(2, 6000)
+ax.grid(True, which='major', color=GRID, lw=0.5, zorder=0)
+for s in ('top', 'right'): ax.spines[s].set_visible(False)
+ax.legend(frameon=False, loc='upper left', fontsize=8, handletextpad=0.3)
+fig.tight_layout()
+fig.savefig(os.path.join(SLIKE, 'cc18_velikosti.pdf'))
+plt.close(fig)
+
+print('== Materiali (results/datasets) ==')
+print('binarnih', int(binary.sum()), '| vsaj en kategoricni', int((props.n_categorical > 0).sum()),
+      '| samo kategoricni', int((props.n_categorical == props.n_features).sum()),
+      '| z manjkajocimi', int((props.missing_share > 0).sum()), 'najvec %', round(100 * props.missing_share.max(), 2),
+      props.loc[props.missing_share.idxmax(), 'dataset'])
+over = {'primerov > 10000': props.n_rows > 10000, 'atributov > 500': props.n_features > 500,
+        'razredov > 10': props.n_classes > 10}
+print({k: (int(v.sum()), sorted(props.dataset[v])) for k, v in over.items()})
+print('zunaj obmocja TabPFN v2 (katerakoli meja):', int(np.logical_or.reduce(list(over.values())).sum()))
+print('ekstremi', {c: (props.loc[props[c].idxmax(), 'dataset'], props[c].max()) for c in ('n_rows', 'n_features', 'n_classes')},
+      'najmanj primerov', props.n_rows.min(), sorted(props.dataset[props.n_rows == props.n_rows.min()]))
+print('razmerje razredov min', round(props.imbalance_ratio.min(), 4), props.loc[props.imbalance_ratio.idxmin(), 'dataset'])
+for f in ('medic3', 'medic3_160'):
+    print(f, pd.read_csv(f'{DS}/{f}.csv').iloc[0].to_dict())

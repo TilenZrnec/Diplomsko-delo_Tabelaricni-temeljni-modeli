@@ -1005,32 +1005,131 @@ javni.
 \chapter{Materiali}
 \label{ch:podatki}
 %=========================================================================
-% Vsebina poglavja:
-%  - Zbirka OpenML-CC18: kako je nastala, kriteriji za uvrstitev množic,
-%    zakaj je primerna za to primerjavo (uporabljata jo tudi izvirna članka
-%    o modelih TabPFN in TabICL).
-%  - Opisna statistika vseh 72 podatkovnih množic: število primerov,
-%    število atributov, delež kategoričnih atributov, število razredov,
-%    delež manjkajočih vrednosti, uravnoteženost razredov.
-%  - Tabela z lastnostmi množic (lahko v prilogo, v besedilu pa povzetek).
-%  - Slika: porazdelitev velikosti množic (log-log razsevni diagram
-%    število primerov proti številu atributov).
-%  - Kje se množice približajo mejam modelov (npr. največje množice).
-%
-% To poglavje prevzema vlogo prvotno načrtovanega podpoglavja 3.1
-% (Podatkovna nabora).
+% Vse številke v tem poglavju: Diplomsko-delo_Koda/results/datasets/{cc18,medic3,
+% medic3_160}.csv (scripts/describe_datasets.py, koda 428167b, izhodi 92b1941;
+% podatki, kot jih naloži benchmark) in izpis rezultati/generiraj_rezultate.py,
+% razdelek 12; tabeli tab_cc18_opis.tex, tab_cc18_lastnosti.tex in slika
+% slike/cc18_velikosti.pdf so iz istega skripta. Za Medic3 še izpis
+% scripts/profile_medic3.py (zagon 2026-10-28): manjkajočost kot napovednik in
+% točnost napovedi iz stolpca Field. Mediana velikosti razreda Medic3 je 180
+% (describe_datasets.py); profile_medic3.py izpiše zgornjo mediano 182.
 
-\todo{CC18 half is writable now (inclusion criteria, 72 datasets, size ranges). Leave the Medic3 subsection as a stub until after the Zoom.}
+Algoritme smo primerjali na 72 podatkovnih množicah javne zbirke OpenML-CC18
+in na zaupni podatkovni množici Medic3. V tem poglavju opišemo obe; lastnosti
+posameznih množic zbirke OpenML-CC18 so zbrane v dodatku~\ref{dod:lastnosti}.
 
 \section{OpenML-CC18}
 \label{sec:cc18}
 
-\todo{Kriteriji za uvrstitev podatkovnih množic v zbirko, 72 množic in razponi velikosti: število primerov, število atributov, delež kategoričnih atributov, število razredov in delež manjkajočih vrednosti. Tabela z opisno statistiko in slika porazdelitve velikosti.}
+Zbirka OpenML-CC18 je zbirka za primerjalno vrednotenje (angl.
+\emph{benchmarking suite}) na platformi OpenML, sestavljena iz 72
+klasifikacijskih nalog~\cite{bischl2021openml}. Avtorji so vanjo uvrstili vse
+preverjene in javno licencirane podatkovne množice platforme do sredine leta
+2018, ki izpolnjujejo vnaprej določena merila. Množica mora imeti od 500 do
+\num{100000} primerov in manj kot 5000 atributov, pri čemer se vsaka vrednost
+kategoričnega atributa šteje kot svoj atribut. Imeti mora vsaj dva razreda,
+noben razred ne sme imeti manj kot 20 primerov, razmerje med najmanjšim in
+največjim razredom pa mora biti večje od \num{0.05}. Množica ne sme biti
+redka, ne sme vsebovati časovne odvisnosti med primeri in ne sme zahtevati
+vzorčenja po skupinah. Izločene so bile tudi umetne množice, podmnožice večjih
+množic, množice s spremenjeno ciljno spremenljivko in množice brez navedenega
+vira, pa tudi množice, ki jih en sam atribut ali odločitveno drevo razvrsti
+brez napake~\cite{bischl2021openml}. Zbirka torej vsebuje srednje velike, ne
+prelahke in ne izrazito neuravnotežene naloge. Avtorji sami navajajo, da
+nekatere množice meril ne izpolnjujejo povsem: sick je različica množice
+hypothyroid z združenimi razredi, electricity ima atribute, povezane s časom,
+balance-scale je umetna, pri mnist\_784 pa bi bilo treba primere istega pisca
+obdržati v isti delitvi~\cite{bischl2021openml}. Množice uporabljamo
+nespremenjene, kot jih vrne platforma.
+% bischl2021openml, arXiv 1708.03731, razd. 6 in 6.1 (str. 6-7): merila (a)-(g),
+% »more opinionated criteria« (a)-(d), »sufficiently challenging« (a)-(b) in
+% priznane napake (sick, electricity, balance_scale, mnist_784); preverjeno
+% 2026-10-28 v PDF. Zbirka 99 na OpenML; identifikatorji pripeti v
+% Diplomsko-delo_Koda/scripts/cc18_ids.json (scripts/gen_cc18_ids.py).
+
+Zbirko smo izbrali, ker je nespremenljiva, javno dostopna in uveljavljena: na
+njej sta bila ovrednotena prva različica modela TabPFN in model TabDPT,
+novejša poročila o modelih TabPFN in TabICL pa je ne vključujejo
+(razdelka~\ref{sec:sor-temeljni} in~\ref{sec:sor-umestitev}). Merilo o
+najmanj 20 primerih na razred poleg tega zagotavlja, da je pri petkratnem
+stratificiranem prečnem preverjanju vsak razred v vsakem testnem delu.
+Identifikatorje vseh 72 nalog smo pripeli ob prvem prenosu, tako da se nabor
+množic med poskusi ni spreminjal.
+
+\input{rezultati/tab_cc18_opis.tex}
+
+Tabela~\ref{tab:cc18-opis} povzema lastnosti množic, slika~\ref{fig:cc18-velikosti}
+pa njihovo velikost. Število primerov sega od 500 (dresses-sales) do
+\num{96320} (numerai28.6), število atributov do 3072 (CIFAR\_10), število
+razredov do 46 (Devnagari-Script). Binarnih nalog je 35, nalog z več razredi
+37. Kategorične atribute ima 23 množic, osem med njimi samo kategorične;
+manjkajoče vrednosti ima devet množic, največ dresses-sales s
+\SI{13.92}{\percent} manjkajočih vrednosti. Najbolj neuravnotežena je množica
+car, pri kateri ima najmanjši razred \num{0.054} primerov največjega.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{cc18_velikosti.pdf}
+\caption{Število primerov in število atributov 72 podatkovnih množic zbirke
+OpenML-CC18 (logaritemski osi). Črtkani črti označujeta meji, do katerih je bil
+ovrednoten TabPFN v2~\cite{hollmann2025tabpfn}.}
+\label{fig:cc18-velikosti}
+\end{figure}
+
+Del množic presega območje, na katerem so bili temeljni modeli prvotno
+predstavljeni. Glede na meje, do katerih je bil ovrednoten TabPFN v2 (do
+\num{10000} primerov, 500 atributov in 10 razredov~\cite{hollmann2025tabpfn}),
+je zunaj tega območja 22 množic: 16 jih ima več kot \num{10000} primerov, devet
+več kot 500 atributov in pet več kot 10 razredov. Na teh množicah se pokaže, ali
+temeljna modela svojo uspešnost ohranita tudi zunaj območja, za katero je bila
+paradigma prvotno zasnovana (razdelek~\ref{sec:rez-lastnosti}).
 
 \section{Podatkovna množica Medic3}
 \label{sec:medic3}
 
-\todo{Ostane zgolj okostje do pogovora prek Zooma.}
+Medic3 je zaupna bolnišnična podatkovna množica, ki ni javno dostopna in ni
+del nobene zbirke za primerjalno vrednotenje, zato je razvijalci temeljnih
+modelov pri razvoju niso mogli uporabiti. Opišemo jo le z zbirnimi
+statistikami.
+% PREVERI: kaj smemo povedati o izvoru, vsebini in pridobitvi podatkovne
+% množice (vprašanje za mentorja); do odgovora le zbirne statistike.
+
+Podatkovna množica obsega \num{122093} primerov s 275 atributi in ciljni
+razred z 220 vrednostmi. Vsi atributi so številski. Razredi so neuravnoteženi:
+največji obsega 7462 primerov (\SI{6.1}{\percent} vseh), najmanjši 50, zato je
+pri petkratnem stratificiranem prečnem preverjanju tudi tu vsak razred v
+vsakem testnem delu. Manjkajočih je \SI{82.2}{\percent} vrednosti atributov;
+manjkajoče vrednosti ima vsak primer, mediana števila znanih atributov na
+primer pa je 50 od 275. Že samo dejstvo, ali je vrednost atributa znana, je
+močno povezano z razredom: med razredi z vsaj 200 primeri ima pri nekaterih
+atributih en razred znano vrednost v \SI{99.5}{\percent} primerov, drug pa v
+\SI{0.0}{\percent} primerov (zaokroženo na eno decimalko). Poleg atributov in razreda vsebuje podatkovna množica zaporedno
+številko primera in stolpec z 11 vrednostmi, ki razrede združuje v skupine.
+Oba stolpca smo po navodilu mentorja izločili; drugi bi bil bližnjica do
+razreda, saj sam napove razred s točnostjo \SI{25.0}{\percent}.
+% PREVERI: ali smemo stolpec Field opisati kot združevanje razredov v skupine
+% (oddelke) in ali je »po navodilu mentorja« ustrezna formulacija.
+
+TabPFN-3.5 sprejme največ 160 razredov (podrazdelek~\ref{sec:tabpfn}), zato
+smo pripravili tudi različico s 160 razredi. Obdržali smo primere 160
+najpogostejših razredov, pri enakem številu primerov pa je odločala oznaka
+razreda; primere preostalih 60 razredov smo zavrgli. Različica obsega
+\num{117825} primerov (\SI{96.5}{\percent} prvotnih), najmanjši obdržani razred
+ima 102 primera. Preostalih razredov nismo združili v skupen razred, ker bi jih
+bilo potem 161 in bi TabPFN-3.5 različico spet zavrnil.
+% PREVERI (vprašanje za mentorja): načrt z dne 2026-08-12 je predvideval, da
+% razrede izločimo enakomerno po skupinah (stolpec Field); koda
+% (Diplomsko-delo_Koda/src/data.py, _limit_classes) obdrži 160 globalno
+% najpogostejših razredov. Odločitev za tak izbor ni nikjer zapisana.
+
+V primerjavi z zbirko OpenML-CC18 je Medic3 skrajna v treh pogledih. Ima več
+primerov od katerekoli množice zbirke (največja, numerai28.6, jih ima
+\num{96320}), skoraj petkrat več razredov kot množica z največ razredi (46) in
+neprimerljivo več manjkajočih vrednosti (v zbirki največ \SI{13.92}{\percent}).
+Ker so vsi atributi številski, nativna obravnava kategoričnih atributov tu
+nobenemu algoritmu ne prinese prednosti, različna obravnava manjkajočih
+vrednosti (razdelek~\ref{sec:predobdelava}) pa pride do izraza bolj kot na
+katerikoli množici zbirke.
 
 %=========================================================================
 \chapter{Rezultati}
@@ -1425,5 +1524,17 @@ v poglavju~\ref{ch:zakljucek}.
 
 %\cleardoublepage
 \printbibliography[heading=bibintoc]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  DODATKI
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PREVERI: položaj dodatkov (pred literaturo ali za njo) po navodilih FRI.
+\appendix
+
+\chapter{Lastnosti podatkovnih množic zbirke OpenML-CC18}
+\label{dod:lastnosti}
+% Vir: Diplomsko-delo_Koda/results/datasets/cc18.csv (scripts/describe_datasets.py).
+
+\input{rezultati/tab_cc18_lastnosti.tex}
 
 \end{document}
