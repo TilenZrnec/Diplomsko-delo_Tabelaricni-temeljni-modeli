@@ -207,7 +207,7 @@ t = src([M_RAW + '/summary/per_dataset.csv', M_160 + '/summary/per_dataset.csv']
         what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160")
 t += r"""\begin{table}[htbp]
 \centering
-\caption{Rezultati na podatkovnem naboru Medic3 z vsemi """ + str(info['raw']['classes']) + r""" razredi in s """ + str(info['160']['classes']) + r""" najpogostejšimi razredi: povprečni ROC-AUC $\pm$ standardni odklon čez 15 učenj ter mediani časa učenja in napovedovanja na učenje. -- označuje neuspeh vseh učenj (TabPFN-3.5 sprejme največ 160 razredov). Časi primerjajo kombinacijo algoritma in strojne opreme (razdelek~\ref{sec:rez-casi}).}
+\caption{Rezultati na podatkovni množici Medic3 z vsemi """ + str(info['raw']['classes']) + r""" razredi in s """ + str(info['160']['classes']) + r""" najpogostejšimi razredi: povprečni ROC-AUC $\pm$ standardni odklon čez 15 učenj ter mediani časa učenja in napovedovanja na učenje. -- označuje neuspeh vseh učenj (TabPFN-3.5 sprejme največ 160 razredov). Časi primerjajo kombinacijo algoritma in strojne opreme (razdelek~\ref{sec:rez-casi}).}
 \label{tab:medic3}
 \footnotesize
 \setlength{\tabcolsep}{3pt}
@@ -237,7 +237,7 @@ t = src([M_RAW + '/summary/corrected_ttest_holm.csv', M_160 + '/summary/correcte
         what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160")
 t += r"""\begin{table}[htbp]
 \centering
-\caption{Popravljeni t-test za ponovljeno prečno preverjanje s Holmovim popravkom na naboru Medic3. Razlika je povprečna razlika ROC-AUC (prvi minus drugi algoritem) čez 15 učenj, zmage pa število učenj, v katerih je boljši prvi oziroma drugi. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$; -- označuje par z algoritmom, ki ni uspel.}
+\caption{Popravljeni t-test za ponovljeno prečno preverjanje s Holmovim popravkom na podatkovni množici Medic3. Razlika je povprečna razlika ROC-AUC (prvi minus drugi algoritem) čez 15 učenj, zmage pa število učenj, v katerih je boljši prvi oziroma drugi. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$; -- označuje par z algoritmom, ki ni uspel.}
 \label{tab:medic3-test}
 \footnotesize
 \setlength{\tabcolsep}{2.5pt}
@@ -377,7 +377,7 @@ t = src([M_RAW + f'/summary/{m}/per_dataset.csv' for m in MET] + [M_160 + f'/sum
              "metrike iz shranjenih napovedi, scripts/compute_metrics.py")
 t += r"""\begin{table}[htbp]
 \centering
-\caption{Dodatni metriki na podatkovnem naboru Medic3: povprečna točnost in povprečna logaritemska izguba $\pm$ standardni odklon čez 15 učenj. Pri logaritemski izgubi je boljša nižja vrednost. -- označuje neuspeh vseh učenj. Algoritmi so urejeni kot v tabeli~\ref{tab:medic3}.}
+\caption{Dodatni metriki na podatkovni množici Medic3: povprečna točnost in povprečna logaritemska izguba $\pm$ standardni odklon čez 15 učenj. Pri logaritemski izgubi je boljša nižja vrednost. -- označuje neuspeh vseh učenj. Algoritmi so urejeni kot v tabeli~\ref{tab:medic3}.}
 \label{tab:medic3-metrike}
 \footnotesize
 \setlength{\tabcolsep}{3pt}

@@ -397,9 +397,9 @@ tako ne~\cite{qu2026tabiclv2}, za TabPFN-3.5 pa tehničnega poročila v času
 pisanja nismo imeli na voljo (razdelek~\ref{sec:tabpfn}).
 % TabICLv2 in TabPFN-3: niz »CC18« se v besedilu poročil ne pojavi (preverjeno
 % 2026-10-15 v besedilu PDF z arXiv).
-Tretjič, poleg javne zbirke vključimo nejavni podatkovni nabor Medic3 s
+Tretjič, poleg javne zbirke vključimo nejavno podatkovno množico Medic3 s
 \num{122093} primeri in 220 razredi, ki presega razredno omejitev modela
-TabPFN-3.5; ker ni del nobene javne zbirke, ga razvijalci modelov pri razvoju
+TabPFN-3.5; ker ni del nobene javne zbirke, je razvijalci modelov pri razvoju
 niso mogli uporabiti. Četrtič, kot glavno metriko uporabljamo ROC-AUC v
 različici OvR, enako kot drugi članek o modelu TabPFN~\cite{hollmann2025tabpfn},
 kot dodatni metriki pa točnost in logaritemsko izgubo; s tem pokrijemo
@@ -755,7 +755,7 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 
 \todo{Kriteriji za uvrstitev podatkovnih množic v zbirko, 72 množic in razponi velikosti: število primerov, število atributov, delež kategoričnih atributov, število razredov in delež manjkajočih vrednosti. Tabela z opisno statistiko in slika porazdelitve velikosti.}
 
-\section{Podatkovni nabor Medic3}
+\section{Podatkovna množica Medic3}
 \label{sec:medic3}
 
 \todo{Ostane zgolj okostje do pogovora prek Zooma.}
@@ -794,7 +794,7 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 
 V tem poglavju predstavimo rezultate primerjave šestih algoritmov na
 72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml} in na
-podatkovnem naboru Medic3. Vsak algoritem smo na vsaki podatkovni množici
+podatkovni množici Medic3. Vsak algoritem smo na vsaki podatkovni množici
 ovrednotili s petkratnim stratificiranim prečnim preverjanjem (angl.
 \emph{stratified cross-validation}), ponovljenim trikrat z različnim mešanjem
 primerov. Na vsak par podatkovne množice in algoritma tako pride 15 učenj, na
@@ -1062,7 +1062,7 @@ med zamrznitvama ni spremenil, so ostali skoraj enaki: ROC-AUC se razlikuje na
 
 \todo{Odvisnost prednosti temeljnih modelov od števila primerov, števila atributov, števila razredov in deleža kategoričnih atributov. Pred pisanjem dodaj v repozitorij s kodo skript, ki to izračuna (npr. Spearmanov koeficient in razbitje po velikosti), da bo imela vsaka številka generiran vir.}
 
-\section{Podatkovni nabor Medic3}
+\section{Podatkovna množica Medic3}
 \label{sec:rez-medic3}
 % Vir: tab_medic3.tex, tab_medic3_test.tex in izpis skripta
 % generiraj_rezultate.py (medic3_raw_v2/combined, medic3_160_v2/combined;
@@ -1071,7 +1071,7 @@ med zamrznitvama ni spremenil, so ostali skoraj enaki: ROC-AUC se razlikuje na
 % lightgbm_4.7.0_independent.csv in lightgbm_4.6.0_independent.csv, ki jih
 % ustvari scripts/diagnose_lightgbm_medic3.py (prva delitev, seme 42).
 
-Na podatkovnem naboru Medic3 (razdelek~\ref{sec:medic3}) smo vseh šest
+Na podatkovni množici Medic3 (razdelek~\ref{sec:medic3}) smo vseh šest
 algoritmov ovrednotili v dveh različicah: z vsemi 220 razredi (\num{122093}
 primerov in 275 atributov) in s 160 najpogostejšimi razredi (\num{117825}
 primerov). Druga različica obstaja zato, ker TabPFN-3.5 sprejme največ 160
@@ -1091,7 +1091,7 @@ sledijo TabICL (\num{0.9543}), XGBoost (\num{0.9400}), naključni gozd
 (\num{0.8726}) in LightGBM (\num{0.5057}). Standardni odklon čez 15 učenj je
 pri vseh algoritmih največ \num{0.0063}.
 
-Ker gre za en sam podatkovni nabor, testov za primerjavo na več podatkovnih
+Ker gre za eno samo podatkovno množico, testov za primerjavo na več podatkovnih
 množicah ne moremo uporabiti~\cite{demsar2006statistical}. Pare algoritmov smo
 zato primerjali s popravljenim t-testom za ponovljeno prečno
 preverjanje~\cite{bouckaert2004evaluating}, ki pri oceni variance razlik
