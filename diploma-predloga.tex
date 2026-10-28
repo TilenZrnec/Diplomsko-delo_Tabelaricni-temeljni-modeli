@@ -456,17 +456,20 @@ značilnosti surovih podatkov obravnavajo nativno; to razliko obravnavamo kot
 namerno eksperimentalno spremenljivko in jo podrobneje opišemo v
 razdelku~\ref{sec:predobdelava}.
 
-Vse algoritme uporabljamo s privzetimi hiperparametri. Edina nastavitev, ki jo
-podamo eksplicitno, je naključno seme (\texttt{random\_state=42}); razlogi za
-tako zasnovo so navedeni v razdelku~\ref{sec:protokol}. Da so vse druge
-nastavitve res privzete in da vsak algoritem prejme le predobdelavo, brez katere
-knjižnica podatkov ne sprejme, smo za vseh šest algoritmov preverili s samodejno
-revizijo: med učenjem prestrežemo klic knjižnice in njegove parametre primerjamo
-s privzetimi, za vsak korak predobdelave pa preverimo, da knjižnica brez njega
-podatkov ne sprejme. Od privzetih vrednosti odstopajo le naključno seme ter
-nastavitve računanja in izpisovanja, ki modela ne spremenijo.
+Vse algoritme uporabljamo s privzetimi hiperparametri; razlogi za tako zasnovo
+so navedeni v razdelku~\ref{sec:protokol}. Izrecno podamo le naključno seme, ki
+je v treh ponovitvah prečnega preverjanja 42, 43 in 44, ter nastavitve
+računanja in izpisovanja, ki modela ne spremenijo in jih navedemo pri
+posameznem algoritmu; pri modelu TabPFN poleg tega izrecno izberemo različico
+modela (podrazdelek~\ref{sec:tabpfn}). Da so vse druge nastavitve res privzete
+in da vsak algoritem prejme le predobdelavo, brez katere knjižnica podatkov ne
+sprejme, smo za vseh šest algoritmov preverili s samodejno revizijo: med
+učenjem prestrežemo klic knjižnice in njegove parametre primerjamo s
+privzetimi, za vsak korak predobdelave pa preverimo, da knjižnica brez njega
+podatkov ne sprejme.
 % Revizija: Diplomsko-delo_Koda/scripts/audit_defaults.py, izpis v
-% results/runs/subset_v4_local/diagnostics/audit_defaults.txt.
+% results/runs/subset_v4_local/diagnostics/audit_defaults.txt. Seme modela je
+% random_state + ponovitev (config.yaml), seme delitev pa 42.
 Ker so pri takem
 protokolu privzete vrednosti dejanski del metode, jih pri vsakem algoritmu
 posebej navedemo skupaj z virom, iz katerega so povzete. Različice knjižnic so
@@ -597,31 +600,63 @@ izvede najprej pozornost po atributih in nato pozornost po
 primerih~\cite{hollmann2025tabpfn}.
 
 Tehnično poročilo tretje različice, TabPFN-3, navaja, da je model predhodno
-naučen izključno na sintetičnih podatkih, da doseže do \num{1000000} učnih
-primerov in 200 atributov ter da na zbirki TabArena en sam prehod naprej z
-znatno razliko prekaša vse druge modele, vključno z uglaševanimi in
-ansambelskimi primerjalnimi modeli~\cite{grinsztajn2026tabpfn3}.
-% PREVERI v poročilu: »200 atributov«? Paket tabpfn 8.5.0 je za TabPFN-3 kot
-% uradno podprto mejo navajal 2000 atributov (sporočilo o napaki na CIFAR_10 v
-% zagonu cc18_v2).
-V naši primerjavi uporabljamo njeno naslednico TabPFN-3.5 iz paketa
+naučen izključno na sintetičnih podatkih in da na zbirki TabArena en sam
+prehod naprej z znatno razliko prekaša vse druge modele, vključno z
+uglaševanimi in ansambelskimi primerjalnimi modeli. Model so ovrednotili na
+množicah z do \num{1000000} učnimi primeri pri 200 atributih, z do
+\num{100000} primeri pri 2000 atributih in z do 1000 primeri pri \num{20000}
+atributih. Napoved je povprečje ansambla ocenjevalcev (angl.
+\emph{estimators}), od katerih vsak privzeto uporabi največ 200 atributov,
+poseben dekodirnik pa omogoča do 160 razredov~\cite{grinsztajn2026tabpfn3}.
+% grinsztajn2026tabpfn3 (arXiv 2605.13986v2, preverjeno 2026-10-28 v PDF):
+% povzetek (»Pretrained exclusively on synthetic data«, TabArena), sl. 4 (»up to
+% 1M rows at 200 features, 100k rows at 2,000 features, or 1k rows at 20,000
+% features«), razd. 3.2.2 (»many-class decoder ... up to 160 classes«), razd. 3.2.3
+% (»each TabPFN-3 estimator is restricted to at most 200 input features per
+% default«). »200 atributov« je torej meja ocenjevalca, ne modela; paket tabpfn
+% 8.5.0 je kot uradno podprto mejo navajal 2000 atributov (razdelek sec:rez-zagona).
+
+V naši primerjavi uporabljamo njegovo naslednico TabPFN-3.5 iz paketa
 tabpfn~9.1.0 (datoteka uteži \texttt{tabpfn-v3.5-20260909}), in sicer z
 razredom \texttt{TabPFNClassifier}, privzetimi nastavitvami in podanim
 naključnim semenom. Različico modela izberemo izrecno, čeprav je v tem paketu
 privzeta, saj je paket privzeto različico med izdajama 8.5.0 in 9.0.0 že
-zamenjal (prej je bila privzeta TabPFN-3). Ločenega tehničnega poročila za
-TabPFN-3.5 v času pisanja nismo imeli na voljo, zato njegovih lastnosti ne
-povzemamo po viru, temveč poročamo le o tistem, kar smo izmerili sami.
-\todo{Poišči preverljiv vir za TabPFN-3.5 (tehnično poročilo ali kartica modela) in ga dodaj v literatura.bib.}
-Trditve iz poročila za TabPFN-3 navajamo kot kontekst, ne kot ugotovitev te
-naloge; ali držijo za njegovo naslednico tudi na zbirki OpenML-CC18 in pod
-našim protokolom, je predmet poglavja~\ref{ch:rezultati}, kjer v
-razdelku~\ref{sec:rez-zagona} primerjamo tudi obe različici. Pri izvedbi sta
-pomembni še dve praktični posebnosti: model za smiselno hitrost potrebuje
-grafično procesno enoto in uteži prenese ob prvi uporabi, poleg tega je za prvo
-uporabo potreben enkraten sprejem licence prek uporabniškega računa ponudnika,
-in sicer za vsako različico modela posebej. Oboje vpliva na
-zasnovo izvedbenega okolja in je opisano v razdelku~\ref{sec:okolje}.
+zamenjal (prej je bila privzeta TabPFN-3). Tehnično poročilo za TabPFN-3.5
+navaja pet sprememb glede na TabPFN-3: nov zapis posamezne celice tabele, en
+model za klasifikacijo in regresijo, dvakrat širši transformer, preprostejšo
+predobdelavo in sintetične podatke, prilagojene kategoričnim atributom z veliko
+vrednostmi, širokim tabelam in podatkom, razdeljenim v skupine. Vsaka celica
+vstopi v model kot trije signali: kot vrednost, standardizirana s povprečjem in
+standardnim odklonom stolpca na učnih primerih, kot indikator manjkajoče
+vrednosti in kot rang vrednosti med učnimi primeri istega stolpca. Manjkajočo
+vrednost model pred tem nadomesti s povprečjem stolpca, indikator pa ohrani
+informacijo, da je manjkala. Dodatnih preslikav atributov, kot so kvantilne
+preslikave, model ne uporablja; napoved je povprečje osmih ocenjevalcev, ki
+dobijo različno premešane podatke. Kot priporočeno območje poročilo navaja do
+milijon primerov in hkrati do 6000 atributov, z več ocenjevalci pa do
+\num{20000} atributov~\cite{jager2026tabpfn35}. Omejitve števila razredov
+poročilo ne navaja; izmerili smo, da paket sprejme največ 160 razredov
+(razdelek~\ref{sec:rez-medic3}).
+% jager2026tabpfn35 (arXiv 2609.17895v2, preverjeno 2026-10-28 v PDF): razd. 3
+% (str. 8) povzame spremembe; razd. 3.1 in sl. 8 (str. 10): indikator NaN/Inf
+% »read before imputation«, »Impute train-column mean«, »Standard scale train mean
+% / std, clipped to +-100«, »In-context ECDF midrank against train rows of the same
+% column«; razd. 3.2 (str. 11): brez kvantilnih preslikav, robustnega skaliranja in
+% SVD, »aggregates eight ... estimators that operate on distinct permutations«;
+% sl. 1: »simultaneously handle 1M data points and 6k features«, »Increasing the
+% number of estimators allows support for up to 20K features«. Meja 160 razredov:
+% izmerjeno 2026-10-06 na Kremnu (160 uspe, 161 in 220 ne), Diplomsko-delo_Koda
+% CLAUDE.md, Datasets.
+
+Trditve iz obeh poročil navajamo kot kontekst, ne kot ugotovitev te naloge;
+ali držijo tudi na zbirki OpenML-CC18 in pod našim protokolom, je predmet
+poglavja~\ref{ch:rezultati}, kjer v razdelku~\ref{sec:rez-zagona} primerjamo
+tudi obe različici. Pri izvedbi sta pomembni še dve praktični posebnosti: model
+za smiselno hitrost potrebuje grafično procesno enoto in uteži prenese ob prvi
+uporabi, poleg tega je za prvo uporabo potreben enkraten sprejem licence prek
+uporabniškega računa ponudnika, in sicer za vsako različico modela posebej.
+Oboje vpliva na zasnovo izvedbenega okolja in je opisano v
+razdelku~\ref{sec:okolje}.
 
 \subsection{TabICL}
 \label{sec:tabicl}
@@ -656,6 +691,20 @@ arhitekturne spremembe in bolje skalirajoč mehanizem
 pozornosti~\cite{qu2026tabiclv2}. Enako kot TabPFN tudi TabICL uteži prenese ob
 prvi uporabi in za smiselno hitrost potrebuje grafično procesno enoto.
 
+Za razliko od modela TabPFN-3.5 paket tabicl podatke pred modelom predobdela
+sam. Kategorične atribute kodira ordinalno, manjkajoče vrednosti številskih
+atributov pa nadomesti s povprečjem stolpca, ne da bi ohranil informacijo,
+katere vrednosti so manjkale. Napoved je povprečje osmih članov ansambla; po
+privzetih nastavitvah polovica članov prejme le standardizirane atribute,
+polovica pa atribute še po Yeo-Johnsonovi preslikavi. Avtorji prve različice to
+opišejo kot standardizacijo z ali brez potenčne preslikave~\cite{qu2025tabicl}.
+% Preverjeno 2026-10-28 v izvorni kodi nameščenega paketa tabicl 2.2.0:
+% tabicl/_sklearn/preprocessing.py, razred TransformToNumerical (OrdinalEncoder za
+% kategorične, SimpleImputer(keep_empty_features=True) = povprečje brez indikatorja
+% za številske); tabicl/_sklearn/classifier.py: n_estimators=8, norm_methods
+% privzeto ["none", "power"], »'power': Yeo-Johnson power transform«.
+% qu2025tabicl str. 7: »z-normalization with or without power transformation«.
+
 Ker zbirka OpenML-CC18 vsebuje tudi množice, ki po velikosti močno presegajo
 razpon, na katerem sta bila oba temeljna modela prvotno predstavljena, ju naš
 protokol namerno postavi tudi zunaj njunega najbolj ugodnega območja. Kje se pri
@@ -663,8 +712,57 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 
 \section{Protokol vrednotenja}
 \label{sec:protokol}
+% Parametri: Diplomsko-delo_Koda/config.yaml (random_state 42, n_splits 5,
+% n_repeats 3, saturation_threshold 0.995, alpha 0.05); delitve in seme modela:
+% src/data.py (RepeatedStratifiedKFold) in src/runner.py.
 
-\todo{5-fold stratified CV, identical splits, \texttt{random\_state=42}, 3 ponovitve s semenom modela 42 + ponovitev. Metrike so opisane v podrazdelku~\ref{sec:metrike}.}
+Vsak algoritem smo na vsaki podatkovni množici ovrednotili s petkratnim
+stratificiranim prečnim preverjanjem (angl. \emph{stratified
+cross-validation}). Podatkovno množico razdelimo na pet približno enako velikih
+delov, v katerih je razmerje med razredi enako kot v celotni množici; vsak del
+enkrat služi kot testni del, preostali štirje skupaj pa kot učni del. Postopek
+trikrat ponovimo z različnim naključnim mešanjem primerov, zato na vsak par
+podatkovne množice in algoritma pride 15 učenj, na zbirki OpenML-CC18 skupaj
+6480 učenj. Delitve za vsako podatkovno množico določimo enkrat (razred
+\texttt{RepeatedStratifiedKFold} knjižnice scikit-learn s semenom 42) in jih
+uporabijo vsi algoritmi, zato so primerjave parne: vsi algoritmi so učeni in
+testirani na istih primerih. Seme modela je v ponovitvi $r \in \{0, 1, 2\}$
+enako $42 + r$, tako da ponovitve zajamejo tudi naključnost samega algoritma,
+ne le delitve.
+
+Vse algoritme uporabljamo s privzetimi hiperparametri. Tak protokol ustreza
+uporabi algoritma brez uglaševanja, za katero sta temeljna modela zasnovana:
+ciljne podatkovne množice se ne učita, temveč jo prejmeta kot kontekst
+(podrazdelek~\ref{sec:tabpfn}). Drevesnim ansamblom uglaševanje uspešnost
+praviloma izboljša~\cite{probst2019tunability}, zato jih privzete nastavitve ne
+postavijo v najboljšo luč; koliko bi pridobili, ocenimo s poskusom uglaševanja
+modela XGBoost (razdelek~\ref{sec:rez-uglasevanje}). Naivnega klasifikatorja
+kot spodnje meje v primerjavo namenoma ne vključimo. Raziskovalno vprašanje je,
+kako se temeljna modela odrežeta v primerjavi z uveljavljenimi drevesnimi
+ansambli, zato vlogo referenčne točke prevzamejo štirje ansambli; klasifikator,
+ki napoveduje ne glede na atribute, ima po konstrukciji ROC-AUC \num{0.5} in k
+primerjavi ne bi prispeval nobene informacije.
+
+Rezultat algoritma na podatkovni množici povzamemo s povprečjem metrike čez 15
+učenj. Algoritme na vsaki podatkovni množici razvrstimo po tem povprečju:
+najboljši prejme rang 1, izenačeni si delijo povprečje rangov, algoritem, ki na
+podatkovni množici v katerem koli učenju ni uspel, pa prejme najslabši rang.
+Neuspelih učenj torej ne izpustimo, saj bi izpuščanje rezultate pristransko
+izboljšalo~\cite{wainberg2016random}. Povprečno vrednost metrike čez podatkovne
+množice računamo le na tistih, na katerih so uspeli vsi algoritmi, da so vsa
+povprečja izračunana na isti podmnožici.
+
+Podatkovno množico imenujemo \emph{nasičena}, če najboljši algoritem na njej
+doseže ROC-AUC vsaj \num{0.995}. Na nasičenih množicah so najboljši algoritmi
+blizu zgornje meje metrike, zato o njihovem vrstnem redu odločajo zelo majhne
+razlike. Vse povzetke in statistične teste na zbirki OpenML-CC18 zato podamo
+dvakrat: na vseh 72 podatkovnih množicah in le na nenasičenih. Nasičenost vedno določimo po ROC-AUC, tudi pri
+dodatnih metrikah, da je podmnožica nenasičenih povsod ista.
+
+Glavni protokol dopolnjujeta dva dodatna poskusa, ki od njega v posameznih
+točkah odstopata, zato ju opišemo skupaj z njunimi rezultati: uglaševanje
+hiperparametrov modela XGBoost (razdelek~\ref{sec:rez-uglasevanje}) in test
+uhajanja podatkov (razdelek~\ref{sec:rez-uhajanje}).
 
 \subsection{Metrike uspešnosti}
 \label{sec:metrike}
@@ -733,20 +831,175 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 % float32 ustvari izenačitve); metrics_info.json ob vsakem naboru. Metrike so
 % izračunane s kodo commita ed2cafc (čisto drevo), rezultati v commitu 783f705.
 
+\subsection{Statistična primerjava}
+\label{sec:statistika}
+% Implementacija: Diplomsko-delo_Koda/src/stats.py (friedman, wilcoxon_holm, holm,
+% corrected_resampled_ttest). chi2_F po Demšarjevi formuli iz povprečnih rangov
+% (brez popravka za izenačitve), q_0,05 za 6 algoritmov = 2,850; ničle pri
+% Wilcoxonovem testu razdeli zero_method="zsplit". Formula in vrednosti preverjene na
+% Demšarjevem zgledu (CLAUDE.md repozitorija s kodo, Structure, src/stats.py).
+
+Razlike med algoritmi na več podatkovnih množicah preverimo po postopku, ki ga
+priporoča Demšar~\cite{demsar2006statistical}. Friedmanov test preveri ničelno
+domnevo, da so vsi algoritmi enakovredni in imajo zato enake pričakovane
+povprečne range. O zavrnitvi odločimo na podlagi statistike $F_F$, ki sta jo
+predlagala Iman in Davenport in jo Demšar priporoča namesto preveč
+konservativne statistike $\chi^2_F$. Če Friedmanov test ničelno domnevo zavrne,
+uporabimo Nemenyijev test kot naknadni test nad povprečnimi rangi: povprečna
+ranga dveh algoritmov se značilno razlikujeta, če je njuna razlika večja od
+kritične razdalje (angl. \emph{critical difference})
+$\mathit{CD} = q_\alpha \sqrt{k(k+1)/(6N)}$, kjer je $k$ število algoritmov,
+$N$ število podatkovnih množic, $q_\alpha$ pa kritična vrednost
+studentiziranega razpona, deljena s $\sqrt{2}$~\cite{demsar2006statistical}.
+Ker je izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri
+drugi algoritmi so vključeni v primerjavo~\cite{benavoli2016should}, vsak par
+algoritmov primerjamo še z Wilcoxonovim testom predznačenih rangov na
+povprečjih po podatkovnih množicah, p-vrednosti vseh parov pa popravimo s
+Holmovim postopkom za večkratno primerjanje~\cite{demsar2006statistical}.
+Stopnja značilnosti je povsod $\alpha = 0{,}05$.
+
+Na eni sami podatkovni množici (Medic3) testov čez več množic ne moremo
+uporabiti~\cite{demsar2006statistical}. Pare algoritmov zato primerjamo s
+popravljenim t-testom za ponovljeno prečno
+preverjanje~\cite{bouckaert2004evaluating}, ki pri oceni variance razlik
+upošteva, da se učni deli zaporednih učenj prekrivajo~\cite{nadeau2003inference}.
+Statistika
+\[
+t = \frac{\bar{d}}{\sqrt{\left(1/k + n_2/n_1\right)\hat{\sigma}^2}}
+\]
+ima $k - 1 = 14$ prostostnih stopenj; pri tem sta $\bar{d}$ in $\hat{\sigma}^2$
+povprečje in vzorčna varianca razlik metrike čez $k = 15$ učenj, $n_1$ in $n_2$
+pa velikosti učnega in testnega dela. P-vrednosti popravimo s Holmovim
+postopkom čez vse pare. Bouckaert in Frank za najboljšo ponovljivost testa
+priporočata desetkrat ponovljeno desetkratno prečno
+preverjanje~\cite{bouckaert2004evaluating}; naše trikrat ponovljeno petkratno
+preverjanje je veljavna, a manj ponovljiva izbira.
+
 \section{Politika predobdelave}
 \label{sec:predobdelava}
+% Pravilo in revizija: Diplomsko-delo_Koda/CLAUDE.md, Preprocessing policy;
+% scripts/audit_defaults.py (izpis results/runs/subset_v4_local/diagnostics/
+% audit_defaults.txt). Stolpca preprocessing in raw_error v vsaki vrstici results.csv.
 
-\todo{Your experimental variable. Say explicitly that it's a deliberate design choice, not an oversight, and that it's what Medic3 will finally stress.}
+Algoritmi se zelo razlikujejo po tem, katere značilnosti surovih podatkov
+obravnavajo sami: manjkajoče vrednosti, kategorične atribute, različne
+razpone vrednosti. Te razlike ne izravnavamo s skupno predobdelavo, temveč jih
+obravnavamo kot namerno eksperimentalno spremenljivko. Pravilo je, da vsak
+algoritem uporabimo tako, kot ga ponuja knjižnica: s privzetimi nastavitvami in
+le s tisto predobdelavo, brez katere knjižnica podatkov ne sprejme. Ne iščemo
+torej najboljše predobdelave za vsak algoritem, temveč merimo, kaj algoritem
+zmore s podatki, kot so. Tschalzev in sodelavci so pokazali, da predobdelava,
+prilagojena posamezni podatkovni množici, range modelov znatno
+spremeni~\cite{tschalzev2024data}; naši rezultati zato veljajo za uporabo brez
+take prilagoditve.
+
+Po tem pravilu prejmeta oba temeljna modela surove podatke. Samo če bi
+knjižnica surove podatke zavrnila, bi uporabili minimalen popravek, ga zabeležili
+in učenje ponovili; na nobeni od uporabljenih podatkovnih množic to ni bilo
+potrebno. Med drevesnimi ansambli manjkajoče vrednosti v številskih atributih
+obravnavajo sami vsi štirje, kategorične atribute pa trije: XGBoost in LightGBM
+jih prejmeta kot kategorični podatkovni tip, CatBoost kot nize. Naključni gozd
+kategoričnih atributov ne sprejme, zato jih kodiramo ordinalno; CatBoost pa ne
+sprejme manjkajoče vrednosti v kategoričnem atributu, zato jo zapišemo kot
+lastno kategorijo. To sta edina posega v vrednosti atributov. Ostali koraki so
+le pretvorbe podatkovnega tipa, ki jih knjižnice zahtevajo; podrobnosti so
+navedene pri posameznih algoritmih v razdelku~\ref{sec:algoritmi}. Da vsak
+korak res potrebujejo, smo preverili s samodejno revizijo, opisano tam.
+
+Pravilo velja za našo kodo. Predobdelava, ki jo knjižnica izvede sama, je del
+algoritma, tudi kadar ni na prvi pogled vidna. TabPFN-3.5 zabeleži, katere
+vrednosti so manjkale, preden jih nadomesti s povprečjem stolpca, in to
+informacijo poda modelu~\cite{jager2026tabpfn35}, paket tabicl pa manjkajoče
+vrednosti nadomesti s povprečjem stolpca brez takega indikatorja
+(podrazdelek~\ref{sec:tabicl}).
+Kadar je že dejstvo, da vrednost manjka, povezano z razredom, ta razlika med
+temeljnima modeloma ni nevtralna. Največ manjkajočih vrednosti ima podatkovna
+množica Medic3 (razdelek~\ref{sec:medic3}), na kateri se politika predobdelave
+zato najbolj pozna.
 
 \section{Izvedbeno okolje}
 \label{sec:okolje}
+% Diplomsko-delo_Koda/CLAUDE.md, Arnes HPC; scripts/run_cc18.sh, run_medic3.sh,
+% run_tuning.sh, run_leakage.sh; src/runner.py (kontrolne točke, ogrevanje,
+% stolpec device). Strojna oprema po učenjih: stolpca device in hostname v results.csv.
 
-\todo{Arnes, H100, SLURM job arrays, micromamba, per-fit checkpointing with atomic \texttt{.partial} files, fail-soft error handling. Fast, descriptive writing. Good warm-up if the algorithms section feels heavy.}
+Vsa učenja glavne primerjave in obeh dodatnih poskusov so tekla na gruči
+Arnes (Akademska in raziskovalna mreža Slovenije), ki opravila razporeja s
+sistemom SLURM; le diagnostiko modela LightGBM v razdelku~\ref{sec:rez-medic3}
+smo izvedli na lokalnih računalnikih.
+% PREVERI: ali je treba gručo Arnes in porabljeni računski čas navesti tudi v
+% zahvali oziroma s posebnim navedkom, kot to zahtevajo pogoji uporabe.
+Glavno primerjavo na zbirki OpenML-CC18 smo izvedli kot polje opravil (angl.
+\emph{job array}), v katerem vsako opravilo obdela eno podatkovno množico, na
+podatkovni množici Medic3 pa vsako opravilo izvede en algoritem, ker bi vseh
+šest algoritmov zaporedoma preseglo časovno omejitev opravila. Opravila so
+tekla na vozliščih z grafično procesno enoto NVIDIA H100 v dveh izvedbah (PCIe
+in SXM); vsako je dobilo osem procesorskih jeder in eno grafično procesno
+enoto, ki sta jo uporabljala le temeljna modela. Poskus uglaševanja modela
+XGBoost, ki grafične procesne enote ne potrebuje, je tekel na procesorskih
+vozliščih z osmimi jedri na opravilo. Programsko okolje (Python~3.12.13 in
+knjižnice iz tabele~\ref{tab:razlicice}) je bilo na gruči enako kot na
+lokalnih računalnikih, na katerih smo kodo razvijali in preizkušali.
+Različice vseh knjižnic smo pripeli na najnovejše stabilne izdaje, ki jih je
+bilo 5.~oktobra 2026 mogoče namestiti skupaj, tako da nobena družina algoritmov
+ni v slabšem položaju zaradi starejše knjižnice.
+
+Opravila tečejo brez povezave z internetom, zato smo podatkovne množice in
+uteži obeh temeljnih modelov pred oddajo opravil prenesli v predpomnilnik na
+gruči. Rezultat vsakega učenja se zapiše takoj, ko je učenje
+končano: opravilo, ki ga razporejevalnik prekine, ob ponovni oddaji nadaljuje
+pri prvem nedokončanem učenju. Napaka posameznega učenja ne ustavi opravila,
+temveč se z razlogom zabeleži v vrstico z rezultatom; algoritem na tej
+podatkovni množici nato prejme najslabši rang (razdelek~\ref{sec:protokol}).
+
+Čas učenja in čas napovedovanja merimo kot pretečeni čas okoli klicev metod za
+učenje in za napovedovanje verjetnosti. Vključuje predobdelavo, ki jo knjižnica
+izvede sama, ne pa naših pretvorb podatkovnega tipa. Ker temeljna modela ob
+učenju ne posodobita uteži, je pri njiju večji del računskega dela v
+napovedovanju. Pri algoritmih na
+grafični procesni enoti vsak proces pred prvim merjenim učenjem izvede eno
+ogrevalno učenje, da prvo merjeno učenje ne vsebuje nalaganja uteži in
+inicializacije grafične procesne enote. Ker so učenja tekla na različnih
+vozliščih in na različni strojni opremi, izmerjeni časi primerjajo kombinacijo
+algoritma in strojne opreme, ne algoritmov samih.
 
 \section{Ponovljivost}
 \label{sec:ponovljivost}
+% Diplomsko-delo_Koda: config.yaml, requirements.txt, results/runs/<zagon>/
+% (manifest.json, results.csv, PROVENANCE.md, sacct.txt). Razlike med ponovitvami:
+% naključni gozd podrazdelek sec:rf; temeljna modela med izvedbama H100:
+% results/runs/cc18_leakage/PROVENANCE.md (TabPFN-3.5 do 9,3e-5, TabICL do 4,4e-3
+% na foldih 0-4); CatBoost na numerai28.6 med vozliščema gwn02 in gwn10 do 2,9e-3
+% (isti PROVENANCE.md); LightGBM na Medic3: CLAUDE.md, Datasets.
 
-\todo{Repo, seeds, pinned versions, PROVENANCE.}
+Koda, nastavitve in rezultati so v javnem repozitoriju
+\url{https://github.com/TilenZrnec/Diplomsko-delo_Koda}. Vsi parametri
+poskusov (semena, število delitev in ponovitev, seznam algoritmov in
+podatkovnih množic, prag nasičenosti, stopnja značilnosti, mreža uglaševanja in
+parametri testa uhajanja) so v eni sami nastavitveni datoteki, iz katere jih
+berejo vsi skripti. Podatkovne množice zbirke OpenML-CC18 so določene z
+identifikatorji OpenML, pripetimi v repozitoriju, različice knjižnic pa v
+datoteki \texttt{requirements.txt}. Vsak zagon ima svojo mapo z rezultati, v
+kateri so zapisani identifikator različice kode v sistemu git, ime vozlišča,
+grafična procesna enota, posnetek nastavitev, celoten seznam nameščenih paketov in
+datoteki z utežmi temeljnih modelov; vsaka vrstica z rezultatom učenja nosi še
+svojo različico kode, vozlišče, napravo in čas. Ob vsakem učenju smo shranili
+tudi napovedane verjetnosti, zato je dodatne metrike mogoče izračunati brez
+ponovnega učenja; zaradi zaupnosti podatkovne množice Medic3 jih hranimo
+zunaj javnega repozitorija. Vse tabele in slike v poglavjih~\ref{ch:podatki}
+in~\ref{ch:rezultati} so ustvarjene s skripti iz teh datotek, vir vsake
+številke pa je naveden v izvorni kodi besedila.
+
+Ponovni zagon na isti strojni opremi da pri drevesnih ansamblih enake
+rezultate z dvema izjemama: pri naključnem gozdu vzporedno napovedovanje
+povzroči razlike na četrti ali peti decimalki (podrazdelek~\ref{sec:rf}), pri
+modelu LightGBM pa se natančne vrednosti razlikujejo, kadar učenje propade, kar
+se zgodi na podatkovni množici Medic3 (razdelek~\ref{sec:rez-medic3}). Med
+različnima izvedbama grafične procesne enote se ROC-AUC temeljnih modelov na
+posameznem učenju razlikuje za največ nekaj tisočink; enako velja za CatBoost
+na največjih podatkovnih množicah, kadar teče na različnih vozliščih. Rezultatov na
+podatkovni množici Medic3 tretja oseba ne more ponoviti, ker podatki niso
+javni.
 
 %=========================================================================
 \chapter{Materiali}
@@ -783,17 +1036,12 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 \chapter{Rezultati}
 \label{ch:rezultati}
 %=========================================================================
-% Vsebina poglavja (samo predstavitev meritev, razlaga gre v poglavje 6):
-%  - Skupna primerjava: povprečni ROC-AUC in povprečni rang po algoritmih.
-%  - Tabela z rezultati po posameznih podatkovnih množicah.
-%  - Statistična značilnost razlik med pari algoritmov.
-%  - Dodatni metriki: točnost in logaritemska izguba.
-%  - Časovna učinkovitost: čas učenja in čas sklepanja.
-%  - Odvisnost uspešnosti od velikosti podatkovne množice in od deleža
-%    kategoričnih atributov.
-%  - Neuspela učenja in njihovi vzroki.
-%  - Popravek predobdelave naključnega gozda in modela XGBoost.
-%  - Podatkovni nabor Medic3.
+% Vsebina poglavja (predstavitev meritev, razlaga gre v poglavje 6): skupna
+% primerjava, statistična značilnost, dodatni metriki, rezultati po podatkovnih
+% množicah (tabela v prilogi), časi, neuspela učenja, TabPFN-3 proti TabPFN-3.5,
+% odvisnost od lastnosti množic, Medic3, nato oba dodatna poskusa (uglaševanje,
+% test uhajanja) z zasnovo in rezultati. Zgodovine razvoja (ponovni zagoni)
+% besedilo ne opisuje; izvor številk je v komentarjih.
 
 % Vse številke v tem poglavju izvirajo iz repozitorija s kodo
 % (Diplomsko-delo_Koda/results/runs; kaj je kateri zagon, pove razdelek
@@ -806,41 +1054,27 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 % generira skript rezultati/generiraj_rezultate.py, ki izpiše tudi številke iz
 % besedila (vir je naveden v komentarju ob odstavku). Prejšnji zagon cc18_v2
 % (TabPFN-3) skript bere iz zgodovine gita, commit 5a14045.
-% OPOMBA: angleške izvirnike statističnih izrazov ob prvi pojavitvi prestavi v
-% razdelek Protokol vrednotenja, ko bo napisan. Naknadni test, Wilcoxonov test
-% predznačenih rangov, ROC-AUC, točnost in logaritemska izguba so že vpeljani v
-% poglavju Sorodni pristopi.
 
 V tem poglavju predstavimo rezultate primerjave šestih algoritmov na
-72 podatkovnih množicah zbirke OpenML-CC18~\cite{bischl2021openml} in na
-podatkovni množici Medic3. Vsak algoritem smo na vsaki podatkovni množici
-ovrednotili s petkratnim stratificiranim prečnim preverjanjem (angl.
-\emph{stratified cross-validation}), ponovljenim trikrat z različnim mešanjem
-primerov. Na vsak par podatkovne množice in algoritma tako pride 15 učenj, na
-zbirki OpenML-CC18 skupaj 6480 učenj. Protokol je podrobneje opisan v
-razdelku~\ref{sec:protokol}. Model TabPFN smo vrednotili v različici TabPFN-3.5
-(razdelek~\ref{sec:tabpfn}), zato ga v tabelah in besedilu tega poglavja
-imenujemo s tem imenom. V tem poglavju meritve zgolj
-predstavimo, njihovo razlago in omejitve pa obravnavamo v
-poglavju~\ref{ch:zakljucek}.
-
-Podatkovno množico imenujemo \emph{nasičena}, če najboljši algoritem na njej
-doseže ROC-AUC vsaj \num{0.995}. Takih je 35 od 72 podatkovnih množic. Ker so
-razlike med algoritmi na nasičenih množicah blizu zgornje meje metrike, vse
-povzetke in statistične teste na zbirki OpenML-CC18 podamo dvakrat: na vseh 72
-podatkovnih množicah in na 37 nenasičenih.
+72 podatkovnih množicah zbirke OpenML-CC18 in na podatkovni množici Medic3
+(poglavje~\ref{ch:podatki}), dobljene po protokolu iz
+razdelka~\ref{sec:protokol}, nato pa še rezultata obeh dodatnih poskusov, ki
+jima zaradi odstopanj od protokola dodamo opis zasnove: uglaševanja modela
+XGBoost in testa uhajanja podatkov. Model TabPFN smo vrednotili v različici
+TabPFN-3.5 (podrazdelek~\ref{sec:tabpfn}), zato ga v tabelah in besedilu tega
+poglavja imenujemo s tem imenom. Meritve v tem poglavju zgolj predstavimo,
+njihovo razlago in omejitve pa obravnavamo v poglavju~\ref{ch:zakljucek}.
+Nasičenih je 35 od 72 podatkovnih množic zbirke OpenML-CC18, zato povzetke in
+teste podamo na vseh 72 in na 37 nenasičenih.
 
 \section{Skupna primerjava}
 \label{sec:rez-skupno}
 % Vir: summary/overall.csv, summary/overall_nonsaturated.csv (cc18_v4/combined)
 
-Tabela~\ref{tab:skupno} povzema uspešnost algoritmov. Za vsako podatkovno
-množico algoritme razvrstimo po povprečnem ROC-AUC čez 15 učenj; najboljši
-prejme rang 1, izenačeni algoritmi si delijo povprečje rangov, algoritem, ki na
-podatkovni množici ni uspel, pa prejme najslabši rang. Povprečni ROC-AUC
-računamo le na podatkovnih množicah, na katerih so uspeli vsi algoritmi, da so
-povprečja izračunana na isti podmnožici. Na zbirki OpenML-CC18 so vsi algoritmi
-uspeli na vseh podatkovnih množicah, zato so povprečja izračunana na vseh.
+Tabela~\ref{tab:skupno} povzema uspešnost algoritmov s povprečnim ROC-AUC,
+povprečnim rangom in številom zmag, izračunanimi po pravilih iz
+razdelka~\ref{sec:protokol}. Na zbirki OpenML-CC18 so vsi algoritmi uspeli na
+vseh podatkovnih množicah, zato so povprečja izračunana na vseh.
 
 \input{rezultati/tab_skupno.tex}
 
@@ -861,23 +1095,13 @@ povprečni ROC-AUC (\num{0.8516} proti \num{0.8511}).
 % Vir: summary/friedman.csv, summary/nemenyi.csv, summary/wilcoxon_holm.csv
 % in njihove različice *_nonsaturated.csv (cc18_v4/combined)
 
-Razlike med algoritmi smo preverili po postopku za primerjavo več
-klasifikatorjev na več podatkovnih množicah, ki ga
-priporoča Demšar~\cite{demsar2006statistical}: s Friedmanovim testom, ki
-preveri ničelno domnevo, da so vsi algoritmi enakovredni, z Nemenyijevim testom
-kot naknadnim testom nad povprečnimi rangi ter s parnimi Wilcoxonovimi testi
-predznačenih rangov s Holmovim popravkom za večkratno primerjanje. Stopnja
-značilnosti je povsod $\alpha = 0{,}05$.
-
-O zavrnitvi ničelne domneve Friedmanovega testa odločimo na podlagi statistike
-$F_F$, ki sta jo predlagala Iman in Davenport in jo Demšar priporoča namesto
-preveč konservativne statistike $\chi^2_F$~\cite{demsar2006statistical}.
-Friedmanov test ničelno domnevo zavrne tako na vseh 72 podatkovnih množicah
+Razlike med algoritmi smo preverili s Friedmanovim testom, Nemenyijevim
+testom in parnimi Wilcoxonovimi testi s Holmovim popravkom
+(podrazdelek~\ref{sec:statistika}). Friedmanov test ničelno domnevo zavrne tako na vseh 72 podatkovnih množicah
 ($\chi^2_F = \num{251.30}$, $F_F = \num{164.15}$ s $(5, 355)$ prostostnimi
 stopnjami, $p = \num{5.1e-90}$) kot na 37 nenasičenih ($\chi^2_F =
 \num{132.43}$, $F_F = \num{90.68}$ s $(5, 180)$ prostostnimi stopnjami, $p =
-\num{2.7e-47}$). Kritična razdalja
-(angl. \emph{critical difference}) Nemenyijevega testa znaša \num{0.889} na vseh
+\num{2.7e-47}$). Kritična razdalja Nemenyijevega testa znaša \num{0.889} na vseh
 in \num{1.240} na nenasičenih podatkovnih množicah; povprečna ranga dveh
 algoritmov, ki se razlikujeta za manj od kritične razdalje, se značilno ne
 razlikujeta. Rezultat prikazujeta diagrama kritične razdalje na
@@ -1110,16 +1334,10 @@ sledijo TabICL (\num{0.9543}), XGBoost (\num{0.9400}), naključni gozd
 (\num{0.8726}) in LightGBM (\num{0.5057}). Standardni odklon čez 15 učenj je
 pri vseh algoritmih največ \num{0.0063}.
 
-Ker gre za eno samo podatkovno množico, testov za primerjavo na več podatkovnih
-množicah ne moremo uporabiti~\cite{demsar2006statistical}. Pare algoritmov smo
-zato primerjali s popravljenim t-testom za ponovljeno prečno
-preverjanje~\cite{bouckaert2004evaluating}, ki pri oceni variance razlik
-upošteva, da se učni deli zaporednih učenj prekrivajo~\cite{nadeau2003inference}.
-Statistika $t = \bar{d} \,/\, \sqrt{(1/k + n_2/n_1)\,\hat{\sigma}^2}$ ima
-$k - 1 = 14$ prostostnih stopenj; pri tem sta $\bar{d}$ in $\hat{\sigma}^2$
-povprečje in vzorčna varianca razlik ROC-AUC čez $k = 15$ učenj, $n_1$ in $n_2$ pa
-velikosti učnega in testnega dela. P-vrednosti smo popravili s Holmovim
-postopkom čez vse pare. Rezultate prikazuje tabela~\ref{tab:medic3-test}.
+Ker gre za eno samo podatkovno množico, smo pare algoritmov primerjali s
+popravljenim t-testom za ponovljeno prečno preverjanje in p-vrednosti popravili
+s Holmovim postopkom čez vse pare (podrazdelek~\ref{sec:statistika}).
+Rezultate prikazuje tabela~\ref{tab:medic3-test}.
 
 \input{rezultati/tab_medic3_test.tex}
 
