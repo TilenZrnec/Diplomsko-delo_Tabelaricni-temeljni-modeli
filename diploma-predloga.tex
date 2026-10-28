@@ -1781,24 +1781,217 @@ poglavju~\ref{ch:zakljucek}.
 \chapter{Diskusija in zaključek}
 \label{ch:zakljucek}
 %=========================================================================
-% Vsebina poglavja:
-%  - Razlaga rezultatov in odgovori na raziskovalna vprašanja iz uvoda.
-%  - Primerjava naših ugotovitev z objavljenimi rezultati.
-%  - Praktična priporočila: kdaj se splača uporabiti temeljni model.
-%  - Omejitve dela (privzeti hiperparametri, omejitve strojne opreme,
-%    zgolj klasifikacija). Metrike: glavna ROC-AUC, dodatni točnost in
-%    logaritemska izguba (sec:metrike); na CC18 se prva tri mesta ne
-%    spremenijo, na Medic3-160 se vrstni red TabPFN-3.5 in CatBoost obrne
-%    (sec:rez-medic3). Visoka log. izguba naključnega gozda: verjetnosti so
-%    deleži dreves, pogosto točno 0 (razloži z virom ali meritvijo).
-%    Sum na uhajanje podatkov (TabPFN-3.5 je zbirko CC18 morda videl med
-%    razvojem) navedemo kot omejitev NE GLEDE NA IZID testa uhajanja
-%    (mentor, 2026-10-20); test zazna le pomnjenje vrednosti, ne posrednega
-%    vpliva (izbira modela na javnih zbirkah).
-%  - Nadaljnje delo: optimizacija hiperparametrov, podatkovni nabor
-%    Medic3, dodatne zbirke za primerjalno vrednotenje.
+% Številke v tem poglavju so povzete iz poglavij 4 in 5 (vir je naveden tam), razen
+% razčlenitve logaritemske izgube naključnega gozda: Diplomsko-delo_Koda/results/
+% runs/cc18_v4/combined/summary/log_loss/logloss_split_report.txt in
+% medic3_160_v2/combined/summary/log_loss/logloss_split_report.txt
+% (scripts/analyze_logloss.py, koda 428167b, izhodi 92b1941; razčlenitev se z
+% metrics.csv ujema do 4,4e-16 oziroma 7,1e-15). Mentor (2026-10-20): sum na
+% uhajanje navedemo kot omejitev ne glede na izid testa.
 
-\todo{Napiši diskusijo in zaključek: razlaga rezultatov, omejitve in nadaljnje delo.}
+V tem poglavju rezultate razložimo, jih primerjamo z objavljenimi in navedemo
+omejitve naloge. Sklenemo z odgovori na raziskovalna vprašanja iz uvoda in z
+možnostmi za nadaljnje delo.
+
+\section{Temeljni modeli in drevesni ansambli}
+\label{sec:disk-cc18}
+
+Na zbirki OpenML-CC18 sta oba tabelarična temeljna modela, uporabljena brez
+kakršnega koli prilagajanja, značilno prekašala vse štiri drevesne ansamble, in
+to po vseh treh metrikah ter tudi na nenasičenih podatkovnih množicah
+(razdelka~\ref{sec:rez-znacilnost} in~\ref{sec:rez-metrike}). Najboljši
+drevesni ansambel je bil boljši od obeh temeljnih modelov le na dveh nasičenih
+množicah. Prednost ni zanemarljiva: na 36 nenasičenih množicah poskusa
+uglaševanja je povprečni ROC-AUC modela TabPFN-3.5 za \num{0.0224} višji od
+CatBoostovega, uglaševanje pa je modelu XGBoost dodalo povprečno \num{0.0141}
+(razdelek~\ref{sec:rez-uglasevanje}).
+
+Ugotovitev se ujema s poročili razvijalcev, ki so prednost temeljnih modelov
+pokazali na drugih zbirkah~\cite{grinsztajn2025tabpfn25,grinsztajn2026tabpfn3,qu2025tabicl},
+in z zbirko TabArena, na kateri so se temeljni modeli najbolje izkazali na
+manjših podatkovnih množicah~\cite{erickson2025tabarena}. Starejše
+primerjave, po katerih drevesni ansambli na množicah srednje velikosti ostajajo
+najboljši~\cite{grinsztajn2022why}, tabelaričnih temeljnih modelov še niso
+vključevale; naši rezultati kažejo, da njihov sklep za temeljne modele ne velja
+več. Prednost tudi ni omejena na majhne množice, za katere je bila paradigma
+prvotno zasnovana: temeljni model je bil boljši od vseh ansamblov na vseh 16
+množicah z več kot \num{10000} primeri, na nenasičenih množicah pa prednost ni
+povezana z nobeno od preučenih lastnosti (razdelek~\ref{sec:rez-lastnosti}).
+Cena se pokaže drugje: oba temeljna modela za smiselno hitrost potrebujeta
+grafično procesno enoto, TabICL pa je na množici CIFAR\_10 porabil 394~GiB
+pomnilnika (razdelek~\ref{sec:rez-pomnilnik}).
+
+Med temeljnima modeloma je bil TabPFN-3.5 značilno boljši od modela TabICL,
+vendar je razlika majhna (mediana absolutne razlike ROC-AUC \num{0.0011}) in
+odvisna od različice modela: s predhodnikom TabPFN-3 je bil vrstni red obrnjen
+(razdelek~\ref{sec:rez-zagona}). Razvrstitev med temeljnima modeloma se je
+torej že ob eni zamenjavi različice obrnila, zato je ne bi posploševali.
+
+Uglaševanje modela XGBoost je zaprlo \SI{38}{\percent} zaostanka za
+TabPFN-3.5 in uglašeni XGBoost izenačilo s privzetim CatBoostom, za kar je
+potreboval več stokrat več računanja od privzetega učenja
+(razdelek~\ref{sec:rez-uglasevanje}). Dobiček je manjši od uglasljivosti
+\num{0.043}, ki jo za XGBoost navajajo Probst in
+sodelavci~\cite{probst2019tunability}. To je pričakovano, saj je njihova
+uglasljivost razlika do najboljše nastavitve na posamezni množici, poiskane s
+\num{100000} naključnimi točkami na nadomestnem modelu, torej zgornja meja, ki
+je postopek z izbiro na notranjih delitvah in omejeno mrežo ne doseže; poleg
+tega so primerjali s privzeto nastavitvijo s 500 drevesi. Drugačen postopek,
+na primer naključno iskanje, ki iskanje po mreži pogosto
+prekaša~\cite{bischl2023hyperparameter}, ali uglaševanje drugih ansamblov bi
+zaostanek morda zmanjšal še bolj. Da bi drevesni ansambel z uglaševanjem
+dohitel temeljna modela, ki ju nismo uglaševali, pa naši rezultati ne kažejo.
+
+\section{Podatkovna množica Medic3}
+\label{sec:disk-medic3}
+
+Na podatkovni množici Medic3 je slika manj enoznačna
+(razdelek~\ref{sec:rez-medic3}). Z vsemi 220 razredi TabPFN-3.5 ni mogel teči,
+najboljši pa je bil CatBoost. Na različici s 160 razredi je bil TabPFN-3.5
+najboljši po ROC-AUC, a le za \num{0.0015} pred CatBoostom, ki je imel značilno
+nižjo logaritemsko izgubo. Metriki merita različno: ROC-AUC v različici OvR
+vsak razred obravnava enakovredno in meri le razvrščanje, logaritemska izguba
+pa povpreči kakovost verjetnosti čez primere, zato nanjo bolj vplivajo pogosti
+razredi in kalibracija (podrazdelek~\ref{sec:metrike}). Pri tako majhnih
+razlikah sta razvrstitvi po obeh metrikah lahko različni. Izrazite prednosti
+temeljnih modelov, kakršno smo izmerili na zbirki OpenML-CC18, na tej
+podatkovni množici torej ni.
+
+TabICL je bil na različici s 160 razredi za \num{0.0071} slabši od modela
+TabPFN-3.5. Ena od mogočih razlag je obravnava manjkajočih vrednosti: paket
+tabicl jih nadomesti s povprečjem stolpca brez indikatorja
+(podrazdelek~\ref{sec:tabicl}), zato model ne vidi, katere vrednosti so
+manjkale, čeprav je to na tej množici močno povezano z razredom
+(razdelek~\ref{sec:medic3}). TabPFN-3.5 to informacijo ohrani, drevesni
+ansambli pa manjkajoče vrednosti obravnavajo sami. Te razlage s poskusom nismo
+preverili.
+
+LightGBM je na obeh različicah propadel, ne da bi knjižnica javila napako. Pri
+gradientnem pospeševanju z aproksimacijo drugega reda je vrednost lista
+$-G/(H + \lambda)$, kjer sta $G$ in $H$ vsoti prvih in drugih odvodov izgube po
+primerih v listu, $\lambda$ pa koeficient L2
+regularizacije~\cite{chen2016xgboost}. Pri večrazredni logaritemski izgubi je
+drugi odvod po izhodu za razred $k$ sorazmeren s $p_k(1 - p_k)$, kjer je $p_k$
+napovedana verjetnost razreda, zato je pri redkih razredih z majhno verjetnostjo
+blizu nič. LightGBM ima privzeto $\lambda = 0$ in najmanjšo vsoto drugih
+odvodov v listu \num{0.001}~\cite{lightgbmdocs}, zato lahko nastanejo listi z
+zelo majhnim imenovalcem in zelo velikimi vrednostmi. To se ujema z izmerjenim
+naraščanjem največje vrednosti lista do reda $10^6$ in z naraščanjem učne
+izgube, prav tako pa z ugotovitvijo, da učenje ustali že ena sama od privzetih
+vrednosti modela XGBoost ($\lambda = 1$ ali najmanjša vsota drugih odvodov 1).
+Razlaga je naša in je v izvorni kodi knjižnice nismo preverili. Zaradi
+protokola s privzetimi nastavitvami propadle vrednosti poročamo kot rezultat
+modela LightGBM; praktični nauk pa je, da privzete nastavitve na množicah z
+veliko redkimi razredi lahko odpovejo tiho in da je treba rezultat preveriti.
+% Odvod p_k(1 - p_k): lastna izpeljava (drugi odvod -log softmax po z_k).
+% lightgbmdocs: lambda_l2 = 0,0, min_sum_hessian_in_leaf = 1e-3 (privzeti vrednosti,
+% preverjeno tudi v nameščeni knjižnici 4.7.0, CLAUDE.md repozitorija s kodo).
+
+\section{Logaritemska izguba naključnega gozda}
+\label{sec:disk-rf}
+
+Naključni gozd ima pri podobni točnosti kot ostali drevesni ansambli izrazito
+najvišjo logaritemsko izgubo (razdelek~\ref{sec:rez-metrike}). Njegova
+napovedana verjetnost je povprečje verjetnosti dreves, verjetnost drevesa pa je
+delež razreda med učnimi primeri v listu~\cite{sklearndocsrf}. S privzetimi
+nastavitvami drevesa
+rastejo, dokler listi niso čisti~\cite{sklearndocsrf}, zato posamezno drevo
+razredu običajno pripiše verjetnost 0 ali 1, gozd pa delež dreves, ki glasujejo
+zanj. Če za pravi razred ne glasuje nobeno drevo, je njegova verjetnost točno 0
+in primer k izgubi prispeva največjo vrednost \num{36.04}
+(podrazdelek~\ref{sec:metrike}). Na zbirki OpenML-CC18 se je to zgodilo le pri
+\SI{0.089}{\percent} testnih primerov (na 47 od 72 množic), ti primeri pa
+prispevajo \SI{23.9}{\percent} povprečne logaritemske izgube naključnega gozda.
+Preostanek razlike izvira iz manjše samozavesti pri pravilnih napovedih:
+pravemu razredu pravilno razvrščenega primera naključni gozd v povprečju
+pripiše verjetnost \num{0.82}, ostali algoritmi od \num{0.89} do \num{0.93}.
+Tudi brez prispevka primerov z verjetnostjo 0 bi bila njegova povprečna izguba
+\num{0.391}, kar je več kot pri ostalih ansamblih (od \num{0.312} do
+\num{0.381}). Na podatkovni množici Medic3 s 160 razredi je verjetnost 0 za
+pravi razred dobilo \SI{6.7}{\percent} testnih primerov, ki prispevajo
+\SI{57.4}{\percent} izgube naključnega gozda.
+
+\section{Omejitve}
+\label{sec:omejitve}
+
+Najpomembnejša omejitev je sum na uhajanje podatkov. Zbirka OpenML-CC18 je
+javna, razvijalci temeljnih modelov pa so med razvojem uporabljali realne
+podatkovne množice (razdelek~\ref{sec:rez-uhajanje}). Naš test je pokazal, da
+TabPFN-3.5 na spremenjenih kopijah množic zbirke izgubi značilno več od
+CatBoosta, na podatkovni množici Medic3 pa ne, kar je skladno s pomnjenjem.
+Učinek je majhen, saj TabPFN-3.5 tudi na kopijah obdrži večino prednosti, test
+pa ima dve slabosti. Referenca je ena sama podatkovna množica, ki se od množic
+zbirke močno razlikuje, in test zazna le pomnjenje vrednosti, ne pa posrednega
+vpliva: model, ki so ga razvijalci izbirali in uglaševali na javnih zbirkah, se
+lahko prilagodi njihovim lastnostim, ne da bi si zapomnil vrednosti. Na to
+nevarnost opozarjajo tudi avtorji zbirke TabArena~\cite{erickson2025tabarena}.
+Rezultatov na zbirki OpenML-CC18 zato ne moremo šteti za povsem neodvisno oceno
+uspešnosti na novih podatkih; podatkovna množica Medic3, ki je modela nista
+mogla videti, je edina taka ocena v nalogi.
+
+Glavna primerjava velja za privzete nastavitve in za predobdelavo, ki jo
+zahtevajo knjižnice; s predobdelavo, prilagojeno posamezni množici, bi se
+razvrstitev lahko spremenila~\cite{tschalzev2024data}. Uglaševali smo le en
+ansambel in le z iskanjem po mreži, katere robovi so izbiro omejevali
+(razdelek~\ref{sec:rez-uglasevanje}). Naloga obravnava le klasifikacijo,
+glavna metrika ROC-AUC v različici OvR pa je občutljiva na neuravnoteženost
+razredov~\cite{sklearndocsroc}; dodatni metriki na zbirki OpenML-CC18 ne
+spremenita prvih treh mest, na podatkovni množici Medic3 s 160 razredi pa
+vrstni red prvih dveh obrneta. Časi primerjajo
+kombinacijo algoritma in strojne opreme, saj sta temeljna modela tekla na
+grafični procesni enoti, ansambli pa na procesorju. Zbirka OpenML-CC18 je
+statična in vsebuje množice, ki njenih meril ne izpolnjujejo
+povsem~\cite{bischl2021openml}, skoraj polovica njenih množic pa je nasičenih.
+Na podatkovni množici Medic3 so sklepi omejeni na eno množico, trikrat
+ponovljeno petkratno prečno preverjanje je manj ponovljivo od
+priporočenega (podrazdelek~\ref{sec:statistika}), izbor 160 razredov pa je le
+eden od mogočih (razdelek~\ref{sec:medic3}).
+
+\section{Sklep}
+\label{sec:sklep}
+
+V nalogi smo tabelarična temeljna modela TabPFN-3.5 in TabICL primerjali s
+štirimi drevesnimi ansambli na 72 podatkovnih množicah zbirke OpenML-CC18 in na
+zaupni podatkovni množici Medic3, vse s privzetimi nastavitvami in z minimalno
+predobdelavo. Na raziskovalna vprašanja iz uvoda odgovorimo takole.
+\begin{enumerate}
+\item Na zbirki OpenML-CC18 sta oba temeljna modela brez uglaševanja značilno
+boljša od vseh štirih drevesnih ansamblov po ROC-AUC, točnosti in logaritemski
+izgubi; najboljši je TabPFN-3.5, med ansambli CatBoost. Prednost ostane tudi na
+množicah, ki so večje od območja, za katero je bila paradigma prvotno
+zasnovana.
+\item Na podatkovni množici Medic3 prednosti ni: TabPFN-3.5 s 160 razredi ostane
+najboljši po ROC-AUC le tesno pred CatBoostom, ki ima nižjo logaritemsko
+izgubo, z vsemi 220 razredi pa TabPFN-3.5 ne more teči in je najboljši CatBoost.
+\item Uglaševanje modela XGBoost z iskanjem po mreži zapre \SI{38}{\percent}
+zaostanka za TabPFN-3.5 in ga izenači s privzetim CatBoostom, za ceno več
+stokrat večjega računanja.
+\item Test uhajanja podatkov je skladen s tem, da si je TabPFN-3.5 del
+vrednosti zbirke OpenML-CC18 zapomnil, vendar je učinek majhen in ne pojasni
+večine njegove prednosti; posrednega vpliva test ne more izključiti.
+\end{enumerate}
+
+Za praktično uporabo iz rezultatov sledi, da je na klasifikacijskih nalogah,
+kakršne so v zbirki OpenML-CC18, temeljni model brez uglaševanja smiselna prva
+izbira, kadar je na voljo grafična procesna enota in licenca dopušča
+predvideno rabo; uteži modela TabPFN-3.5 so na primer na voljo za raziskave in
+vrednotenje, ne pa za komercialno ali produkcijsko
+rabo~\cite{jager2026tabpfn35}. Kadar temeljnega modela ni mogoče uporabiti ali
+ima naloga več razredov, kot jih model sprejme, je bil med privzetimi ansambli
+najboljši CatBoost. Na podatkovnih množicah z veliko redkimi razredi je treba
+rezultate preveriti, saj lahko algoritem s privzetimi nastavitvami odpove, ne
+da bi to javil.
+
+Nadaljnje delo vidimo na treh področjih. Sum na uhajanje podatkov bi lahko
+zanesljiveje preverili na več podatkovnih množicah, ki jih modeli niso mogli
+videti, na primer na zaupnih ali po izidu modela objavljenih množicah.
+Uglaševanje bi lahko razširili na vse ansamble in na naključno iskanje v širšem
+prostoru hiperparametrov. Na podatkovni množici Medic3 bi lahko preverili, ali
+TabICL izboljša indikator manjkajočih vrednosti, in obravnavali vseh 220
+razredov z razširitvami za veliko razredov, kakršne razvijalci ponujajo za
+starejše različice modela TabPFN~\cite{grinsztajn2026tabpfn3}. Primerjavo bi
+bilo smiselno razširiti tudi na regresijo in na novejše zbirke, kot je
+TabArena.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  LITERATURA
