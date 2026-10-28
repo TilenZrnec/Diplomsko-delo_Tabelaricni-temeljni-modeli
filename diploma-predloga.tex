@@ -106,11 +106,39 @@ morda bo zapisal tudi ključno literaturo.}
 % Obsegati morata 100-200 besed in vsebovati: (1) stanje področja in problem,
 % (2) naš pristop, (3) najpomembnejši rezultat.
 
+% Številke so povzete iz poglavij 5 in 6 (vir je naveden tam).
 \newcommand{\tpovzetek}
-{TODO: povzetek napiši na koncu, ko bodo znani vsi rezultati. Obsegati mora med 100 in 200 besed ter zajeti stanje področja in obravnavani problem, naš pristop k njegovemu reševanju ter najpomembnejši rezultat naloge.}
+{Tabelarični temeljni modeli, kot sta TabPFN in TabICL, so predhodno naučeni na
+sintetičnih podatkih in novo nalogo rešijo z učenjem iz konteksta, ne da bi se
+učili na ciljni podatkovni množici. Njihovi razvijalci poročajo, da prekašajo
+uveljavljene ansamble odločitvenih dreves, vendar na zbirkah, ki so jih izbrali
+sami. V nalogi smo modela TabPFN-3.5 in TabICL primerjali z naključnim gozdom,
+XGBoost, LightGBM in CatBoost na 72 podatkovnih množicah zbirke OpenML-CC18 in
+na zaupni bolnišnični podatkovni množici Medic3, vse s privzetimi nastavitvami,
+s trikrat ponovljenim petkratnim prečnim preverjanjem in s statističnimi testi.
+Na zbirki OpenML-CC18 sta oba temeljna modela značilno boljša od vseh ansamblov
+po ROC-AUC, točnosti in logaritemski izgubi, najboljši je TabPFN-3.5.
+Uglaševanje modela XGBoost z iskanjem po mreži zapre 38~\% njegovega
+zaostanka. Test uhajanja podatkov s spremenjenimi kopijami množic je skladen s
+tem, da si je TabPFN-3.5 del zbirke zapomnil, vendar model obdrži večino
+prednosti. Na podatkovni množici Medic3 s 160 razredi je TabPFN-3.5 le tesno
+pred CatBoostom, ki ima nižjo logaritemsko izgubo.}
 
 \newcommand{\tabstract}
-{TODO: write the abstract last, once all results are known. It must contain between 100 and 200 words and cover the state of the art and the problem addressed, our approach to solving it, and the most important result of the thesis.}
+{Tabular foundation models such as TabPFN and TabICL are pretrained on
+synthetic data and solve a new task by in-context learning, without training on
+the target dataset. Their developers report that they outperform established
+decision tree ensembles, but on benchmarks of their own choosing. We compared
+TabPFN-3.5 and TabICL with random forest, XGBoost, LightGBM and CatBoost on the
+72 datasets of the OpenML-CC18 suite and on Medic3, a confidential hospital
+dataset, using default settings, three repetitions of five-fold
+cross-validation and statistical tests. On OpenML-CC18, both foundation models
+are significantly better than all ensembles in ROC-AUC, accuracy and log loss,
+with TabPFN-3.5 ranking first. Tuning XGBoost by grid search closes 38\% of its
+gap. A data leakage test with perturbed copies of the datasets is consistent
+with TabPFN-3.5 having memorised part of the suite, but the model retains most
+of its lead. On Medic3 with 160 classes, TabPFN-3.5 is only narrowly ahead of
+CatBoost, which achieves a lower log loss.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %  VKLJUČITEV NUJNIH ELEMENTOV 2/2
