@@ -237,7 +237,13 @@ klasifikacijskih množicah z do \num{10000} primeri in 500 atributi ter na
 atributi~\cite{grinsztajn2025tabpfn25}. Tehnično poročilo za TabPFN-3 model
 vrednoti na zbirkah TabArena in TALENT ter na lastnih zbirkah z veliko
 primeri, razredi ali atributi, zbirke OpenML-CC18 pa ne
-vključuje~\cite{grinsztajn2026tabpfn3}.
+vključuje~\cite{grinsztajn2026tabpfn3}. Poročilo za njegovo naslednico
+TabPFN-3.5, ki jo uporabljamo v tej nalogi, model vrednoti na sedmih zbirkah,
+med njimi na zbirkah TabArena in TALENT; zbirke OpenML-CC18 med njimi
+ni~\cite{jager2026tabpfn35}.
+% jager2026tabpfn35: tabela 1 (str. 1) našteje sedem zbirk (TabArena, BeyondArena,
+% STRABLE, MulTaBench, RelArena-alfa, TALENT, ScoringBench); niza »CC18« v besedilu
+% ni (preverjeno 2026-10-28 v besedilu PDF arXiv 2609.17895v2, pdftotext).
 
 Vzporedno se razvijajo modeli TabICL. Prvo različico so avtorji ovrednotili na
 200 klasifikacijskih množicah zbirke TALENT, pri čemer so izločili 15 množic,
@@ -245,7 +251,9 @@ ki so jih razvijalci modela TabPFN v2 uporabili pri uglaševanju in izbiri
 modela~\cite{qu2025tabicl}; različico TabICLv2 so ovrednotili na zbirkah
 TabArena in TALENT~\cite{qu2026tabiclv2}. TabPFN-3 in obe različici TabICL so
 predhodno naučeni izključno na sintetičnih
-podatkih~\cite{grinsztajn2026tabpfn3,qu2025tabicl,qu2026tabiclv2}. Drugačno
+podatkih~\cite{grinsztajn2026tabpfn3,qu2025tabicl,qu2026tabiclv2}; za TabPFN-3.5
+poročilo navaja, da tvorjenje sintetičnih podatkov tesno sledi postopku za
+TabPFN-3~\cite{jager2026tabpfn35}. Drugačno
 pot ubere TabDPT, ki je predhodno naučen na 123 realnih podatkovnih množicah s
 platforme OpenML in ovrednoten prav na zbirki OpenML-CC18; avtorji so zato vse
 pare učnih in testnih množic primerjali po metapodatkih in statistikah
@@ -312,7 +320,7 @@ TabDPT~\cite{ma2025tabdpt} & 72 iz OpenML-CC18 & do 30 konfiguracij & ROC-AUC, t
 TabArena~\cite{erickson2025tabarena} & 51 (z regresijskimi) & privzeto; 200 konfiguracij; ansambliranje & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
 TabICLv2~\cite{qu2026tabiclv2} & TabArena, TALENT & po zbirkah & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
 TabPFN-3~\cite{grinsztajn2026tabpfn3} & TabArena, TALENT, lastne zbirke & po zbirkah & po zbirkah; ROC-AUC (OvR) in točnost pri veliko razredih \\
-Ta naloga & 72 iz OpenML-CC18, Medic3 & brez (privzete vrednosti) & ROC-AUC (OvR); točnost, logaritemska izguba \\
+Ta naloga & 72 iz OpenML-CC18, Medic3 & privzete vrednosti; XGBoost tudi 128 konfiguracij & ROC-AUC (OvR); točnost, logaritemska izguba \\
 \hline
 \end{tabular}
 \end{table}
@@ -385,22 +393,33 @@ algoritmov vrednotimo s privzetimi hiperparametri in le s predobdelavo, brez
 katere knjižnica podatkov ne sprejme. Privzete nastavitve vrednoti tudi
 TabArena, vendar kot enega od treh režimov in na drugačnem izboru podatkovnih
 množic~\cite{erickson2025tabarena}; pri nas so privzete nastavitve osrednji
-protokol, ki ustreza uporabi algoritma brez uglaševanja.
-% Ko bo v nalogi razdelek o uglaševanju modela XGBoost (poskus 4, zagon
-% cc18_xgb_tuned), tu dodaj stavek s sklicem nanj.
+protokol, ki ustreza uporabi algoritma brez uglaševanja. Koliko bi drevesni
+ansambel pridobil z uglaševanjem, preverimo z dodatnim poskusom, v katerem
+hiperparametre modela XGBoost izberemo z iskanjem po mreži (angl. \emph{grid
+search}) (razdelek~\ref{sec:rez-uglasevanje}).
 Drugič, oba temeljna modela vrednotimo na celotni zbirki OpenML-CC18, vključno z
 množicami, ki po velikosti presegajo razpon, na katerem sta bila predstavljena.
 Prva različica TabPFN je bila ovrednotena le na 30 manjših množicah te
-zbirke~\cite{hollmann2023tabpfn}, poročilo o TabPFN-3 je ne
-vključuje~\cite{grinsztajn2026tabpfn3}, poročilo o TabICLv2 prav
-tako ne~\cite{qu2026tabiclv2}, za TabPFN-3.5 pa tehničnega poročila v času
-pisanja nismo imeli na voljo (razdelek~\ref{sec:tabpfn}).
+zbirke~\cite{hollmann2023tabpfn}, poročila o TabPFN-3, TabPFN-3.5 in TabICLv2
+pa je ne
+vključujejo~\cite{grinsztajn2026tabpfn3,jager2026tabpfn35,qu2026tabiclv2}.
 % TabICLv2 in TabPFN-3: niz »CC18« se v besedilu poročil ne pojavi (preverjeno
-% 2026-10-15 v besedilu PDF z arXiv).
+% 2026-10-15 v besedilu PDF z arXiv); TabPFN-3.5 enako (2026-10-28, arXiv
+% 2609.17895v2).
 Tretjič, poleg javne zbirke vključimo nejavno podatkovno množico Medic3 s
 \num{122093} primeri in 220 razredi, ki presega razredno omejitev modela
 TabPFN-3.5; ker ni del nobene javne zbirke, je razvijalci modelov pri razvoju
-niso mogli uporabiti. Četrtič, kot glavno metriko uporabljamo ROC-AUC v
+niso mogli uporabiti. Zato nam služi tudi kot referenca v testu, ali temeljna
+modela podatkovne množice zbirke OpenML-CC18 prepoznata po vrednostih, ki sta
+si jih morda zapomnila med razvojem (razdelek~\ref{sec:rez-uhajanje}). Avtorji
+zbirke TabArena ugotavljajo, da za tabelarične temeljne modele še ni postopka,
+ki bi zaznal, ali je model podatke, na katerih ga vrednotimo, videl že med
+razvojem~\cite{erickson2025tabarena}; temu pojavu v nalogi pravimo uhajanje
+podatkov (angl. \emph{data leakage}).
+% erickson2025tabarena, dodatek E.6, str. 55-56: »For tabular foundation models,
+% we currently have no way of detecting contamination« (preverjeno 2026-10-21,
+% results/runs/cc18_leakage/DESIGN.md v repozitoriju s kodo).
+Četrtič, kot glavno metriko uporabljamo ROC-AUC v
 različici OvR, enako kot drugi članek o modelu TabPFN~\cite{hollmann2025tabpfn},
 kot dodatni metriki pa točnost in logaritemsko izgubo; s tem pokrijemo
 metrike, ki v tabeli~\ref{tab:sorodni} prevladujejo, razlike med algoritmi pa
