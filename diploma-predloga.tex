@@ -1608,6 +1608,141 @@ izbrane nastavitve sta v mediani trajala 654-krat (nenasičene množice)
 oziroma 714-krat (nasičene) dlje kot eno učenje privzetega modela na istem
 vozlišču, skupaj \num{197} ur na osmih procesorskih jedrih.
 
+\section{Test uhajanja podatkov}
+\label{sec:rez-uhajanje}
+% Vir: Diplomsko-delo_Koda/results/runs/cc18_leakage: DESIGN.md (vnaprej določena
+% zasnova z viri in stranmi, commitana skupaj s kodo pred zagonom: 6444529, pravilo
+% za referenco 1186a57), PROVENANCE.md (potrdila, preverbe), summary/leakage_tests.csv
+% in leakage_report.txt (scripts/analyze_leakage.py, rezultat 0bdf444); referenca
+% results/runs/medic3_160_leakage. Raziskovalni del: summary/leakage_exploratory*
+% (scripts/explore_leakage.py, koda 428167b, izhodi 92b1941). Tabela tab_uhajanje.tex
+% in izpis generiraj_rezultate.py, razdelek 14.
+
+TabPFN-3.5 je na zbirki OpenML-CC18 najuspešnejši algoritem
+(razdelek~\ref{sec:rez-skupno}). Podatkovne množice zbirke so javne že od leta
+2018, poročilo o modelu TabPFN-3.5 pa navaja, da so pri vrednotenju na zbirki
+TALENT izločili 26 množic, uporabljenih pri razvoju modelov TabPFN-2 in
+TabICLv2~\cite{jager2026tabpfn35}; razvijalci so torej med razvojem
+uporabljali tudi realne podatkovne množice. Postavi se vprašanje, ali je model
+nekatere množice zbirke OpenML-CC18 videl in si zapomnil njihove vrednosti, kar
+bi njegovo uspešnost na njih umetno izboljšalo. To smo preverili s testom,
+katerega zasnovo, parametre in analizo smo zapisali in shranili v repozitorij
+pred prvim zagonom na spremenjenih podatkih.
+
+\subsection{Zasnova}
+
+Test sledi zamisli, ki so jo za velike jezikovne modele uporabili Bordt in
+sodelavci: podatkovno množico spremenimo tako, da se vrednosti spremenijo,
+učni problem pa ostane enak~\cite{bordt2024elephants}. Model, ki napoveduje le
+iz konteksta, ima na spremenjeni kopiji približno enak rezultat, model, ki
+množico prepozna po zapomnjenih vrednostih, pa bi na kopiji izgubil več.
+Bordt in sodelavci so pokazali, da uspešnost jezikovnih modelov ob takih
+spremembah pade na množicah, ki so si jih zapomnili, na novih množicah pa
+ne~\cite{bordt2024elephants}.
+
+Pripravili smo dve spremenjeni kopiji vsake podatkovne množice. V prvi vsak
+številski atribut standardiziramo, $z = (x - \mu)/\sigma$, kjer sta $\mu$ in
+$\sigma$ povprečje in standardni odklon atributa, in ga preslikamo s
+predznačenim kubičnim korenom, $x' = \operatorname{sgn}(z)\,|z|^{1/3}$. To
+strogo naraščajočo preslikavo so za preučevanje tabelaričnih temeljnih modelov
+uporabili Biloš in sodelavci~\cite{bilos2026mechanistic}. V drugi kopiji pred
+korenom prištejemo še šum, $x' = \operatorname{sgn}(z + \varepsilon)\,|z +
+\varepsilon|^{1/3}$, kjer je $\varepsilon$ normalno porazdeljen s standardnim
+odklonom $0{,}1$. Kategorični atributi, manjkajoče vrednosti, razredi in
+delitve ostanejo nespremenjeni. Strogo naraščajoča preslikava ohrani vrstni red
+vrednosti, zato pri modelu TabPFN-3.5 spremeni le standardizirano vrednost
+celice, rang vrednosti v stolpcu pa ostane enak
+(podrazdelek~\ref{sec:tabpfn})~\cite{jager2026tabpfn35}; šum spremeni tudi
+range. Standardizacija pred korenom in velikost šuma sta naša izbira, ki je
+noben vir ne predpisuje.
+% DESIGN.md, točke 3-6: bilos2026mechanistic tabela 7 (str. 16) in dodatek H.1
+% (str. 42); jager2026tabpfn35 razd. 3.1 (str. 9): »midranks are unchanged by any
+% strictly increasing transformation of a column«. Brez standardizacije bi bil koren
+% na atributu daleč od nič skoraj linearen; šum ima varianco 1 % variance atributa,
+% en žreb na množico, seme 42 (config.yaml, razdelek leakage).
+
+Kot kontrolo uporabimo CatBoost. Odločitvena drevesa so za strogo monotone
+preslikave posameznih atributov skoraj neobčutljiva, saj je delitev odvisna le
+od vrstnega reda vrednosti~\cite{galili2016splitting}; Biloš in sodelavci pri
+modelu XGBoost ob tej preslikavi niso izmerili nobene
+spremembe~\cite{bilos2026mechanistic}. Padec CatBoosta tako oceni, koliko
+uspešnosti odvzame že sama sprememba podatkov. Za vsako podatkovno množico
+izračunamo padec ROC-AUC, torej razliko med izvirno in spremenjeno različico
+(povprečje petih delitev), za temeljni model in za CatBoost ter njuno razliko
+\[
+\Delta = \text{padec(temeljni model)} - \text{padec(CatBoost)}.
+\]
+Pozitiven $\Delta$ pomeni, da je temeljni model na kopiji izgubil več od
+kontrole. Ničelno domnevo, da je $\Delta$ porazdeljen simetrično okoli nič,
+preverimo z enostranskim Wilcoxonovim testom predznačenih rangov (alternativna
+domneva $\Delta > 0$) čez podatkovne množice, p-vrednosti obeh kopij pa
+popravimo s Holmovim postopkom znotraj modela, kot so to storili Biloš in
+sodelavci~\cite{bilos2026mechanistic}. Glavni model testa je TabPFN-3.5,
+TabICL je drugotni.
+% Galili in Meilijson str. 2 (citat knjige CART, str. 57) in str. 1 (izjema ob
+% novih vrednostih blizu točke delitve); bilos2026mechanistic dodatek H.5 in H.6
+% (str. 44). Ničle pri Wilcoxonovem testu: zero_method="zsplit".
+
+Značilen $\Delta$ še ne pomeni pomnjenja, saj je model na preslikavo lahko
+splošno občutljiv. Enake kopije smo zato pripravili tudi za podatkovno množico
+Medic3 s 160 razredi, ki je noben temeljni model ni mogel videti. Vnaprej smo
+določili pravilo: značilen rezultat na zbirki OpenML-CC18 je skladen s
+pomnjenjem le, če je $\Delta$ na množici Medic3 značilno manjši od mediane
+$\Delta$ na zbirki, kar preverimo z enostranskim popravljenim t-testom na
+petih delitvah (podrazdelek~\ref{sec:statistika}). Primerjava zapomnjenih in
+novih podatkovnih množic je osrednji del zasnove Bordta in
+sodelavcev~\cite{bordt2024elephants}, samo pravilo pa je naše.
+
+Test smo izvedli na 34 nenasičenih podatkovnih množicah zbirke OpenML-CC18. Od
+37 nenasičenih smo izpustili CIFAR\_10 zaradi računske zahtevnosti ter
+analcatdata\_dmft in connect-4, ki nimata nobenega številskega atributa, zato
+ju preslikava ne spremeni. Uporabili smo prvih pet delitev glavnega protokola,
+zato izvirna različica ponovi rezultate glavne primerjave do razlik zaradi
+strojne opreme (največ \num{0.0044} na posameznem učenju). Vse tri različice
+podatkovne množice so tekle v istem opravilu na istem vozlišču.
+% PROVENANCE.md cc18_leakage, Preverbe: izvirna različica proti cc18_v4/combined
+% (foldi 0-4): TabPFN-3.5 enak v 167/170 (do 9,3e-5), TabICL v 95/170 (do 4,4e-3),
+% CatBoost v 165/170 (numerai28.6 na drugem vozlišču, do 2,9e-3).
+
+\subsection{Rezultati}
+
+\input{rezultati/tab_uhajanje.tex}
+
+Rezultate vnaprej določenega testa povzema tabela~\ref{tab:uhajanje}. Padec
+kontrole ob monotoni preslikavi je bil zanemarljiv (mediana \num{4.4e-7},
+največ \num{0.0014}), CatBoost torej preslikave skoraj ne zazna. TabPFN-3.5 je
+na spremenjenih kopijah izgubil značilno več od CatBoosta: ob monotoni
+preslikavi je bila mediana $\Delta$ \num{0.0026} (pozitiven $\Delta$ na 29 od 34
+množic, $p_\mathrm{Holm} = \num{7.7e-7}$), ob preslikavi s šumom \num{0.0025} (23
+od 34, $p_\mathrm{Holm} = \num{0.011}$). Na množici Medic3 TabPFN-3.5 ni izgubil
+ničesar ($\Delta$ \num{-0.0002} oziroma \num{-0.0004}), kar je značilno manj od
+mediane na zbirki OpenML-CC18. Po vnaprej določenem pravilu je rezultat zato
+skladen s pomnjenjem. TabICL se je ob monotoni preslikavi odzval enako (mediana
+$\Delta$ \num{0.0013}, $p_\mathrm{Holm} = \num{2.8e-6}$, na množici Medic3
+\num{-0.0012}), ob preslikavi s šumom pa je izgubil tudi na množici Medic3
+($\Delta$ \num{0.0059}), zato tam njegovega padca ne moremo ločiti od splošne
+občutljivosti na preslikavo.
+
+Učinek je majhen. Pregled po testu, ki ni bil vnaprej določen, pokaže, da
+TabPFN-3.5 ostane boljši od CatBoosta na 33 od 34 množic ob monotoni preslikavi
+in na 32 ob preslikavi s šumom. Njegova povprečna prednost pred CatBoostom se
+zmanjša z \num{0.0222} na \num{0.0185} oziroma \num{0.0163}, torej obdrži
+\SI{84}{\percent} oziroma \SI{74}{\percent} prvotne prednosti; na množici
+Medic3 je prednost ves čas okoli \num{0.002}. $\Delta$ modela TabPFN-3.5 ob
+monotoni preslikavi je bil večji na množicah, kjer je bila prvotna prednost
+pred CatBoostom večja (Spearmanov koeficient $\rho = \num{0.42}$, $p =
+\num{0.013}$), z velikostjo učne množice pa ni bil povezan ($\rho =
+\num{-0.02}$). Največji je bil na množicah kc1, GesturePhaseSegmentationProcessed
+in kc2 (okoli \num{0.01}). Točnost in logaritemska izguba pokažeta isti vzorec:
+ob monotoni preslikavi je TabPFN-3.5 tudi po teh metrikah izgubil značilno več
+od CatBoosta (točnost $p_\mathrm{Holm} = \num{0.0098}$, logaritemska izguba
+$p_\mathrm{Holm} = \num{3.6e-6}$), na množici Medic3 pa ne.
+
+Sklep testa ni dokaz pomnjenja. Referenca je ena sama podatkovna množica, ki
+se od množic zbirke OpenML-CC18 močno razlikuje, test pa ne zazna posrednega
+vpliva, na primer izbire modela na javnih zbirkah. Obe omejitvi obravnavamo v
+poglavju~\ref{ch:zakljucek}.
+
 %=========================================================================
 \chapter{Diskusija in zaključek}
 \label{ch:zakljucek}

@@ -1,0 +1,19 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_leakage/summary/leakage_tests.csv (scripts/analyze_leakage.py, vnaprej določena analiza; referenca medic3_160_leakage). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Test uhajanja podatkov na 34 nenasičenih podatkovnih množicah zbirke OpenML-CC18. $\Delta$ je padec ROC-AUC temeljnega modela na spremenjeni kopiji, zmanjšan za padec CatBoosta; $p_\mathrm{Holm}$ je p-vrednost enostranskega Wilcoxonovega testa ($\Delta > 0$) s Holmovim popravkom znotraj modela. Zadnja stolpca: $\Delta$ na podatkovni množici Medic3 s 160 razredi in p-vrednost enostranskega popravljenega t-testa, da je manjši od mediane $\Delta$ na zbirki OpenML-CC18. Zadnji stolpec pove, ali je rezultat po vnaprej določenem pravilu skladen s pomnjenjem (značilni sta obe p-vrednosti); pri »ne« ga ne moremo ločiti od splošne občutljivosti modela na preslikavo.}
+\label{tab:uhajanje}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrlrlc}
+\hline
+ & & \multicolumn{3}{c}{OpenML-CC18} & \multicolumn{2}{c}{Medic3} & \\
+Model & Preslikava & mediana $\Delta$ & $\Delta > 0$ & $p_\mathrm{Holm}$ & $\Delta$ & $p$ & Skladno \\
+\hline
+TabPFN-3.5 & monotona & \num{0.0026} & 29/34 & \num{7.7e-07} & \num{-0.0002} & \num{7.7e-06} & da \\
+TabPFN-3.5 & s šumom & \num{0.0025} & 23/34 & \num{0.0108} & \num{-0.0004} & \num{6.3e-04} & da \\
+TabICL & monotona & \num{0.0013} & 27/34 & \num{2.8e-06} & \num{-0.0012} & \num{8.0e-04} & da \\
+TabICL & s šumom & \num{0.0028} & 23/34 & \num{0.0098} & \num{0.0059} & \num{0.9982} & ne \\
+\hline
+\end{tabular}
+\end{table}

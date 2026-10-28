@@ -562,3 +562,36 @@ print('uglaseni - privzeti: najvecji', d.sort_values().tail(4).round(4).to_dict(
 print('uglaseni pred TabPFN-3.5:', (tpd.xgboost_tuned - tpd.tabpfn)[tpd.xgboost_tuned > tpd.tabpfn].round(5).to_dict(),
       'nasicena:', tpd.saturated[tpd.xgboost_tuned > tpd.tabpfn].to_dict())
 print(open(TU + '/tuning_report.txt', encoding='utf-8').read())
+
+# 14. Test uhajanja (zagona cc18_leakage in medic3_160_leakage) ------------------------------
+# Vnaprej določena analiza: summary/leakage_tests.csv (scripts/analyze_leakage.py, koda
+# 1186a57, rezultat 0bdf444; zasnova DESIGN.md). Raziskovalni del (post hoc):
+# summary/leakage_exploratory*.csv (scripts/explore_leakage.py, koda 428167b, izhodi 92b1941).
+LK = RUNS + '/cc18_leakage/summary'
+lt = pd.read_csv(LK + '/leakage_tests.csv')
+ARM = {'monotone': 'monotona', 'monotone_noise': 's šumom'}
+SKLEP = {True: 'da', False: 'ne'}
+t = src([LK + '/leakage_tests.csv'], what='scripts/analyze_leakage.py, vnaprej določena analiza; '
+        'referenca medic3_160_leakage')
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Test uhajanja podatkov na """ + str(int(lt.n.iloc[0])) + r""" nenasičenih podatkovnih množicah zbirke OpenML-CC18. $\Delta$ je padec ROC-AUC temeljnega modela na spremenjeni kopiji, zmanjšan za padec CatBoosta; $p_\mathrm{Holm}$ je p-vrednost enostranskega Wilcoxonovega testa ($\Delta > 0$) s Holmovim popravkom znotraj modela. Zadnja stolpca: $\Delta$ na podatkovni množici Medic3 s 160 razredi in p-vrednost enostranskega popravljenega t-testa, da je manjši od mediane $\Delta$ na zbirki OpenML-CC18. Zadnji stolpec pove, ali je rezultat po vnaprej določenem pravilu skladen s pomnjenjem (značilni sta obe p-vrednosti); pri »ne« ga ne moremo ločiti od splošne občutljivosti modela na preslikavo.}
+\label{tab:uhajanje}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llrrlrlc}
+\hline
+ & & \multicolumn{3}{c}{OpenML-CC18} & \multicolumn{2}{c}{Medic3} & \\
+Model & Preslikava & mediana $\Delta$ & $\Delta > 0$ & $p_\mathrm{Holm}$ & $\Delta$ & $p$ & Skladno \\
+\hline
+"""
+for _, r in lt.iterrows():
+    consistent = bool(r.significant) and r.reference_p_below_median < 0.05
+    t += (f"{IME[r.model]} & {ARM[r.arm]} & {n(r.median_delta)} & {int(r.n_positive)}/{int(r.n)} & {e(r.p_holm)} & "
+          f"{n(r.reference_delta)} & {e(r.reference_p_below_median)} & {SKLEP[consistent]} \\\\\n")
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_uhajanje.tex', t)
+
+print('== Test uhajanja ==')
+print(open(LK + '/leakage_report.txt', encoding='utf-8').read())
+print(open(LK + '/leakage_exploratory_report.txt', encoding='utf-8').read())
