@@ -947,7 +947,7 @@ Ker je izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri
 drugi algoritmi so vključeni v primerjavo~\cite{benavoli2016should}, vsak par
 algoritmov primerjamo še z Wilcoxonovim testom predznačenih rangov na
 povprečjih po podatkovnih množicah, p-vrednosti vseh parov pa popravimo s
-Holmovim postopkom za večkratno primerjanje~\cite{demsar2006statistical}.
+Holmovim popravkom za večkratno primerjanje~\cite{demsar2006statistical}.
 Stopnja značilnosti je povsod $\alpha = 0{,}05$.
 
 Na eni sami podatkovni množici (Medic3) testov čez več množic ne moremo
@@ -962,7 +962,7 @@ t = \frac{\bar{d}}{\sqrt{\left(1/k + n_2/n_1\right)\hat{\sigma}^2}}
 ima $k - 1 = 14$ prostostnih stopenj; pri tem sta $\bar{d}$ in $\hat{\sigma}^2$
 povprečje in vzorčna varianca razlik metrike čez $k = 15$ učenj, $n_1$ in $n_2$
 pa velikosti učnega in testnega dela. P-vrednosti popravimo s Holmovim
-postopkom čez vse pare. Bouckaert in Frank za najboljšo ponovljivost testa
+popravkom čez vse pare. Bouckaert in Frank za najboljšo ponovljivost testa
 priporočata desetkrat ponovljeno desetkratno prečno
 preverjanje~\cite{bouckaert2004evaluating}; naše trikrat ponovljeno petkratno
 preverjanje je veljavna, a manj ponovljiva izbira.
@@ -1495,7 +1495,7 @@ ROC-AUC med boljšim od obeh temeljnih modelov in najboljšim drevesnim
 ansamblom. S Spearmanovim koeficientom korelacije smo jo povezali s petimi
 lastnostmi iz tabele~\ref{tab:cc18-opis} (številom primerov, atributov in
 razredov, deležem kategoričnih atributov in deležem manjkajočih vrednosti) in
-p-vrednosti popravili s Holmovim postopkom. Na 37 nenasičenih množicah
+p-vrednosti popravili s Holmovim popravkom. Na 37 nenasičenih množicah
 prednost z nobeno lastnostjo ni značilno povezana (največja absolutna vrednost
 koeficienta je \num{0.16}, vse popravljene p-vrednosti so 1). Na vseh 72
 množicah je značilna le negativna povezava s številom razredov ($\rho =
@@ -1551,7 +1551,7 @@ pri vseh algoritmih največ \num{0.0063}.
 
 Ker gre za eno samo podatkovno množico, smo pare algoritmov primerjali s
 popravljenim t-testom za ponovljeno prečno preverjanje in p-vrednosti popravili
-s Holmovim postopkom čez vse pare (podrazdelek~\ref{sec:statistika}).
+s Holmovim popravkom čez vse pare (podrazdelek~\ref{sec:statistika}).
 Rezultate prikazuje tabela~\ref{tab:medic3-test}.
 
 \input{rezultati/tab_medic3_test.tex}
@@ -1802,7 +1802,7 @@ Pozitiven $\Delta$ pomeni, da je temeljni model na kopiji izgubil več od
 kontrole. Ničelno domnevo, da je $\Delta$ porazdeljen simetrično okoli nič,
 preverimo z enostranskim Wilcoxonovim testom predznačenih rangov (alternativna
 domneva $\Delta > 0$) čez podatkovne množice, p-vrednosti obeh kopij pa
-popravimo s Holmovim postopkom znotraj modela, kot so to storili Biloš in
+popravimo s Holmovim popravkom znotraj modela, kot so to storili Biloš in
 sodelavci~\cite{bilos2026mechanistic}. Glavni model testa je TabPFN-3.5,
 TabICL je drugotni.
 % Galili in Meilijson str. 2 (citat knjige CART, str. 57) in str. 1 (izjema ob
