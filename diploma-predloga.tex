@@ -157,18 +157,18 @@ CatBoost, which achieves a lower log loss.}
 \chapter{Uvod}
 \label{ch:uvod}
 %=========================================================================
-% Angleški izvirniki ključnih izrazov so navedeni tu, ob njihovi prvi pojavitvi; v
-% poglavjih 2 in 4 so zato odstranjeni. Raziskovalna vprašanja RV1-RV4 so odgovorjena
+% Angleški izvirnik navajamo ob prvi pojavitvi le za izraze, katerih slovenski
+% prevod ni ustaljen (npr. temeljni modeli, učenje iz konteksta, uhajanje podatkov).
+% Ustaljenim izrazom (strojno učenje, naključni gozd, točnost, prečno preverjanje ...)
+% ga namenoma ne dodajamo (odločitev 2026-11-04). Raziskovalna vprašanja RV1-RV4 so odgovorjena
 % v razdelku sec:sklep.
 
 Na tabelaričnih podatkih (angl. \emph{tabular data}), v katerih vrstice
 predstavljajo primere, stolpci pa njihove atribute, so v strojnem učenju
-(angl. \emph{machine learning}) dolgo prevladovali ansambli odločitvenih dreves
-(angl. \emph{decision tree ensembles}), kot sta naključni gozd (angl.
-\emph{random forest}) in gradientno pospeševanje (angl. \emph{gradient
-boosting}). Primerjalne študije so večkrat
+dolgo prevladovali ansambli odločitvenih dreves, kot sta naključni gozd in
+gradientno pospeševanje. Primerjalne študije so večkrat
 pokazale, da na tabelaričnih podatkih večinoma prekašajo tudi modele globokega
-učenja (angl. \emph{deep learning}), zasnovane posebej za take
+učenja, zasnovane posebej za take
 podatke~\cite{borisov2024deep,grinsztajn2022why,shwartzziv2022tabular}.
 
 Na področju besedila in slik so se medtem uveljavili temeljni modeli (angl.
@@ -181,8 +181,7 @@ rešijo z učenjem iz konteksta (angl. \emph{in-context learning}): učne primer
 prejmejo kot del vhoda in napovedi za testne primere vrnejo brez kakršne koli
 posodobitve uteži~\cite{hollmann2025tabpfn,qu2025tabicl}. Razvijalci modela
 TabPFN-3 poročajo, da en sam prehod modela na zbirki TabArena prekaša vse druge
-modele, tudi tiste z uglaševanjem hiperparametrov (angl. \emph{hyperparameter
-tuning})~\cite{grinsztajn2026tabpfn3}. Če to velja splošno, model, ki se ciljne
+modele, tudi tiste z uglaševanjem hiperparametrov~\cite{grinsztajn2026tabpfn3}. Če to velja splošno, model, ki se ciljne
 podatkovne množice sploh ne uči, prekaša algoritme, ki so na tabelaričnih
 podatkih desetletja veljali za najboljše.
 
@@ -256,7 +255,7 @@ v čem se naša primerjava razlikuje od objavljenih.
 \label{sec:sor-drevesa}
 
 Obsežna primerjava 179 klasifikatorjev iz 17 družin na 121 podatkovnih
-množicah je za najuspešnejšo družino po točnosti (angl. \emph{accuracy})
+množicah je za najuspešnejšo družino po točnosti
 razglasila naključne gozdove~\cite{fernandez2014we}. Poznejši odziv je
 pokazal, da so rezultati te študije pristranski, ker ni uporabila ločene
 testne množice in je izpustila poskuse, ki so se končali z napako; po lastnih
@@ -438,7 +437,7 @@ uporabljajo ROC-AUC, pri klasifikaciji z več razredi logaritemsko izgubo
 (angl. \emph{log
 loss})~\cite{gijsbers2024amlb,erickson2025tabarena,qu2026tabiclv2}. Avtorji
 zbirke AutoML Benchmark izrecno opozarjajo, da ROC-AUC ni občutljiv na
-kalibracijo (angl. \emph{calibration}) napovedanih
+kalibracijo napovedanih
 verjetnosti~\cite{gijsbers2024amlb}. Logaritemska
 izguba je nasprotno pravilno pravilo točkovanja (angl. \emph{proper scoring
 rule}): njena pričakovana vrednost je najmanjša, kadar napovedana porazdelitev
@@ -458,12 +457,11 @@ algoritme razvršča z oceno Elo~\cite{erickson2025tabarena}, poročili o modeli
 TabPFN-3 in TabICLv2 pa dodajata izboljšljivost (angl. \emph{improvability}),
 ki meri relativno zaostajanje za najboljšim
 modelom~\cite{grinsztajn2026tabpfn3,qu2026tabiclv2}. Prva različica TabPFN poroča povprečne
-range in parne Wilcoxonove teste predznačenih rangov (angl. \emph{Wilcoxon
-signed-rank test}) s Holmovim popravkom~\cite{hollmann2023tabpfn},
+range in parne Wilcoxonove teste predznačenih rangov s Holmovim popravkom~\cite{hollmann2023tabpfn},
 TabICL pa povprečne range s statističnimi testi nad njimi~\cite{qu2025tabicl}.
 
 Za statistično primerjavo več algoritmov na več podatkovnih množicah Demšar
-priporoča Friedmanov test z naknadnim testom (angl. \emph{post-hoc test}) nad
+priporoča Friedmanov test z naknadnim testom nad
 povprečnimi rangi~\cite{demsar2006statistical}. Benavoli in sodelavci so pokazali, da je
 izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri drugi
 algoritmi so vključeni v primerjavo, in zato predlagajo parne teste, katerih
@@ -487,8 +485,7 @@ TabArena, vendar kot enega od treh režimov in na drugačnem izboru podatkovnih
 množic~\cite{erickson2025tabarena}; pri nas so privzete nastavitve osrednji
 protokol, ki ustreza uporabi algoritma brez uglaševanja. Koliko bi drevesni
 ansambel pridobil z uglaševanjem, preverimo z dodatnim poskusom, v katerem
-hiperparametre modela XGBoost izberemo z iskanjem po mreži (angl. \emph{grid
-search}) (razdelek~\ref{sec:rez-uglasevanje}).
+hiperparametre modela XGBoost izberemo z iskanjem po mreži (razdelek~\ref{sec:rez-uglasevanje}).
 Drugič, oba temeljna modela vrednotimo na celotni zbirki OpenML-CC18, vključno z
 množicami, ki po velikosti presegajo razpon, na katerem sta bila predstavljena.
 Prva različica TabPFN je bila ovrednotena le na 30 manjših množicah te
@@ -809,8 +806,7 @@ tem ustavita, obravnavamo v poglavju~\ref{ch:rezultati}.
 % src/data.py (RepeatedStratifiedKFold) in src/runner.py.
 
 Vsak algoritem smo na vsaki podatkovni množici ovrednotili s petkratnim
-stratificiranim prečnim preverjanjem (angl. \emph{stratified
-cross-validation}). Podatkovno množico razdelimo na pet približno enako velikih
+stratificiranim prečnim preverjanjem. Podatkovno množico razdelimo na pet približno enako velikih
 delov, v katerih je razmerje med razredi enako kot v celotni množici; vsak del
 enkrat služi kot testni del, preostali štirje skupaj pa kot učni del. Postopek
 trikrat ponovimo z različnim naključnim mešanjem primerov, zato na vsak par
@@ -1649,8 +1645,7 @@ zagonom in je med poskusom nismo spreminjali.
 
 Če bi nastavitev izbrali na istih testnih delih, na katerih poročamo
 uspešnost, bi bila ocena optimistično pristranska~\cite{cawley2010over,varma2006bias},
-zato smo uporabili gnezdeno prečno preverjanje (angl. \emph{nested
-cross-validation}). Zunanje delitve so iste kot v glavnem protokolu, zato je
+zato smo uporabili gnezdeno prečno preverjanje. Zunanje delitve so iste kot v glavnem protokolu, zato je
 uglašeni XGBoost neposredno primerljiv z ostalimi algoritmi. Na učnem delu
 vsake zunanje delitve vseh 128 nastavitev ovrednotimo s trikratnim
 stratificiranim prečnim preverjanjem. Nastavitev z najvišjim povprečnim

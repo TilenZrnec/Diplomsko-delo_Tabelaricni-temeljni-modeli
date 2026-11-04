@@ -20,6 +20,10 @@ ne opozori posebej.
   učenje* proti *machine learning*). Angleški izvirnik navedemo ob **prvi**
   pojavitvi v obliki `strojno učenje (angl. machine learning)`, nato dosledno le
   slovenski izraz.
+  **Le za izraze, katerih slovenski prevod ni ustaljen** (npr. temeljni modeli,
+  učenje iz konteksta, uhajanje podatkov). Ustaljenim izrazom (strojno učenje,
+  naključni gozd, točnost, prečno preverjanje, iskanje po mreži ...) ga ne
+  dodajamo, ker preveč prevodov moti branje (uporabnik, 2026-11-04).
 - **Ista ugotovitev na več mestih, na različnih ravneh podrobnosti:**
   visokonivojsko v povzetku, motivacijsko v uvodu, tehnično v jedru, sintetično
   v zaključku. To ni podvajanje, ampak zahtevana struktura.
