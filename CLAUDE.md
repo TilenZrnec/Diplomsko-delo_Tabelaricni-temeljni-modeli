@@ -1,7 +1,7 @@
 # Diplomsko delo — besedilo (FRI)
 
 Repozitorij vsebuje besedilo diplomske naloge v LaTeXu (uradna predloga FRI):
-`diploma-predloga.tex`, viri v `literatura.bib`, slike v `slike/`, predloga in
+`diplomsko-delo.tex`, viri v `literatura.bib`, slike v `slike/`, predloga in
 naslovne strani v `podporno/`. Koda in eksperimenti so v ločenem repozitoriju
 `../Diplomsko-delo_Koda` (glej njegov `CLAUDE.md`).
 
