@@ -363,24 +363,75 @@ učenje sintetično.
 \section{Zbirke in protokoli vrednotenja}
 \label{sec:sor-zbirke}
 
-Zbirka OpenML-CC18 združuje 72 klasifikacijskih podatkovnih množic, izbranih po
-vnaprej določenih merilih~\cite{bischl2021openml}; podrobneje jo opišemo v
-razdelku~\ref{sec:cc18}. AutoML Benchmark obsega 71 klasifikacijskih in 33
-regresijskih nalog~\cite{gijsbers2024amlb}. TabArena je zasnovana kot živa
-zbirka, ki jo skrbniki sproti dopolnjujejo: avtorji so ročno izbrali 51
-podatkovnih množic in vsak model ovrednotili v treh režimih: s privzetimi
-hiperparametri, z uglaševanjem prek 200 naključnih konfiguracij in z naknadnim
-ansambliranjem konfiguracij~\cite{erickson2025tabarena}. V režimu z
-uglaševanjem je bil najboljši CatBoost, po naknadnem ansambliranju so ga
-prehiteli nevronski mreži TabM in RealMLP ter LightGBM, temeljni modeli pa so
-se najbolje izkazali na
-manjših podatkovnih množicah; TabICL in TabDPT so ovrednotili le s privzetimi
-nastavitvami, ker njuni avtorji uglaševanja ne
-predvidevajo~\cite{erickson2025tabarena}.
+Izid primerjave ni odvisen le od algoritmov, temveč tudi od protokola
+vrednotenja. Protokol sestavljajo štiri odločitve: na katerih podatkovnih
+množicah algoritme vrednotimo, kako uglasimo primerjalne modele, s katerimi
+metrikami merimo uspešnost ter kako rezultate združimo čez podatkovne množice
+in preverimo značilnost razlik. V tem razdelku jih obravnavamo v tem vrstnem
+redu, tabela~\ref{tab:sorodni} pa jih povzema za primerjave iz
+razdelkov~\ref{sec:sor-drevesa} in~\ref{sec:sor-temeljni}.
 
-Tabela~\ref{tab:sorodni} povzema, na katerih podatkovnih množicah, s kakšnim
-uglaševanjem primerjalnih modelov in s katerimi metrikami so bile zasnovane
-opisane primerjave. Ploščino pod krivuljo ROC (angl. \emph{area under the
+Podatkovne množice običajno vzamemo iz ene od javnih zbirk za primerjalno
+vrednotenje. Zbirke se razlikujejo po velikosti, po načinu izbora množic in po
+tem, ali se po objavi še spreminjajo; opišemo jih po vrstnem redu nastanka.
+Zbirko OpenML-CC18 sestavlja 72 klasifikacijskih nalog s platforme OpenML.
+Avtorji so vanjo uvrstili vse množice, ki izpolnjujejo vnaprej določena merila
+o velikosti, razredih in naravi podatkov~\cite{bischl2021openml}; podrobneje
+jo opišemo v razdelku~\ref{sec:cc18}. AutoML Benchmark obsega 71
+klasifikacijskih in 33 regresijskih nalog, izbranih iz starejših člankov o
+sistemih AutoML, s tekmovanj in iz drugih zbirk, med njimi iz zbirke
+OpenML-CC18. Tudi tu so merila določena vnaprej: naloge morajo biti dovolj
+težke, da ločijo med sistemi, izvirati morajo iz resničnih problemov z
+raznolikih področij in ne smejo vsebovati atributov s prostim besedilom,
+časovne odvisnosti ali ponovljenih meritev~\cite{gijsbers2024amlb}. Zbirka
+TALENT združuje več kot 300 klasifikacijskih in regresijskih množic iz virov
+UCI, OpenML in Kaggle. Avtorji so jo namenoma sestavili z ohlapnimi pravili,
+ki izločijo le premajhne, trivialne ali očitno pomanjkljive množice, da bi
+zajeli čim širši nabor nalog~\cite{ye2024closer}. TabArena je zasnovana kot
+živa zbirka, ki jo skrbniki sproti dopolnjujejo. Avtorji so pregledali 1053
+množic iz 14 starejših zbirk in med njimi ročno izbrali 51. Vsaka izbrana
+množica izvira iz resnične napovedne naloge na tabelaričnih podatkih, njeni
+primeri so neodvisni in enako porazdeljeni, učni del pa ima od 500 do
+\num{250000} primerov~\cite{erickson2025tabarena}. Novejša poročila o
+temeljnih modelih uporabljajo predvsem zbirki TALENT in TabArena
+(razdelek~\ref{sec:sor-temeljni}).
+% gijsbers2024amlb razd. 5.1.1, str. 14 (izvor množic in merila: difficulty,
+% real-world, no free-form text, diversity, i.i.d.); ye2024closer v4 razd. 4.1-4.2,
+% str. 10 (UCI, OpenML, Kaggle; »relatively weak filtering rules«: N < 500 ali
+% d < 5, > 20 % manjkajočih, trivialne naloge, duplikati); erickson2025tabarena
+% str. 2 (1053 -> 51) in razd. 2.2, str. 4 (14 zbirk, merila 1-10).
+% Vse preverjeno v PDF 2026-11-05.
+
+Javne zbirke imajo tudi slabosti. Statične zbirke ostanejo nespremenjene, tudi
+ko se v njih odkrijejo napake~\cite{erickson2025tabarena}; tudi avtorji zbirke
+OpenML-CC18 sami navajajo nekaj množic, ki njenih meril ne izpolnjujejo
+povsem~\cite{bischl2021openml}. Poleg tega množic iz široko uporabljane zbirke
+ni mogoče šteti za neznane, ker jih razvijalci uporabljajo pri postopnem
+izboljševanju svojih sistemov. Avtorji zbirke AutoML Benchmark ugotavljajo, da
+bi se temu izognili le z novimi množicami, ki pa po objavi postanejo enako
+dostopne, zasebne množice pa onemogočijo neodvisno ponovitev
+primerjave~\cite{gijsbers2024amlb}.
+% gijsbers2024amlb razd. 5.4 »Overfitting the Benchmark«, str. 20: »these data
+% sets can in general not be assumed to be truly unseen« (preverjeno 2026-11-05).
+
+Druga odločitev je uglaševanje primerjalnih modelov. Proračun zanj se med
+študijami močno razlikuje: od največ 30 konfiguracij~\cite{mcelfresh2023neural}
+in 100 konfiguracij~\cite{ye2024closer} do časovnih proračunov od 30~s do 4~h v
+člankih o modelu TabPFN~\cite{hollmann2023tabpfn,hollmann2025tabpfn}. Kako
+močno je izid primerjave odvisen od uglaševanja, kaže TabArena, ki vsak model
+ovrednoti v treh režimih: s privzetimi hiperparametri, z uglaševanjem prek 200
+naključnih konfiguracij in z naknadnim ansambliranjem konfiguracij. V režimu z
+uglaševanjem je bil najboljši CatBoost, po naknadnem ansambliranju pa so ga
+prehiteli nevronski mreži TabM in RealMLP ter LightGBM. Temeljni modeli so se
+najbolje izkazali na manjših podatkovnih množicah; TabICL in TabDPT so
+ovrednotili le s privzetimi nastavitvami, ker njuni avtorji uglaševanja ne
+predvidevajo~\cite{erickson2025tabarena}. Na izid vpliva tudi predobdelava.
+Tschalzev in sodelavci so pokazali, da so primerjave s poenoteno predobdelavo
+podatkov pristranske: po predobdelavi, prilagojeni posamezni podatkovni
+množici, se rangi modelov znatno spremenijo, razlike med njimi pa
+zmanjšajo~\cite{tschalzev2024data}.
+
+Tretja odločitev je metrika. Ploščino pod krivuljo ROC (angl. \emph{area under the
 receiver operating characteristic curve}, ROC-AUC) je pri več razredih mogoče
 posplošiti na dva načina: kot povprečje čez vse pare razredov, ki ga
 imenujemo en proti enemu (angl. \emph{one-vs-one}, OvO)~\cite{hand2001simple},
@@ -388,7 +439,8 @@ ali kot povprečje čez razrede, pri katerem vsak razred primerjamo z vsemi
 ostalimi, kar imenujemo en proti ostalim (angl. \emph{one-vs-rest},
 OvR)~\cite{fawcett2006introduction}.
 
-Tabela pokaže, da je izbira metrike odvisna predvsem od izvora študije.
+Izbira metrike je odvisna predvsem od izvora študije
+(tabela~\ref{tab:sorodni}).
 Primerjave globokega učenja z drevesnimi ansambli kot glavno metriko večinoma
 uporabljajo točnost~\cite{grinsztajn2022why,mcelfresh2023neural,ye2024closer}.
 Članka o modelu TabPFN uporabljata ROC-AUC, prvi v različici
@@ -457,7 +509,7 @@ Ta naloga & 72 iz OpenML-CC18, Medic3 & privzete vrednosti; XGBoost tudi 128 kon
 % razd. 5; grinsztajn2026tabpfn3 (Elo, izboljšljivost; ROC-AUC OvR in točnost
 % na sintetični zbirki z veliko razredi). Štetje množic poenoteno 2026-11-05.
 
-Razlikuje se tudi združevanje rezultatov čez podatkovne množice. Nekateri
+Četrta odločitev je združevanje rezultatov čez podatkovne množice. Nekateri
 avtorji metriko na vsaki množici normirajo na interval med najslabšim in
 najboljšim algoritmom~\cite{hollmann2025tabpfn}, Grinsztajn in sodelavci pa
 namesto najslabšega algoritma uporabijo 10-odstotni kvantil napake, da
@@ -472,20 +524,14 @@ modelom~\cite{grinsztajn2026tabpfn3,qu2026tabiclv2}. Prva različica TabPFN poro
 range in parne Wilcoxonove teste predznačenih rangov s Holmovim popravkom~\cite{hollmann2023tabpfn},
 TabICL pa povprečne range s statističnimi testi nad njimi~\cite{qu2025tabicl}.
 
-Za statistično primerjavo več algoritmov na več podatkovnih množicah Demšar
+Za preverjanje, ali so razlike med več algoritmi na več podatkovnih množicah
+značilne, Demšar
 priporoča Friedmanov test z naknadnim testom nad
 povprečnimi rangi~\cite{demsar2006statistical}. Benavoli in sodelavci so pokazali, da je
 izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri drugi
 algoritmi so vključeni v primerjavo, in zato predlagajo parne teste, katerih
 izid je odvisen le od obeh primerjanih algoritmov, na primer Wilcoxonov test
-predznačenih rangov~\cite{benavoli2016should}. Tschalzev in sodelavci so pokazali, da so
-primerjave s poenoteno predobdelavo podatkov pristranske: po predobdelavi,
-prilagojeni posamezni podatkovni množici, se rangi modelov znatno spremenijo,
-razlike med njimi pa zmanjšajo~\cite{tschalzev2024data}. Avtorji zbirke
-TabArena opozarjajo, da statične zbirke ostanejo nespremenjene, tudi ko se v
-njih odkrijejo napake~\cite{erickson2025tabarena}; tudi avtorji zbirke
-OpenML-CC18 sami navajajo nekaj množic, ki njenih meril ne izpolnjujejo
-povsem~\cite{bischl2021openml}.
+predznačenih rangov~\cite{benavoli2016should}.
 
 \section{Umestitev naloge}
 \label{sec:sor-umestitev}
