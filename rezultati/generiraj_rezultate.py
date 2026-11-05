@@ -124,13 +124,18 @@ t += "\\hline\n\\end{tabular}\n\\end{table}\n"
 write('tab_wilcoxon.tex', t)
 
 # 3. Časi ------------------------------------------------------------------------
-dev = df.groupby('algorithm').device.agg(lambda s: 'CPU (8 jeder)' if s.mode()[0].startswith('cpu') else 'GPU (H100)')
+# Oznake naprav po slovensko (CPE, GPE); izvedbi H100 imenujemo kot v besedilu (PCIe, SXM),
+# v oklepaju pa navedemo še zapis iz stolpca device (H100 80GB HBM3 je izvedba SXM).
+dev = df.groupby('algorithm').device.agg(lambda s: 'CPE (8 jeder)' if s.mode()[0].startswith('cpu') else 'GPE (H100)')
 gpus = sorted(d.replace('cuda: NVIDIA ', '') for d in df.device.unique() if d.startswith('cuda'))
+IZVEDBA = {'H100 PCIe': 'PCIe', 'H100 80GB HBM3': 'SXM'}
+assert set(gpus) <= set(IZVEDBA), gpus
+gpus = sorted(gpus, key=lambda g: IZVEDBA[g])
 ov['total_h'] = (ov.train_time_total_s + ov.inference_time_total_s) / 3600
 t = src([S + '/overall.csv', R + '/results.csv'])
 t += r"""\begin{table}[htbp]
 \centering
-\caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh """ + str(N_FITS) + r""" učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi; temeljna modela sta tekla na dveh izvedbah grafične procesne enote (""" + ' in '.join(gpus) + r"""), drevesni ansambli pa na procesorjih različnih vozlišč gruče.}
+\caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh """ + str(N_FITS) + r""" učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi; temeljna modela sta tekla na grafični procesni enoti (GPE) NVIDIA H100 v dveh izvedbah (""" + ' in '.join(IZVEDBA[g] for g in gpus) + r"""; v stolpcu \texttt{device} datoteke z rezultati """ + ' in '.join(gpus) + r"""), drevesni ansambli pa na osmih jedrih centralne procesne enote (CPE) različnih vozlišč gruče.}
 \label{tab:casi}
 \footnotesize
 \begin{tabular}{llrrr}

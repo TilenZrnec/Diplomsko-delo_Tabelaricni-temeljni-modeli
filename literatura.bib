@@ -404,14 +404,16 @@ urldate = {2022-06-14}
   eprinttype = {arXiv}
 }
 
-@misc{qu2026tabiclv2,
+% Objava: komentar zapisa arXiv 2602.11139v2 »Published at ICML 2026« (preverjeno
+% 2026-11-05); zbornika PMLR še nismo videli, zato brez zvezka in strani.
+@inproceedings{qu2026tabiclv2,
   title = {{TabICLv2}: A better, faster, scalable, and open tabular foundation model},
   author = {Qu, Jingang and Holzm\"{u}ller, David and Varoquaux, Ga\"{e}l and
             Le Morvan, Marine},
+  booktitle = {International Conference on Machine Learning ({ICML} 2026)},
   year = {2026},
   eprint = {2602.11139},
-  eprinttype = {arXiv},
-  doi = {10.48550/arXiv.2602.11139}
+  eprinttype = {arXiv}
 }
 
 % --- Primerjalno vrednotenje in programska oprema ---
@@ -448,6 +450,7 @@ urldate = {2022-06-14}
             Duchesnay, \'{E}douard},
   journal = {Journal of Machine Learning Research},
   volume = {12},
+  number = {85},
   pages = {2825--2830},
   year = {2011},
   url = {https://www.jmlr.org/papers/v12/pedregosa11a.html},
@@ -455,26 +458,29 @@ urldate = {2022-06-14}
 }
 
 % --- Dokumentacija knjižnic (vir za navedene privzete vrednosti) ---
+% 2026-11-05 posodobljeno na dokumentacijo uporabljenih različic; vse v besedilu
+% navedene privzete vrednosti preverjene na teh straneh. XGBoost na readthedocs nima
+% dokumentacije za 3.4.1, stran »stable« je bila tega dne dokumentacija 3.4.2.
 
 @online{sklearndocsrf,
-  title = {{RandomForestClassifier} --- dokumentacija scikit-learn 1.5},
+  title = {{RandomForestClassifier} --- dokumentacija scikit-learn 1.9},
   author = {{scikit-learn developers}},
-  url = {https://scikit-learn.org/1.5/modules/generated/sklearn.ensemble.RandomForestClassifier.html},
-  urldate = {2026-08-16}
+  url = {https://scikit-learn.org/1.9/modules/generated/sklearn.ensemble.RandomForestClassifier.html},
+  urldate = {2026-11-05}
 }
 
 @online{xgboostdocs,
-  title = {{XGBoost} Parameters --- dokumentacija {XGBoost} 2.1.0},
+  title = {{XGBoost} Parameters --- dokumentacija {XGBoost} 3.4.2},
   author = {{xgboost developers}},
-  url = {https://xgboost.readthedocs.io/en/release_2.1.0/parameter.html},
-  urldate = {2026-08-16}
+  url = {https://xgboost.readthedocs.io/en/stable/parameter.html},
+  urldate = {2026-11-05}
 }
 
 @online{lightgbmdocs,
-  title = {Parameters --- dokumentacija {LightGBM} 4.6.0},
+  title = {Parameters --- dokumentacija {LightGBM} 4.7.0},
   author = {{LightGBM developers}},
-  url = {https://lightgbm.readthedocs.io/en/v4.6.0/Parameters.html},
-  urldate = {2026-08-16}
+  url = {https://lightgbm.readthedocs.io/en/v4.7.0/Parameters.html},
+  urldate = {2026-11-05}
 }
 
 @online{catboostdocs,
@@ -508,8 +514,10 @@ urldate = {2022-06-14}
   title = {Evaluating the Replicability of Significance Tests for Comparing
            Learning Algorithms},
   author = {Bouckaert, Remco R. and Frank, Eibe},
-  booktitle = {Advances in Knowledge Discovery and Data Mining},
+  booktitle = {Advances in Knowledge Discovery and Data Mining: 8th Pacific-Asia
+               Conference, {PAKDD} 2004},
   series = {Lecture Notes in Computer Science},
+  volume = {3056},
   pages = {3--12},
   year = {2004},
   publisher = {Springer},
@@ -622,10 +630,13 @@ urldate = {2022-06-14}
 % Doprinos: zbirka TALENT (300+ množic); GBDT ostaja močan, predhodno naučeni
 % modeli ga na mnogih nalogah dosežejo ali presežejo. Metrika: točnost (glavna),
 % F1 in AUC zabeleženi. Na tej zbirki je ovrednoten TabICL.
+% Trditev o predhodno naučenih modelih je iz povzetka različice 4 (arXiv
+% 2407.00956v4, 2025-11-07; preverjeno 2026-11-04), zato leto in različica 4.
 @misc{ye2024closer,
   title = {A Closer Look at Deep Learning Methods on Tabular Datasets},
   author = {Ye, Han-Jia and Liu, Si-Yang and Cai, Hao-Run and Zhou, Qi-Le and Zhan, De-Chuan},
-  year = {2024},
+  year = {2025},
+  version = {4},
   eprint = {2407.00956},
   eprinttype = {arXiv},
   doi = {10.48550/arXiv.2407.00956}
@@ -748,14 +759,19 @@ urldate = {2022-06-14}
 % Doprinos: primerjave s poenoteno predobdelavo so pristranske; po predobdelavi,
 % prilagojeni množici, se rangi modelov znatno spremenijo (10 množic s Kaggla).
 % Pomen: kritika, ki zadeva našo politiko minimalne predobdelave.
-@misc{tschalzev2024data,
+% Objava preverjena 2026-11-05: proceedings.neurips.cc (Datasets and Benchmarks
+% Track) in Crossref (DOI, strani).
+@inproceedings{tschalzev2024data,
   title = {A Data-Centric Perspective on Evaluating Machine Learning Models for Tabular Data},
   author = {Tschalzev, Andrej and Marton, Sascha and L\"{u}dtke, Stefan and
             Bartelt, Christian and Stuckenschmidt, Heiner},
+  booktitle = {Advances in Neural Information Processing Systems 37 ({NeurIPS} 2024),
+               Datasets and Benchmarks Track},
+  pages = {95896--95930},
   year = {2024},
+  doi = {10.52202/079017-3039},
   eprint = {2407.02112},
-  eprinttype = {arXiv},
-  doi = {10.48550/arXiv.2407.02112}
+  eprinttype = {arXiv}
 }
 
 % Doprinos: uglasljivost hiperparametrov na 38 množicah OpenML; rezultati za AUC,
@@ -963,7 +979,7 @@ urldate = {2022-06-14}
   author = {Varma, Sudhir and Simon, Richard},
   journal = {BMC Bioinformatics},
   volume = {7},
-  pages = {91},
+  eid = {91},
   year = {2006},
   doi = {10.1186/1471-2105-7-91}
 }

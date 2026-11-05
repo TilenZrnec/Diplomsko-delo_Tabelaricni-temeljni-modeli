@@ -5,6 +5,10 @@
 \usepackage[T1]{fontenc}      % omogoča normalno kopiranje slovenskih črk
 \usepackage[utf8]{inputenc}   % omogoča uporabo slovenskih črk kodiranih v formatu UTF-8
 \usepackage[slovene,american]{babel}    % naloži, med drugim, slovenske naslove poglavij in delilne vzorce
+% Enak presledek za vsako piko: babel za slovenščino tega ne vklopi, zato bi bil za
+% kraticami (angl., npr., sod.) predolg razmik, za kratico z veliko črko na koncu povedi
+% (ROC-AUC.) pa prekratek. Glej predlogo FRI, Pogoste napake, Presledki ob kraticah.
+\frenchspacing
 \usepackage{microtype}         % boljša postavitev
 \usepackage[pdftex]{graphicx}  % omogoča vlaganje slik različnih formatov
 \usepackage{fancyhdr}          % poskrbi, na primer, za glave strani
@@ -56,6 +60,9 @@
     pdfproducer={LaTeX}, 
     pdfcreator={LaTeX}
 ]{hyperref}
+
+% URL-je in DOI-je v literaturi lomi na katerem koli znaku, da ne segajo čez desni rob.
+\usepackage{xurl}
 
 
 % \newcommand{\ttitle}{Vzorec diplomskega dela}
