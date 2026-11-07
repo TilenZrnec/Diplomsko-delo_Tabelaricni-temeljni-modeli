@@ -21,6 +21,7 @@
 \usepackage{subcaption}
 \usepackage{array}              % stolpci z >{...}p{...} v tabelah
 \usepackage{longtable}          % tabele čez več strani (rezultati po podatkovnih množicah)
+\usepackage{placeins}           % \FloatBarrier: plavajoči objekti ne smejo čez to točko
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 \usepackage[
@@ -180,6 +181,10 @@
 % vključevanje programske kode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage[hypcap=false]{caption}
+% Naslov tabele je nad tabelo (kot v predlogi FRI). Zaradi \DocumentMetadata jedro
+% LaTeX postavi razmik caption nad naslov in ne med naslov in tabelo (position=top ne
+% učinkuje), zato ga podamo kot razmik pod naslovom; slik ne spremeni (2026-11-07).
+\captionsetup[table]{aboveskip=0pt,belowskip=10pt}
 %\usepackage{minted}
 \definecolor{svetlo-siva}{gray}{0.96}
 %\usemintedstyle{friendly} % lahko uporabite kakšno drugo temo

@@ -625,3 +625,89 @@ fig.savefig(os.path.join(SLIKE, 'cc18_prednost.pdf'))
 plt.close(fig)
 print('== Odvisnost od lastnosti ==')
 print(open(S + '/properties_report.txt', encoding='utf-8').read())
+
+# 16. Skladnost z objavljenimi rezultati (poglavje Materiali) ------------------------------
+# summary/literature_* (scripts/compare_literature.py): naš povprečni ROC-AUC na 49 množicah
+# CC18, ki so tudi v Supplementary Table 4 članka o TabPFN v2 (Hollmann in sod. 2025, zbirka
+# TabZilla; results/literature/hollmann2025_tabzilla.csv iz scripts/extract_hollmann2025.py),
+# skupno in po domenah (results/datasets/cc18_domains.csv, ročna razvrstitev po izvoru).
+lo = pd.read_csv(S + '/literature_overall.csv').set_index('algorithm')
+ld = pd.read_csv(S + '/literature_by_domain.csv')
+lp = pd.read_csv(S + '/literature_per_dataset.csv')
+dom = pd.read_csv(DS + '/cc18_domains.csv')
+DOMENE = list(dict.fromkeys(ld.group))  # vrstni red iz compare_literature.py (DOMAINS)
+N_L = int(lo.n.iloc[0])
+assert N_L == len(lp) and set(lp.dataset) <= set(pv.index) and set(dom.dataset) == set(pv.index)
+LIT = [('catboost', 'CatBoost'), ('lightgbm', 'LightGBM'), ('xgboost', 'XGBoost'),
+       ('xgboost_tuned', 'XGBoost (uglašeni)'), ('random_forest', 'Naključni gozd'),
+       ('tabpfn', 'TabPFN-3.5 / TabPFN v2')]
+def ns(x, d=4):  # razlika z izrecnim predznakom
+    return f"\\num[retain-explicit-plus]{{{x:+.{d}f}}}"
+LSRC = [S + '/literature_overall.csv', S + '/literature_by_domain.csv']
+LWHAT = ('scripts/compare_literature.py: cc18_v4/combined in cc18_xgb_tuned proti '
+         'results/literature/hollmann2025_tabzilla.csv, domene iz results/datasets/cc18_domains.csv')
+t = src(LSRC, what=LWHAT)
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Naši in objavljeni rezultati na """ + str(N_L) + r""" podatkovnih množicah zbirke OpenML-CC18, ki so tudi v dodatnem gradivu članka o modelu TabPFN v2~\cite{hollmann2025tabpfn}: povprečni ROC-AUC, povprečna razlika in mediana razlike (naš $-$ objavljeni) ter Pearsonov koeficient korelacije $r$ med našim in objavljenim ROC-AUC čez množice. Objavljeni ansambli so uglašeni; naši imajo privzete nastavitve, razen uglašenega XGBoosta iz poskusa uglaševanja. Naš TabPFN-3.5 primerjamo z objavljenim TabPFN v2.}
+\label{tab:literatura}
+\small
+\begin{tabular}{lrrrrr}
+\hline
+Algoritem & naš & objavljeni & razlika & mediana & $r$ \\
+\hline
+"""
+for algo, label in LIT:
+    r = lo.loc[algo]
+    t += (f"{label} & {n(r.ours_mean)} & {n(r.published_mean)} & {ns(r.diff_mean)} & "
+          f"{ns(r.diff_median)} & {n(r.pearson, 3)} \\\\\n")
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_literatura.tex', t)
+
+t = src(LSRC, what=LWHAT)
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Povprečna razlika ROC-AUC (naš $-$ objavljeni) po podatkovnih domenah na """ + str(N_L) + r""" skupnih množicah; $n$ je število množic v domeni. Razvrstitev množic v domene je v tabeli~\ref{tab:domene}.}
+\label{tab:literatura-domene}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.5cm}rrrrrrr}
+\hline
+ & & & & \multicolumn{2}{c}{XGBoost} & Naključni & \\
+Domena & $n$ & CatBoost & LightGBM & privzeti & uglašeni & gozd & TabPFN \\
+\hline
+"""
+for g in DOMENE + ['Skupaj']:
+    sub = (lo if g == 'Skupaj' else ld[ld.group == g].set_index('algorithm'))
+    if g == 'Skupaj':
+        t += "\\hline\n"
+    t += f"{g} & {int(sub.n.iloc[0])} & " + " & ".join(ns(sub.loc[a, 'diff_mean']) for a, _ in LIT) + " \\\\\n"
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_literatura_domene.tex', t)
+
+# Priloga: razvrstitev vseh 72 množic v domene; prvi stolpec so množice primerjave.
+def ime(s):
+    return re.sub(r'(?<=[a-z])(?=[A-Z])', r'\\allowbreak ', s).replace('_', r'\_\allowbreak ')
+t = src([DS + '/cc18_domains.csv', S + '/literature_per_dataset.csv'],
+        what='ročna razvrstitev po izvoru podatkov iz opisa množice na OpenML; scripts/compare_literature.py')
+t += r"""\begin{table}[htbp]
+\centering
+\caption{Razvrstitev """ + str(N) + r""" podatkovnih množic zbirke OpenML-CC18 v podatkovne domene po izvoru podatkov, kot ga navaja opis množice na platformi OpenML. Srednji stolpec našteje """ + str(N_L) + r""" množic, ki so v primerjavi z objavljenimi rezultati (razdelek~\ref{sec:cc18-literatura}), desni preostale; števili v oklepaju sta velikosti obeh skupin.}
+\label{tab:domene}
+\scriptsize
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.3cm}>{\raggedright\arraybackslash}p{6.2cm}>{\raggedright\arraybackslash}p{3.9cm}}
+\hline
+Domena & Množice v primerjavi & Ostale množice \\
+\hline
+"""
+shared = set(lp.dataset)
+for g in DOMENE:
+    names = sorted(dom.loc[dom.domain == g, 'dataset'], key=str.lower)
+    inn = [ime(x) for x in names if x in shared]; out = [ime(x) for x in names if x not in shared]
+    t += f"{g} ({len(inn)} + {len(out)}) & {', '.join(inn)} & {', '.join(out) or '--'} \\\\\n"
+t += "\\hline\n\\end{tabular}\n\\end{table}\n"
+write('tab_domene.tex', t)
+assert set(dom.domain) == set(DOMENE)
+
+print('== Skladnost z objavljenimi rezultati ==')
+print(open(S + '/literature_report.txt', encoding='utf-8').read())

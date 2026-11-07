@@ -365,8 +365,8 @@ učenje sintetično.
 
 Izid primerjave ni odvisen le od algoritmov, temveč tudi od protokola
 vrednotenja. Protokol sestavljajo štiri odločitve: na katerih podatkovnih
-množicah algoritme vrednotimo, kako uglasimo primerjalne modele, s katerimi
-metrikami merimo uspešnost ter kako rezultate združimo čez podatkovne množice
+množicah algoritme vrednotimo, kako uglasimo primerjalne modele in
+predobdelamo podatke, s katerimi metrikami merimo uspešnost ter kako rezultate združimo čez podatkovne množice
 in preverimo značilnost razlik. V tem razdelku jih obravnavamo v tem vrstnem
 redu, tabela~\ref{tab:sorodni} pa jih povzema za primerjave iz
 razdelkov~\ref{sec:sor-drevesa} in~\ref{sec:sor-temeljni}.
@@ -414,22 +414,45 @@ primerjave~\cite{gijsbers2024amlb}.
 % gijsbers2024amlb razd. 5.4 »Overfitting the Benchmark«, str. 20: »these data
 % sets can in general not be assumed to be truly unseen« (preverjeno 2026-11-05).
 
-Druga odločitev je uglaševanje primerjalnih modelov. Proračun zanj se med
-študijami močno razlikuje: od največ 30 konfiguracij~\cite{mcelfresh2023neural}
-in 100 konfiguracij~\cite{ye2024closer} do časovnih proračunov od 30~s do 4~h v
-člankih o modelu TabPFN~\cite{hollmann2023tabpfn,hollmann2025tabpfn}. Kako
-močno je izid primerjave odvisen od uglaševanja, kaže TabArena, ki vsak model
-ovrednoti v treh režimih: s privzetimi hiperparametri, z uglaševanjem prek 200
-naključnih konfiguracij in z naknadnim ansambliranjem konfiguracij. V režimu z
-uglaševanjem je bil najboljši CatBoost, po naknadnem ansambliranju pa so ga
-prehiteli nevronski mreži TabM in RealMLP ter LightGBM. Temeljni modeli so se
-najbolje izkazali na manjših podatkovnih množicah; TabICL in TabDPT so
+Druga odločitev je uglaševanje primerjalnih modelov: preizkusimo več nastavitev
+hiperparametrov in obdržimo najboljšo. Študije temu namenijo zelo različen
+proračun. Nekatere omejijo število preizkušenih nastavitev, McElfresh in
+sodelavci na največ 30~\cite{mcelfresh2023neural}, Ye in sodelavci na
+100~\cite{ye2024closer}. Članka o modelu TabPFN pa omejita čas uglaševanja: pri
+prvem traja od 30~s do 1~h~\cite{hollmann2023tabpfn}, pri drugem od 30~s do
+4~h~\cite{hollmann2025tabpfn}. Kako močno je izid primerjave odvisen od uglaševanja, kaže TabArena, ki vsak
+model ovrednoti v treh režimih: s privzetimi hiperparametri, z uglaševanjem prek
+200 naključnih nastavitev in z naknadnim ansambliranjem nastavitev. Razvrstitev
+se med režimi spremeni: z uglaševanjem je najboljši CatBoost, po naknadnem
+ansambliranju pa so pred njim TabM, LightGBM in RealMLP. Uglaševanje tudi ne
+koristi vsem algoritmom enako: privzeti CatBoost doseže podobno oceno Elo kot
+uglašeni XGBoost, privzeti XGBoost pa precej nižjo~\cite{erickson2025tabarena}.
+% erickson2025tabarena razd. 3.1, str. 7 (CatBoost prvi pri uglaševanju; po
+% ansambliranju so pred njim TabM, LightGBM, RealMLP) in tabela A.1, str. 31
+% (Elo: CatBoost privzeti 1427, XGBoost uglašeni 1404, XGBoost privzeti 1225;
+% intervala zaupanja prvih dveh se prekrivata). Preverjeno v PDF 2026-11-05.
+Tabelarični temeljni modeli so bili na manjših množicah, na katerih jih je
+mogoče uporabiti, najboljši že brez uglaševanja; TabICL in TabDPT so
 ovrednotili le s privzetimi nastavitvami, ker njuni avtorji uglaševanja ne
-predvidevajo~\cite{erickson2025tabarena}. Na izid vpliva tudi predobdelava.
-Tschalzev in sodelavci so pokazali, da so primerjave s poenoteno predobdelavo
-podatkov pristranske: po predobdelavi, prilagojeni posamezni podatkovni
-množici, se rangi modelov znatno spremenijo, razlike med njimi pa
-zmanjšajo~\cite{tschalzev2024data}.
+predvidevajo~\cite{erickson2025tabarena}.
+% erickson2025tabarena str. 2, ugotovitev (C): »dominate for small data with
+% strong in-context learning performance even without tuning«; razd. 3.1,
+% str. 7: vrednoteni ločeno, le na množicah znotraj svojih omejitev; str. 4:
+% TabICL in TabDPT brez uglaševanja.
+
+Na izid vpliva tudi predobdelava. Primerjalne študije običajno vse podatkovne
+množice predobdelajo enako, v praksi pa podatke za vsako množico pripravijo
+posebej, pogosto tudi z izpeljavo novih atributov. Tschalzev in sodelavci so
+na desetih množicah s tekmovanj Kaggle uporabili pripravo podatkov iz visoko
+uvrščenih rešitev teh tekmovanj. Po taki pripravi so bili modeli razvrščeni
+znatno drugače kot po poenoteni predobdelavi, razlike med njimi pa so bile
+manjše~\cite{tschalzev2024data}. Vrstni red modelov, dobljen s poenoteno
+predobdelavo, torej ne velja nujno tudi za podatke, ki jih za vsako množico
+pripravi strokovnjak.
+% tschalzev2024data (arXiv 2407.02112v3): povzetek, str. 1 (»model rankings
+% change considerably, performance differences decrease«); razd. 3, str. 5
+% (za vsako množico ena visoko uvrščena rešitev s Kaggla, iz nje vzeta priprava
+% podatkov). Preverjeno v PDF 2026-11-05.
 
 Tretja odločitev je metrika. Ploščino pod krivuljo ROC (angl. \emph{area under the
 receiver operating characteristic curve}, ROC-AUC) je pri več razredih mogoče
@@ -463,51 +486,6 @@ metrikami uporabljajo Probst in sodelavci, ki v študiji uglaševanja
 hiperparametrov na 38 podatkovnih množicah s platforme OpenML izračunajo
 ROC-AUC, točnost in Brierjevo oceno, razpravljajo pa predvsem o
 ROC-AUC~\cite{probst2019tunability}.
-
-\begin{table}[htbp]
-\centering
-\caption{Zasnova sorodnih primerjav: podatkovne množice (pripis \enquote{z
-regresijskimi} pomeni, da so štete tudi regresijske), uglaševanje primerjalnih
-modelov in metrike za klasifikacijo.}
-\label{tab:sorodni}
-\footnotesize
-\setlength{\tabcolsep}{4pt}
-\begin{tabular}{>{\raggedright\arraybackslash}p{0.21\linewidth}
-                >{\raggedright\arraybackslash}p{0.23\linewidth}
-                >{\raggedright\arraybackslash}p{0.2\linewidth}
-                >{\raggedright\arraybackslash}p{0.28\linewidth}}
-\hline
-Delo & Podatkovne množice & Uglaševanje & Metrike \\
-\hline
-Grinsztajn in sod.~\cite{grinsztajn2022why} & 45 (z regresijskimi) & naključno iskanje & točnost (normirana) \\
-Shwartz-Ziv in Armon~\cite{shwartzziv2022tabular} & 11 (z regresijskimi) & da & logaritemska izguba \\
-McElfresh in sod.~\cite{mcelfresh2023neural} & 176 & do 30 konfiguracij & točnost, logaritemska izguba \\
-Ye in sod.~\cite{ye2024closer} & več kot 300 (z regresijskimi) & 100 konfiguracij & točnost \\
-Gijsbers in sod.~\cite{gijsbers2024amlb} & 104 (z regresijskimi) & sistemi AutoML, 1 h ali 4 h & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
-TabPFN~\cite{hollmann2023tabpfn} & 30 iz OpenML-CC18 & od 30 s do 1 h & ROC-AUC (OvO) \\
-TabPFN v2~\cite{hollmann2025tabpfn} & 57 (z regresijskimi) & od 30 s do 4 h & ROC-AUC (OvR), točnost \\
-TabICL~\cite{qu2025tabicl} & 185 iz TALENT & po zbirki TALENT & točnost, logaritemska izguba \\
-TabDPT~\cite{ma2025tabdpt} & 107 (z regresijskimi) & do 30 konfiguracij & ROC-AUC, točnost \\
-TabArena~\cite{erickson2025tabarena} & 51 (z regresijskimi) & privzeto; 200 konfiguracij; ansambliranje & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
-TabICLv2~\cite{qu2026tabiclv2} & TabArena, TALENT & po zbirkah & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
-TabPFN-3~\cite{grinsztajn2026tabpfn3} & TabArena, TALENT, lastne zbirke & po zbirkah & po zbirkah; ROC-AUC (OvR) in točnost pri veliko razredih \\
-Ta naloga & 72 iz OpenML-CC18, Medic3 & privzete vrednosti; XGBoost tudi 128 konfiguracij & ROC-AUC (OvR); točnost, logaritemska izguba \\
-\hline
-\end{tabular}
-\end{table}
-% Viri za vrstice: grinsztajn2022why razd. 3 (točnost, R2, naključno iskanje);
-% shwartzziv2022tabular razd. 3 (11 množic s klasifikacijo in regresijo;
-% cross-entropy pri binarni klasifikaciji); mcelfresh2023neural razd. 3 (176
-% klasifikacijskih množic, do 30 konfiguracij, točnost, log loss, F1 in AUC
-% v prilogi D); ye2024closer razd. o protokolu (Optuna, 100 poskusov; točnost,
-% F1 in AUC dodatno); gijsbers2024amlb razd. 5.1.2 (71 klasifikacijskih in 33
-% regresijskih nalog); hollmann2023tabpfn razd. 5 (AUC OVO, proračuni 30 s do
-% 1 h); hollmann2025tabpfn Methods (29 klasifikacijskih in 28 regresijskih,
-% ROC AUC OvR in točnost, normirano, 30 s do 4 h); qu2025tabicl razd. 5.1
-% (200 - 15 = 185, 171 z največ 10 razredi); ma2025tabdpt razd. 4 (CC18 in
-% CTR23, skupaj 107; tabela 1); erickson2025tabarena razd. 3; qu2026tabiclv2
-% razd. 5; grinsztajn2026tabpfn3 (Elo, izboljšljivost; ROC-AUC OvR in točnost
-% na sintetični zbirki z veliko razredi). Štetje množic poenoteno 2026-11-05.
 
 Četrta odločitev je združevanje rezultatov čez podatkovne množice. Nekateri
 avtorji metriko na vsaki množici normirajo na interval med najslabšim in
@@ -573,6 +551,51 @@ metrike, ki v tabeli~\ref{tab:sorodni} prevladujejo, razlike med algoritmi pa
 preverimo s Friedmanovim testom in s parnimi
 testi~\cite{demsar2006statistical,benavoli2016should}.
 
+\begin{table}[htbp]
+\centering
+\caption{Zasnova sorodnih primerjav: podatkovne množice (pripis \enquote{z
+regresijskimi} pomeni, da so štete tudi regresijske), uglaševanje primerjalnih
+modelov in metrike za klasifikacijo.}
+\label{tab:sorodni}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.21\linewidth}
+                >{\raggedright\arraybackslash}p{0.23\linewidth}
+                >{\raggedright\arraybackslash}p{0.2\linewidth}
+                >{\raggedright\arraybackslash}p{0.28\linewidth}}
+\hline
+Delo & Podatkovne množice & Uglaševanje & Metrike \\
+\hline
+Grinsztajn in sod.~\cite{grinsztajn2022why} & 45 (z regresijskimi) & naključno iskanje & točnost (normirana) \\
+Shwartz-Ziv in Armon~\cite{shwartzziv2022tabular} & 11 (z regresijskimi) & da & logaritemska izguba \\
+McElfresh in sod.~\cite{mcelfresh2023neural} & 176 & do 30 nastavitev & točnost, logaritemska izguba \\
+Ye in sod.~\cite{ye2024closer} & več kot 300 (z regresijskimi) & 100 nastavitev & točnost \\
+Gijsbers in sod.~\cite{gijsbers2024amlb} & 104 (z regresijskimi) & sistemi AutoML, 1 h ali 4 h & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabPFN~\cite{hollmann2023tabpfn} & 30 iz OpenML-CC18 & od 30 s do 1 h & ROC-AUC (OvO) \\
+TabPFN v2~\cite{hollmann2025tabpfn} & 57 (z regresijskimi) & od 30 s do 4 h & ROC-AUC (OvR), točnost \\
+TabICL~\cite{qu2025tabicl} & 185 iz TALENT & po zbirki TALENT & točnost, logaritemska izguba \\
+TabDPT~\cite{ma2025tabdpt} & 107 (z regresijskimi) & do 30 nastavitev & ROC-AUC, točnost \\
+TabArena~\cite{erickson2025tabarena} & 51 (z regresijskimi) & privzeto; 200 nastavitev; ansambliranje & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabICLv2~\cite{qu2026tabiclv2} & TabArena, TALENT & po zbirkah & ROC-AUC (binarno), logaritemska izguba (več razredov) \\
+TabPFN-3~\cite{grinsztajn2026tabpfn3} & TabArena, TALENT, lastne zbirke & po zbirkah & po zbirkah; ROC-AUC (OvR) in točnost pri veliko razredih \\
+Ta naloga & 72 iz OpenML-CC18, Medic3 & privzete vrednosti; XGBoost tudi 128 nastavitev & ROC-AUC (OvR); točnost, logaritemska izguba \\
+\hline
+\end{tabular}
+\end{table}
+% Viri za vrstice: grinsztajn2022why razd. 3 (točnost, R2, naključno iskanje);
+% shwartzziv2022tabular razd. 3 (11 množic s klasifikacijo in regresijo;
+% cross-entropy pri binarni klasifikaciji); mcelfresh2023neural razd. 3 (176
+% klasifikacijskih množic, do 30 konfiguracij, točnost, log loss, F1 in AUC
+% v prilogi D); ye2024closer razd. o protokolu (Optuna, 100 poskusov; točnost,
+% F1 in AUC dodatno); gijsbers2024amlb razd. 5.1.2 (71 klasifikacijskih in 33
+% regresijskih nalog); hollmann2023tabpfn razd. 5 (AUC OVO, proračuni 30 s do
+% 1 h); hollmann2025tabpfn Methods (29 klasifikacijskih in 28 regresijskih,
+% ROC AUC OvR in točnost, normirano, 30 s do 4 h); qu2025tabicl razd. 5.1
+% (200 - 15 = 185, 171 z največ 10 razredi); ma2025tabdpt razd. 4 (CC18 in
+% CTR23, skupaj 107; tabela 1); erickson2025tabarena razd. 3; qu2026tabiclv2
+% razd. 5; grinsztajn2026tabpfn3 (Elo, izboljšljivost; ROC-AUC OvR in točnost
+% na sintetični zbirki z veliko razredi). Štetje množic poenoteno 2026-11-05.
+
 %=========================================================================
 \chapter{Metode in testna metodologija}
 \label{ch:metode}
@@ -586,42 +609,52 @@ testi~\cite{demsar2006statistical,benavoli2016should}.
 
 V primerjavo smo vključili šest algoritmov za nadzorovano klasifikacijo
 tabelaričnih podatkov. Prvi štirje -- naključni gozd, XGBoost, LightGBM in
-CatBoost -- so ansambli odločitvenih dreves. Ti že dve desetletji veljajo za privzeto orodje na tabelaričnih
-podatkih; primerjalne študije kažejo, da na tipičnih tabelaričnih množicah
-srednje velikosti še vedno prekašajo arhitekture globokega učenja, zasnovane
-posebej za tabelarične podatke~\cite{grinsztajn2022why}. Zadnja dva, TabPFN in
+CatBoost -- so ansambli odločitvenih dreves in v primerjavi služijo kot
+referenčna točka. Kot smo opisali v poglavju~\ref{ch:sorodni}, so bili v
+primerjalnih študijah večinoma boljši od nevronskih mrež, ki se učijo na
+posamezni podatkovni množici, ali z njimi
+enakovredni~\cite{grinsztajn2022why,mcelfresh2023neural}; najboljše med temi
+mrežami so jih dohitele šele z obsežnim uglaševanjem in
+ansambliranjem~\cite{erickson2025tabarena}. Zadnja dva, TabPFN in
 TabICL, sta tabelarična temeljna modela: predhodno naučena modela, ki ciljne podatkovne množice ne vidita med
-učenjem, temveč jo ob napovedovanju prejmeta kot kontekst.
+učenjem, temveč jo ob napovedovanju prejmeta kot kontekst. Razvijalci teh
+modelov poročajo, da drevesne ansamble prekašajo že brez
+uglaševanja~\cite{grinsztajn2025tabpfn25,grinsztajn2026tabpfn3,qu2025tabicl},
+na zbirki TabArena pa so bili temeljni modeli najboljši na manjših
+podatkovnih množicah, na katerih jih je mogoče
+uporabiti~\cite{erickson2025tabarena}. Ali to velja tudi pod našim
+protokolom, je osrednje vprašanje naloge.
 
 Izbor pokriva obe uveljavljeni družini drevesnih ansamblov -- vrečenje
 (angl. \emph{bagging}) pri naključnem gozdu in gradientno pospeševanje
 pri preostalih treh -- in znotraj
 gradientnega pospeševanja tri implementacije, ki se med seboj razlikujejo po
 načinu rasti dreves in po obravnavi kategoričnih atributov. Prav zadnje je za
-našo nalogo bistveno, saj se algoritmi zelo razlikujejo po tem, koliko
-značilnosti surovih podatkov obravnavajo nativno; to razliko obravnavamo kot
-namerno eksperimentalno spremenljivko in jo podrobneje opišemo v
-razdelku~\ref{sec:predobdelava}.
+našo nalogo pomembno, saj se algoritmi zelo razlikujejo po tem, katere
+značilnosti surovih podatkov, na primer manjkajoče vrednosti in kategorične
+atribute, obravnavajo sami. Teh razlik namenoma ne izravnamo s skupno
+predobdelavo, temveč so del primerjave (razdelek~\ref{sec:predobdelava}).
 
 Vse algoritme uporabljamo s privzetimi hiperparametri; razlogi za tako zasnovo
 so navedeni v razdelku~\ref{sec:protokol}. Izrecno podamo le naključno seme
 (42, 43 ali 44, odvisno od ponovitve) ter nastavitve
 računanja in izpisovanja, ki modela ne spremenijo in jih navedemo pri
 posameznem algoritmu; pri modelu TabPFN poleg tega izrecno izberemo različico
-modela (podrazdelek~\ref{sec:tabpfn}). Da so vse druge nastavitve res privzete
-in da vsak algoritem prejme le predobdelavo, brez katere knjižnica podatkov ne
-sprejme, smo za vseh šest algoritmov preverili s samodejno revizijo: med
-učenjem prestrežemo klic knjižnice in njegove parametre primerjamo s
-privzetimi, za vsak korak predobdelave pa preverimo, da knjižnica brez njega
-podatkov ne sprejme.
-% Revizija: Diplomsko-delo_Koda/scripts/audit_defaults.py, izpis v
-% results/runs/subset_v4_local/diagnostics/audit_defaults.txt. Seme modela je
-% random_state + ponovitev (config.yaml), seme delitev pa 42.
-Ker so pri takem
+modela (podrazdelek~\ref{sec:tabpfn}). Privzete vrednosti določata različica
+knjižnice in razred, prek katerega algoritem uporabimo; oba sta navedena v
+tabeli~\ref{tab:razlicice}, različice pa so pripete v datoteki
+\texttt{requirements.txt} repozitorija s kodo. Ker so pri takem
 protokolu privzete vrednosti dejanski del metode, jih pri vsakem algoritmu
-posebej navedemo skupaj z virom, iz katerega so povzete. Različice knjižnic so
-zbrane v tabeli~\ref{tab:razlicice} in pripete v datoteki
-\texttt{requirements.txt} repozitorija s kodo.
+posebej navedemo skupaj z virom, iz katerega so povzete.
+% Da so vse druge nastavitve res privzete in da vsak algoritem prejme le
+% predobdelavo, brez katere knjižnica podatkov ne sprejme, preverja
+% Diplomsko-delo_Koda/scripts/audit_defaults.py (izpis v
+% results/runs/subset_v4_local/diagnostics/audit_defaults.txt). Revizije v
+% besedilu namenoma ne opisujemo (odločitev 2026-11-06). Seme modela je
+% random_state + ponovitev (config.yaml), seme delitev pa 42.
+% Primer, zakaj šteje razred: v xgboost 3.4.1 xgboost.train privzeto zgradi 10
+% dreves, XGBClassifier pa 100 (get_num_boosting_rounds(); preverjeno 2026-11-06
+% v okolju tabular3.5).
 
 % Tabela je generirana iz manifest.json zagona cc18_v3 (scripts/gen_version_table.py
 % v repozitoriju s kodo, kopira jo rezultati/generiraj_rezultate.py); zagon cc18_v4
@@ -725,7 +758,7 @@ kategoričnem atributu ne sprejme.
 \label{sec:tabpfn}
 
 TabPFN je predstavnik nove družine modelov za tabelarične podatke, ki temelji na
-zamisli mreže, prilagojene apriornim podatkom
+ideji mreže, prilagojene apriornim podatkom
 (PFN)~\cite{muller2022transformers}. Namesto da bi se model učil na
 ciljni podatkovni množici, ga enkrat in vnaprej naučimo na velikem številu
 sintetičnih podatkovnih množic, vzorčenih iz vnaprej določene apriorne
@@ -739,15 +772,17 @@ posodobitve uteži. Učna množica se skupaj s testnimi primeri poda modelu kot
 vhodno zaporedje in napovedi za celotno testno množico nastanejo v enem samem
 prehodu naprej. Temu pravimo učenje iz konteksta; ciljna podatkovna množica je za model zgolj vhod, nikoli učni signal.
 
-Prva različica TabPFN~\cite{hollmann2023tabpfn} je to zamisel prenesla na
+Prva različica TabPFN je to idejo prenesla na
 tabelarične podatke, a z ozkim območjem uporabnosti: do 1000 učnih primerov, do
-100 številskih atributov, do 10 razredov in brez manjkajočih vrednosti. Druga
-različica~\cite{hollmann2025tabpfn} je model razširila na do \num{10000}
+100 številskih atributov, do 10 razredov in brez manjkajočih
+vrednosti~\cite{hollmann2023tabpfn}. Druga
+različica je model razširila na do \num{10000}
 primerov, 500 atributov in 10 razredov ter mu dodala sposobnost, da se z
 manjkajočimi vrednostmi, kategoričnimi atributi in osamelci spoprime sam:
 avtorji poročajo, da so ga predhodno naučili na približno 100 milijonih
 sintetičnih podatkovnih množic, ki take težave vsebujejo, zato se ustreznih
-strategij nauči namesto ročno vgrajenih rešitev. Arhitekturno vsaka plast
+strategij nauči namesto ročno vgrajenih rešitev~\cite{hollmann2025tabpfn}.
+Arhitekturno vsaka plast
 izvede najprej pozornost po atributih in nato pozornost po
 primerih~\cite{hollmann2025tabpfn}.
 
@@ -787,7 +822,7 @@ preslikave, model ne uporablja; napoved je povprečje osmih ocenjevalcev, ki
 dobijo različno premešane podatke. Kot priporočeno območje poročilo navaja do
 milijon primerov in hkrati do 6000 atributov, z več ocenjevalci pa do
 \num{20000} atributov~\cite{jager2026tabpfn35}. Omejitve števila razredov
-poročilo ne navaja; izmerili smo, da paket sprejme največ 160 razredov
+poročilo ne navaja; izmerili smo, da model sprejme največ 160 razredov
 (razdelek~\ref{sec:rez-medic3}).
 % jager2026tabpfn35 (arXiv 2609.17895v2, preverjeno 2026-10-28 v PDF): razd. 3
 % (str. 8) povzame spremembe; razd. 3.1 in sl. 8 (str. 10): indikator NaN/Inf
@@ -802,8 +837,7 @@ poročilo ne navaja; izmerili smo, da paket sprejme največ 160 razredov
 
 Trditve iz obeh poročil navajamo kot kontekst, ne kot ugotovitev te naloge;
 ali držijo tudi na zbirki OpenML-CC18 in pod našim protokolom, je predmet
-poglavja~\ref{ch:rezultati}, kjer v razdelku~\ref{sec:rez-zagona} primerjamo
-tudi obe različici. Pri izvedbi so pomembne še tri praktične posebnosti: model
+poglavja~\ref{ch:rezultati}. Pri izvedbi so pomembne še tri praktične posebnosti: model
 za smiselno hitrost potrebuje grafično procesno enoto, uteži prenese ob prvi
 uporabi, pred prvo uporabo pa je potreben enkraten sprejem licence prek
 uporabniškega računa ponudnika, in sicer za vsako različico modela posebej.
@@ -877,13 +911,40 @@ stratificiranim prečnim preverjanjem. Podatkovno množico razdelimo na pet prib
 delov, v katerih je razmerje med razredi enako kot v celotni množici; vsak del
 enkrat služi kot testni del, preostali štirje skupaj pa kot učni del. Postopek
 trikrat ponovimo z različnim naključnim mešanjem primerov, zato na vsak par
-podatkovne množice in algoritma pride 15 učenj, na zbirki OpenML-CC18 skupaj
-6480 učenj. Delitve za vsako podatkovno množico določimo enkrat (razred
-\texttt{RepeatedStratifiedKFold} knjižnice scikit-learn s semenom 42) in jih
-uporabijo vsi algoritmi, zato so primerjave parne: vsi algoritmi so učeni in
-testirani na istih primerih. Seme modela je v ponovitvi $r \in \{0, 1, 2\}$
-enako $42 + r$, tako da ponovitve zajamejo tudi naključnost samega algoritma,
-ne le delitve.
+podatkovne množice in algoritma pride 15 učenj. Na 72 podatkovnih množicah
+zbirke OpenML-CC18 je to skupaj 6480 učenj (6 algoritmov, 72 množic, 15 učenj).
+Po enakem protokolu smo ovrednotili tudi podatkovno množico Medic3 v dveh
+različicah, z vsemi 220 razredi in s 160 najpogostejšimi razredi
+(razdelek~\ref{sec:medic3}), kar je dodatnih 180 učenj (6 algoritmov,
+2 različici, 15 učenj).
+
+Delitve za vsako podatkovno množico določimo enkrat in jih uporabijo vsi
+algoritmi, zato so primerjave parne: vsi algoritmi so učeni in testirani na
+istih primerih. Ustvari jih razred \texttt{RepeatedStratifiedKFold} knjižnice
+scikit-learn, ki dobi eno samo seme, 42, in iz njega izpelje različno mešanje
+primerov za vse tri ponovitve. Seme modela pa je v ponovitvi
+$r \in \{0, 1, 2\}$ enako $42 + r$, torej 42, 43 ali 44, tako da ponovitve
+zajamejo tudi naključnost samega algoritma, ne le delitve.
+% scikit-learn 1.9.1, _RepeatedSplits.split: rng = check_random_state(random_state),
+% nato za vsako ponovitev StratifiedKFold(shuffle=True, random_state=rng)
+% (preverjeno 2026-11-06).
+
+Zbirka OpenML-CC18 za vsako podatkovno množico sicer določa desetkratno
+stratificirano prečno preverjanje z vnaprej določenimi
+delitvami~\cite{bischl2021openml}. Uporabimo lastne delitve, da vse podatkovne
+množice, tudi Medic3, ki ni na platformi OpenML, ovrednotimo po enakem
+protokolu in da ponovitve zajamejo naključnost delitve in algoritma. Petkratno
+preverjanje s tremi ponovitvami zahteva 15 učenj na par podatkovne množice in
+algoritma, desetkratno pa bi jih zahtevalo 30. Cena te izbire je, da se
+algoritmi učijo na \SI{80}{\percent} namesto na \SI{90}{\percent} primerov,
+kar pa zaradi skupnih delitev velja za vse algoritme enako.
+% bischl2021openml (arXiv 1708.03731v3): str. 3 (naloga določa postopek vrednotenja
+% in delitve), str. 6 (merilo (c) utemeljeno z desetkratnim preverjanjem), str. 9
+% (»suite-defined 10-fold cross-validation«); stratificiranost: OpenML
+% api/v1/json/task/<id>, estimation_procedure (preverjeno 2026-11-06, glej
+% razdelek sec:cc18-literatura). Utemeljitev lastnih delitev potrdil uporabnik
+% 2026-11-07; n_splits 5 je v kodi od prve različice (2026-07-16), n_repeats 3 od
+% 2026-09.
 
 Vse algoritme uporabljamo s privzetimi hiperparametri. Tak protokol ustreza
 uporabi algoritma brez uglaševanja, za katero sta temeljna modela zasnovana:
@@ -904,8 +965,18 @@ najboljši prejme rang 1, izenačeni si delijo povprečje rangov, algoritem, ki 
 podatkovni množici v katerem koli učenju ni uspel, pa prejme najslabši rang.
 Neuspelih učenj torej ne izpustimo, saj bi izpuščanje rezultate pristransko
 izboljšalo~\cite{wainberg2016random}. Povprečno vrednost metrike čez podatkovne
-množice računamo le na tistih, na katerih so uspeli vsi algoritmi, da so vsa
-povprečja izračunana na isti podmnožici.
+množice računamo le na tistih, na katerih so uspeli vsi algoritmi, tako da so
+povprečja vseh algoritmov izračunana na isti podmnožici in med seboj
+primerljiva. Na zbirki OpenML-CC18 so uspela vsa učenja
+(razdelek~\ref{sec:rez-pomnilnik}), zato so povprečja izračunana na vseh 72
+podatkovnih množicah. Pri podatkovni množici Medic3 je vsaka različica ena sama
+podatkovna množica, zato povprečij čez množice ne računamo; algoritme
+primerjamo s povprečjem čez 15 učenj in s parnimi testi
+(podrazdelek~\ref{sec:statistika}). Na različici z 220 razredi TabPFN-3.5 ne
+more uspeti, ker sprejme največ 160 razredov. Njegov neuspeh v rezultatih
+označimo, primerjava na tej različici pa zajame preostalih pet algoritmov;
+vseh šest primerjamo na različici s 160 razredi, ki smo jo pripravili prav
+zato (razdelek~\ref{sec:medic3}).
 
 Podatkovno množico imenujemo \emph{nasičena}, če najboljši algoritem na njej
 doseže ROC-AUC vsaj \num{0.995}. Na nasičenih množicah so najboljši algoritmi
@@ -994,24 +1065,61 @@ ROC-AUC, zato je podmnožica nenasičenih množic povsod ista.
 % Wilcoxonovem testu razdeli zero_method="zsplit". Formula in vrednosti preverjene na
 % Demšarjevem zgledu (CLAUDE.md repozitorija s kodo, Structure, src/stats.py).
 
+% Strani pri Demšarju (JMLR 7, 2006; preverjeno iz PDF 2026-11-06): družinska
+% napaka str. 9; Wilcoxon §3.1.3 str. 7 (razlike rangira po absolutni vrednosti,
+% primerja vsoti rangov pozitivnih in negativnih razlik; večje razlike štejejo več,
+% absolutne velikosti ne; osamelci vplivajo manj kot pri t-testu); Friedman in F_F
+% §3.2.2 str. 11; Nemenyi in CD str. 11-12 ("differ by at least the critical
+% difference"; koda: značilno, če razlika rangov >= CD); q_alpha tabela 5(a) str. 12
+% (studentizirani razpon, deljen s sqrt(2); k = 6: 2,850); diagram CD str. 15-16.
+
 Razlike med algoritmi na več podatkovnih množicah preverimo po postopku, ki ga
-priporoča Demšar~\cite{demsar2006statistical}. Friedmanov test preveri ničelno
-domnevo, da so vsi algoritmi enakovredni in imajo zato enake pričakovane
-povprečne range. O zavrnitvi odločimo na podlagi statistike $F_F$, ki sta jo
-predlagala Iman in Davenport in jo Demšar priporoča namesto preveč
-konservativne statistike $\chi^2_F$. Če Friedmanov test ničelno domnevo zavrne,
-uporabimo Nemenyijev test kot naknadni test nad povprečnimi rangi: povprečna
-ranga dveh algoritmov se značilno razlikujeta, če je njuna razlika večja od
-kritične razdalje (angl. \emph{critical difference})
+priporoča Demšar~\cite{demsar2006statistical}. Testi uporabljajo range
+algoritmov oziroma povprečja metrike na posameznih podatkovnih množicah
+(razdelek~\ref{sec:protokol}). Stopnja značilnosti je pri vseh testih
+$\alpha = 0{,}05$.
+
+Najprej s Friedmanovim testom preverimo, ali se algoritmi sploh razlikujejo.
+Test preveri ničelno domnevo, da so vsi algoritmi enakovredni in imajo zato
+enake pričakovane povprečne range. O zavrnitvi odločimo na podlagi statistike
+$F_F$, ki sta jo predlagala Iman in Davenport in jo Demšar priporoča namesto
+preveč konservativne statistike $\chi^2_F$~\cite{demsar2006statistical}.
+Zavrnitev pove le, da se vsaj dva algoritma med seboj razlikujeta, ne pa,
+katera.
+
+Če Friedmanov test ničelno domnevo zavrne, z Nemenyijevim testom poiščemo
+pare algoritmov, ki se značilno razlikujejo. Test hkrati primerja povprečne
+range vseh parov: povprečna ranga dveh algoritmov se značilno razlikujeta, če
+se razlikujeta vsaj za kritično razdaljo (angl. \emph{critical difference})
 $\mathit{CD} = q_\alpha \sqrt{k(k+1)/(6N)}$, kjer je $k$ število algoritmov,
-$N$ število podatkovnih množic, $q_\alpha$ pa kritična vrednost
-studentiziranega razpona, deljena s $\sqrt{2}$~\cite{demsar2006statistical}.
-Ker je izid naknadnih testov nad povprečnimi rangi odvisen od tega, kateri
-drugi algoritmi so vključeni v primerjavo~\cite{benavoli2016should}, vsak par
-algoritmov primerjamo še z Wilcoxonovim testom predznačenih rangov na
-povprečjih po podatkovnih množicah, p-vrednosti vseh parov pa popravimo s
-Holmovim popravkom za večkratno primerjanje~\cite{demsar2006statistical}.
-Stopnja značilnosti je povsod $\alpha = 0{,}05$.
+$N$ število podatkovnih množic, $q_\alpha$ pa kritična vrednost, ki je odvisna
+le od števila algoritmov in stopnje značilnosti in jo Demšar podaja v tabeli;
+za šest algoritmov in $\alpha = 0{,}05$ znaša
+$q_\alpha = \num{2.850}$~\cite{demsar2006statistical}. Kritična razdalja se z
+večjim številom podatkovnih množic zmanjšuje, zato test na več množicah zazna
+manjše razlike v rangih. Izid prikažemo z diagramom kritične razdalje, na
+katerem so algoritmi razvrščeni po povprečnem rangu, skupine algoritmov, med
+katerimi razlika ni značilna, pa so povezane~\cite{demsar2006statistical}.
+Nemenyijev test nam torej pove, kateri algoritmi se po vrstnem redu na
+podatkovnih množicah značilno razlikujejo, ne pa tudi, za koliko se
+razlikujejo njihove vrednosti metrike.
+
+Nemenyijev test ima dve slabosti. Na vsaki podatkovni množici upošteva le
+vrstni red algoritmov, ne pa tudi, za koliko je eden boljši od drugega, njegov
+izid pa je odvisen tudi od tega, kateri drugi algoritmi so vključeni v
+primerjavo~\cite{benavoli2016should}. Zato vsak par algoritmov primerjamo še z
+Wilcoxonovim testom predznačenih rangov. Test na vsaki podatkovni množici
+izračuna razliko povprečij metrike obeh algoritmov, razlike razvrsti po
+absolutni vrednosti in primerja vsoto rangov množic, na katerih je boljši prvi
+algoritem, z vsoto rangov množic, na katerih je boljši drugi. Večje razlike
+tako štejejo več kot manjše, njihova natančna velikost pa ne, zato posamezne
+izjemne podatkovne množice na izid vplivajo manj kot pri parnem
+t-testu~\cite{demsar2006statistical}. Test preveri ničelno domnevo, da sta
+algoritma enako dobra; zavrnitev pomeni, da je eden od njiju na podatkovnih
+množicah značilno boljši. Pri šestih algoritmih je parov 15, zato p-vrednosti
+vseh parov popravimo s Holmovim popravkom za večkratno primerjanje, ki
+verjetnost, da bi med vsemi pari vsaj eno razliko napačno razglasili za
+značilno, omeji na stopnjo značilnosti~\cite{demsar2006statistical}.
 
 Na eni sami podatkovni množici (Medic3) testov čez več množic ne moremo
 uporabiti~\cite{demsar2006statistical}. Pare algoritmov zato primerjamo s
@@ -1058,8 +1166,7 @@ kategoričnih atributov ne sprejme, zato jih kodiramo ordinalno; CatBoost pa ne
 sprejme manjkajoče vrednosti v kategoričnem atributu, zato jo zapišemo kot
 lastno kategorijo. To sta edina posega v vrednosti atributov. Ostali koraki so
 le pretvorbe podatkovnega tipa, ki jih knjižnice zahtevajo; podrobnosti so
-navedene pri posameznih algoritmih v razdelku~\ref{sec:algoritmi}. Da vsak
-korak res potrebujejo, smo preverili s samodejno revizijo, opisano tam.
+navedene pri posameznih algoritmih v razdelku~\ref{sec:algoritmi}.
 
 Pravilo velja za našo kodo. Predobdelava, ki jo knjižnica izvede sama, je del
 algoritma, tudi kadar ni na prvi pogled vidna. TabPFN-3.5 zabeleži, katere
@@ -1082,9 +1189,8 @@ Vsa učenja glavne primerjave in obeh dodatnih poskusov so tekla na gruči
 Arnes (Akademska in raziskovalna mreža Slovenije), ki opravila razporeja s
 sistemom SLURM. Na lokalnih računalnikih smo izvedli le diagnostiko modela
 LightGBM v razdelku~\ref{sec:rez-medic3} in preverjanja, ki niso del
-rezultatov, na primer revizijo privzetih nastavitev
-(razdelek~\ref{sec:algoritmi}) in meritev največjega števila razredov modela
-TabPFN-3.5 (podrazdelek~\ref{sec:tabpfn}).
+rezultatov, na primer meritev največjega števila razredov modela TabPFN-3.5
+(podrazdelek~\ref{sec:tabpfn}).
 % PREVERI: ali je treba gručo Arnes in porabljeni računski čas navesti tudi v
 % zahvali oziroma s posebnim navedkom, kot to zahtevajo pogoji uporabe.
 Glavno primerjavo na zbirki OpenML-CC18 smo izvedli kot polje opravil (angl.
@@ -1176,6 +1282,8 @@ javni.
 Algoritme smo primerjali na 72 podatkovnih množicah javne zbirke OpenML-CC18
 in na zaupni podatkovni množici Medic3. V tem poglavju opišemo obe; lastnosti
 posameznih množic zbirke OpenML-CC18 so zbrane v dodatku~\ref{dod:lastnosti}.
+Na koncu poglavja preverimo, ali so naši rezultati na zbirki OpenML-CC18
+skladni z objavljenimi.
 
 \section{OpenML-CC18}
 \label{sec:cc18}
@@ -1192,8 +1300,9 @@ največjim razredom pa mora biti večje od \num{0.05}. Množica ne sme biti
 redka, ne sme vsebovati časovne odvisnosti med primeri in ne sme zahtevati
 vzorčenja po skupinah. Izločene so bile tudi umetne množice, podmnožice večjih
 množic, množice s spremenjeno ciljno spremenljivko in množice brez navedenega
-vira, pa tudi množice, ki jih en sam atribut ali odločitveno drevo razvrsti
-brez napake~\cite{bischl2021openml}. Zbirka torej vsebuje srednje velike, ne
+vira, pa tudi množice, ki jih en sam atribut razvrsti brez napake ali na
+katerih odločitveno drevo pri desetkratnem prečnem preverjanju doseže
+\SI{100}{\percent} točnost~\cite{bischl2021openml}. Zbirka torej vsebuje srednje velike, ne
 prelahke in ne izrazito neuravnotežene naloge. Avtorji sami navajajo, da
 nekatere množice meril ne izpolnjujejo povsem: sick je različica množice
 hypothyroid z združenimi razredi, electricity ima atribute, povezane s časom,
@@ -1215,8 +1324,6 @@ stratificiranem prečnem preverjanju vsak razred v vsakem testnem delu.
 Identifikatorje vseh 72 nalog smo pripeli ob prvem prenosu, tako da se
 seznam množic med poskusi ni spreminjal.
 
-\input{rezultati/tab_cc18_opis.tex}
-
 Tabela~\ref{tab:cc18-opis} povzema lastnosti množic, slika~\ref{fig:cc18-velikosti}
 pa njihovo velikost. Število primerov sega od 500 (dresses-sales) do
 \num{96320} (numerai28.6), število atributov do 3072 (CIFAR\_10), število
@@ -1225,6 +1332,8 @@ razredov do 46 (Devnagari-Script). Binarnih nalog je 35, nalog z več razredi
 manjkajoče vrednosti ima devet množic, največ dresses-sales s
 \SI{13.92}{\percent} manjkajočih vrednosti. Najbolj neuravnotežena je množica
 car, pri kateri je razmerje med najmanjšim in največjim razredom \num{0.054}.
+
+\input{rezultati/tab_cc18_opis.tex}
 
 \begin{figure}[htbp]
 \centering
@@ -1235,13 +1344,22 @@ ovrednoten TabPFN v2~\cite{hollmann2025tabpfn}.}
 \label{fig:cc18-velikosti}
 \end{figure}
 
+% Tabela in slika naj bosta pred odstavkom o mejah modelov (uporabnik, 2026-11-07).
+\FloatBarrier
+
 Del množic presega območje, na katerem so bili temeljni modeli prvotno
 predstavljeni. Glede na meje, do katerih je bil ovrednoten TabPFN v2 (do
 \num{10000} primerov, 500 atributov in 10 razredov~\cite{hollmann2025tabpfn}),
 je zunaj tega območja 22 množic: 16 jih ima več kot \num{10000} primerov, devet
-več kot 500 atributov in pet več kot 10 razredov. Na teh množicah se pokaže, ali
-temeljna modela svojo uspešnost ohranita tudi zunaj območja, za katero je bila
-paradigma prvotno zasnovana (razdelek~\ref{sec:rez-lastnosti}).
+več kot 500 atributov in pet več kot 10 razredov. Model
+TabPFN-3.5, ki ga uporabljamo, ima precej širše območje: tehnično poročilo
+zanj navaja do milijon primerov in hkrati do 6000 atributov~\cite{jager2026tabpfn35},
+model pa sprejme največ 160 razredov (podrazdelek~\ref{sec:tabpfn}). Znotraj teh
+mej so vse množice zbirke. Da model podatkovno množico sprejme, pa še ne
+pomeni, da na njej ohrani prednost pred drevesnimi ansambli; to preverimo v
+razdelku~\ref{sec:rez-lastnosti}.
+% Preverjeno iz results/datasets/cc18.csv (2026-11-07): največ 96320 primerov,
+% 3072 atributov, 46 razredov; nobena množica ne preseže 1M / 6000 / 160.
 
 \section{Podatkovna množica Medic3}
 \label{sec:medic3}
@@ -1260,22 +1378,35 @@ pri petkratnem stratificiranem prečnem preverjanju tudi tu vsak razred v
 vsakem testnem delu. Manjkajočih je \SI{82.2}{\percent} vrednosti atributov;
 manjkajoče vrednosti ima vsak primer, mediana števila znanih atributov na
 primer pa je 50 od 275. Že samo dejstvo, ali je vrednost atributa znana, je
-močno povezano z razredom: med razredi z vsaj 200 primeri ima pri nekaterih
-atributih en razred znano vrednost v \SI{99.5}{\percent} primerov, drug pa v
-\SI{0.0}{\percent} primerov (zaokroženo na eno decimalko). Poleg atributov in razreda vsebuje podatkovna množica zaporedno
+lahko močno povezano z razredom. Atribut A177 je na primer znan pri 206 od 207
+primerov enega razreda in pri nobenem od 233 primerov drugega.
+% Vir: izpis scripts/profile_medic3.py (2026-11-07), razdelek Bližnjice: »A177: opažen
+% pri C152 ... (206/207), pri C202 ... (0/233)«. Prag 200 vrstic in filter 2 % v skriptu
+% sta le hevristiki iskanja; navedeni števili sta golo štetje in od njiju ne zavisita.
+Poleg atributov in razreda vsebuje podatkovna množica identifikacijsko
 številko primera in stolpec z 11 vrednostmi, ki razrede združuje v skupine.
 Oba stolpca smo po navodilu mentorja izločili; drugi bi bil bližnjica do
 razreda, saj sam napove razred s točnostjo \SI{25.0}{\percent}.
-% PREVERI: ali smemo stolpec Field opisati kot združevanje razredov v skupine
-% (oddelke) in ali je »po navodilu mentorja« ustrezna formulacija.
+% Stolpca Index (narašča od 1 do 179681, z vrzelmi, zato »identifikacijska« in ne
+% »zaporedna« številka) in Field (11 vrednosti; vsak razred pripada natanko eni
+% vrednosti) sta izločena po navodilu mentorja (potrdil uporabnik 2026-11-07).
+% Točnost 25,0 %: napoved najpogostejšega razreda za vsako vrednost Field, na vseh
+% primerih 25,04 %, pri petkratnem preverjanju na testnih delih 24,8-25,2 %
+% (preverjeno 2026-11-07 iz Diplomsko-delo_Koda/data/medic3/Medic3.csv).
 
 TabPFN-3.5 sprejme največ 160 razredov (podrazdelek~\ref{sec:tabpfn}), zato
 smo pripravili tudi različico s 160 razredi. Obdržali smo primere 160
 najpogostejših razredov, pri enakem številu primerov pa je odločala oznaka
 razreda; primere preostalih 60 razredov smo zavrgli. Različica obsega
 \num{117825} primerov (\SI{96.5}{\percent} prvotnih), najmanjši obdržani razred
-ima 102 primera. Preostalih razredov nismo združili v skupen razred, ker bi jih
-bilo potem 161 in bi TabPFN-3.5 različico spet zavrnil.
+ima 102 primera. Preostalih razredov tudi nismo združili v skupni razred. Da
+bi ostalo 160 razredov, bi morali obdržati 159 najpogostejših, skupni razred
+pa bi združeval 61 med seboj nepovezanih razredov iz desetih skupin in bi s
+4370 primeri postal peti največji razred.
+% Izračunano 2026-11-07 iz Diplomsko-delo_Koda/data/medic3/Medic3.csv z vrstnim redom
+% kot v src/data.py (_limit_classes): razredi 160.-220. imajo skupaj 4370 primerov in
+% pripadajo 10 vrednostim stolpca Field (vse razen F010); po velikosti bi bil tak
+% razred 5. od 160 (večji so 7462, 7014, 6180, 5162).
 % PREVERI (vprašanje za mentorja): načrt z dne 2026-08-12 je predvideval, da
 % razrede izločimo enakomerno po skupinah (stolpec Field); koda
 % (Diplomsko-delo_Koda/src/data.py, _limit_classes) obdrži 160 globalno
@@ -1289,6 +1420,98 @@ Ker so vsi atributi številski, nativna obravnava kategoričnih atributov tu
 nobenemu algoritmu ne prinese prednosti, različna obravnava manjkajočih
 vrednosti (razdelek~\ref{sec:predobdelava}) pa pride do izraza bolj kot na
 katerikoli množici zbirke.
+
+\section{Skladnost z objavljenimi rezultati}
+\label{sec:cc18-literatura}
+% Vse številke: Diplomsko-delo_Koda/results/runs/cc18_v4/combined/summary/literature_*
+% (scripts/compare_literature.py, 2026-11-06) in izpis rezultati/generiraj_rezultate.py,
+% razdelek 16; tabele tab_literatura.tex, tab_literatura_domene.tex in tab_domene.tex so
+% iz istega skripta. Objavljene vrednosti: results/literature/hollmann2025_tabzilla.csv
+% (scripts/extract_hollmann2025.py iz Supplementary Table 4 članka hollmann2025tabpfn,
+% PDF 41586_2024_8328_MOESM1_ESM.pdf, sha256 c36dd246...; README v isti mapi). Protokol
+% avtorjev: hollmann2025tabpfn, Methods (ROC AUC One-vs-Rest; naključno iskanje s
+% petkratnim prečnim preverjanjem po ROC-AUC, prvi kandidat privzeta nastavitev; delitve
+% določajo naloge OpenML), naslov tabele 4 »after one hour«; zbirka TabZilla v članku:
+% »102 datasets«. Vseh 49 nalog je nalog zbirke OpenML-CC18 (api/v1/json/study/99), te pa
+% imajo desetkratno stratificirano prečno preverjanje (api/v1/json/task/<id>,
+% estimation_procedure); preverjeno 2026-11-06. Dodatno gradivo drugih metrik po množicah
+% ne navaja. Domene: results/datasets/cc18_domains.csv (ročna razvrstitev po opisu na
+% OpenML; oznake OpenML so neenotne, objavljene razvrstitve zbirke po domenah nismo našli).
+% Standardni odklon objavljenih rezultatov na ilpd: stolpci *_std v hollmann2025_tabzilla.csv.
+
+Preden predstavimo rezultate, preverimo, ali naša koda za vrednotenje na
+zbirki OpenML-CC18 daje rezultate, skladne z objavljenimi. Za tako primerjavo
+potrebujemo objavljen ROC-AUC po posameznih podatkovnih množicah zbirke, in to
+za iste algoritme. Takšne rezultate objavljajo avtorji modela TabPFN v2 v
+dodatnem gradivu svojega članka: poleg glavnih zbirk tam za vse štiri drevesne
+ansamble in za TabPFN v2 navajajo ROC-AUC v različici OvR na 102 klasifikacijskih
+množicah zbirke TabZilla~\cite{mcelfresh2023neural}, ki ustrezajo omejitvam
+modela TabPFN v2 (razdelek~\ref{sec:cc18})~\cite{hollmann2025tabpfn}. Med njimi
+je 49 množic zbirke OpenML-CC18. Povezali smo jih po identifikatorju OpenML in
+vse so med našimi 72.
+
+Protokol avtorjev se od našega razlikuje v dveh pogledih. Drevesne ansamble so
+uglaševali z naključnim iskanjem, v katerem so nastavitve ocenjevali s
+petkratnim prečnim preverjanjem po ROC-AUC, prva preizkušena nastavitev pa je
+bila privzeta; za to zbirko navajajo rezultate po eni uri
+uglaševanja~\cite{hollmann2025tabpfn}. Vsako množico so ovrednotili na
+delitvah, ki jih zanjo vnaprej določa platforma
+OpenML~\cite{hollmann2025tabpfn}; pri zbirki OpenML-CC18 je to desetkratno
+stratificirano prečno preverjanje, pri katerem je v vsaki delitvi za testiranje
+\SI{10}{\percent} primerov. Mi smo ansamble uporabili s privzetimi nastavitvami
+in jih ovrednotili s trikrat ponovljenim petkratnim prečnim preverjanjem
+(razdelek~\ref{sec:protokol}), pri katerem je za testiranje
+\SI{20}{\percent} primerov. Algoritmi so isti, različic knjižnic avtorji ne
+navajajo. Namesto modela TabPFN-3.5 so ovrednotili njegovega predhodnika
+TabPFN v2, zato pri temeljnem modelu enakih rezultatov ne pričakujemo;
+objavljenega vrednotenja modela TabPFN-3.5 na zbirki OpenML-CC18 ob pisanju
+naloge nismo našli.
+
+\input{rezultati/tab_literatura.tex}
+
+Tabela~\ref{tab:literatura} povzema primerjavo. Naši in objavljeni rezultati
+se po množicah skoraj popolnoma ujemajo: Pearsonov koeficient korelacije je pri
+vseh parih algoritmov med \num{0.986} in \num{0.997}, kar pomeni, da so iste
+množice v obeh vrednotenjih lahke oziroma težke. Naši privzeti ansambli so od
+objavljenih uglašenih v povprečju slabši za \num{0.0044} (CatBoost) do
+\num{0.0125} (XGBoost), mediane zaostanka pa so le od \num{0.0010} do
+\num{0.0024}. Na večini množic je zaostanek torej majhen, povprečje pa
+zvišajo posamezne množice z večjo razliko. Zaostanek je pričakovan učinek uglaševanja, kar kaže XGBoost iz
+našega poskusa uglaševanja (razdelek~\ref{sec:rez-uglasevanje}): uglašeni je
+od objavljenega slabši za \num{0.0036}, privzeti pa za \num{0.0125}. Večji del
+razlike torej pojasni uglaševanje, preostanek pa je lahko posledica drugačnega
+postopka uglaševanja in manjšega učnega dela pri naših delitvah. Naš
+TabPFN-3.5 je od objavljenega TabPFN v2 v povprečju boljši za \num{0.0039}
+(mediana \num{0.0012}), kar je za novejšo različico majhna razlika; največja je
+na množicah cylinder-bands (\num{0.0511}), GesturePhaseSegmentationProcessed
+(\num{0.0342}) in ilpd (\num{0.0221}).
+
+Primerjava je torej preverba naše kode za vrednotenje. Napaka, zaradi katere
+bi informacija iz testnega dela prešla v učenje, bi se pokazala kot ROC-AUC,
+opazno višji od objavljenega. Takega odstopanja ni: naši privzeti ansambli so
+od objavljenih uglašenih za več kot \num{0.01} boljši le na eni majhni
+množici.
+% To je ilpd (583 primerov), kjer so nad objavljenimi vsi štirje ansambli; standardni
+% odklon objavljenih rezultatov ansamblov čez delitve je tam od 0,04 do 0,07 (stolpci
+% *_std v hollmann2025_tabzilla.csv). Stavek o uhajanju podatkov (lastnost modela,
+% preverja ga razdelek sec:rez-uhajanje) odstranjen na željo uporabnika 2026-11-07.
+
+\input{rezultati/tab_literatura_domene.tex}
+
+Tabela~\ref{tab:literatura-domene} prikazuje razlike po podatkovnih domenah,
+torej po področjih, iz katerih podatki izvirajo. Objavljene razvrstitve množic
+zbirke po domenah nismo našli, zato smo jih razvrstili sami, po izvoru
+podatkov, kot ga navaja opis množice na platformi OpenML; razvrstitev je v
+tabeli~\ref{tab:domene} v dodatku~\ref{dod:lastnosti}. Naš TabPFN-3.5 je od
+objavljenega TabPFN v2 v povprečju boljši v petih domenah, v domeni iger in
+umetnih podatkov pa enako dober (\num{-0.0003}). Zaostanek privzetih CatBoosta,
+LightGBM in naključnega gozda je največji v domeni poslovanja in družbe (od
+\num{0.0101} do \num{0.0242}), zaostanek privzetega XGBoosta pa v domeni
+računalništva in besedil (\num{0.0277}), sledi mu domena poslovanja in družbe
+(\num{0.0254}). V tej domeni uglaševanje razliko odpravi: naš uglašeni XGBoost
+je enak objavljenemu (\num[retain-explicit-plus]{+0.0001}).
+Domene obsegajo od 4 do 16 množic, zato povprečja po domenah le opisujejo, kje
+so razlike večje, in jih ne posplošujemo.
 
 %=========================================================================
 \chapter{Rezultati}
@@ -2174,6 +2397,13 @@ TabArena.
 % Vir: Diplomsko-delo_Koda/results/datasets/cc18.csv (scripts/describe_datasets.py).
 
 \input{rezultati/tab_cc18_lastnosti.tex}
+
+Tabela~\ref{tab:domene} navaja razvrstitev množic v podatkovne domene, ki jo
+uporabljamo v razdelku~\ref{sec:cc18-literatura}.
+% Vir: Diplomsko-delo_Koda/results/datasets/cc18_domains.csv (ročna razvrstitev,
+% stolpec basis navede izvor po opisu na OpenML).
+
+\input{rezultati/tab_domene.tex}
 
 \chapter{Rezultati po podatkovnih množicah}
 \label{dod:rezultati}

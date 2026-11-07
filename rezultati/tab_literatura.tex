@@ -1,0 +1,19 @@
+% Samodejno iz Diplomsko-delo_Koda/results/runs/cc18_v4/combined/summary/literature_overall.csv, results/runs/cc18_v4/combined/summary/literature_by_domain.csv (scripts/compare_literature.py: cc18_v4/combined in cc18_xgb_tuned proti results/literature/hollmann2025_tabzilla.csv, domene iz results/datasets/cc18_domains.csv). Ne urejaj na roko.
+\begin{table}[htbp]
+\centering
+\caption{Naši in objavljeni rezultati na 49 podatkovnih množicah zbirke OpenML-CC18, ki so tudi v dodatnem gradivu članka o modelu TabPFN v2~\cite{hollmann2025tabpfn}: povprečni ROC-AUC, povprečna razlika in mediana razlike (naš $-$ objavljeni) ter Pearsonov koeficient korelacije $r$ med našim in objavljenim ROC-AUC čez množice. Objavljeni ansambli so uglašeni; naši imajo privzete nastavitve, razen uglašenega XGBoosta iz poskusa uglaševanja. Naš TabPFN-3.5 primerjamo z objavljenim TabPFN v2.}
+\label{tab:literatura}
+\small
+\begin{tabular}{lrrrrr}
+\hline
+Algoritem & naš & objavljeni & razlika & mediana & $r$ \\
+\hline
+CatBoost & \num{0.9223} & \num{0.9267} & \num[retain-explicit-plus]{-0.0044} & \num[retain-explicit-plus]{-0.0012} & \num{0.997} \\
+LightGBM & \num{0.9147} & \num{0.9238} & \num[retain-explicit-plus]{-0.0091} & \num[retain-explicit-plus]{-0.0013} & \num{0.989} \\
+XGBoost & \num{0.9127} & \num{0.9252} & \num[retain-explicit-plus]{-0.0125} & \num[retain-explicit-plus]{-0.0024} & \num{0.986} \\
+XGBoost (uglašeni) & \num{0.9216} & \num{0.9252} & \num[retain-explicit-plus]{-0.0036} & \num[retain-explicit-plus]{-0.0008} & \num{0.995} \\
+Naključni gozd & \num{0.9138} & \num{0.9200} & \num[retain-explicit-plus]{-0.0062} & \num[retain-explicit-plus]{-0.0010} & \num{0.995} \\
+TabPFN-3.5 / TabPFN v2 & \num{0.9363} & \num{0.9325} & \num[retain-explicit-plus]{+0.0039} & \num[retain-explicit-plus]{+0.0012} & \num{0.995} \\
+\hline
+\end{tabular}
+\end{table}
