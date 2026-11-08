@@ -211,9 +211,12 @@ def cell(tab, algo):
 def tcell(tab, algo, col, d):
     r = tab.loc[algo]
     return '--' if r.n_failed == r.n_folds or pd.isna(r[col]) else n(r[col], d)
+# Tabele Medic3 (tab_medic3, tab_medic3_test, tab_medic3_metrike) imajo [H] (paket float):
+# v razdelku o Medic3 se izmenjujejo z besedilom, zato vsaka stoji natanko za odstavkom,
+# ki jo opisuje, in ga ne preseka na prelomu strani (uporabnik, 2026-11-08).
 t = src([M_RAW + '/summary/per_dataset.csv', M_160 + '/summary/per_dataset.csv'],
         what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160")
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Rezultati na podatkovni množici Medic3 z vsemi """ + str(info['raw']['classes']) + r""" razredi in s """ + str(info['160']['classes']) + r""" najpogostejšimi razredi: povprečni ROC-AUC $\pm$ standardni odklon čez 15 učenj ter mediani časa učenja in napovedovanja na učenje. -- označuje neuspeh vseh učenj (TabPFN-3.5 sprejme največ 160 razredov). Časi primerjajo kombinacijo algoritma in strojne opreme (razdelek~\ref{sec:rez-casi}).}
 \label{tab:medic3}
@@ -243,7 +246,7 @@ def tt_rows(tt):
 traw, t160 = tt_rows(raw_tt), tt_rows(m160_tt)
 t = src([M_RAW + '/summary/corrected_ttest_holm.csv', M_160 + '/summary/corrected_ttest_holm.csv'],
         what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160")
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Popravljeni t-test za ponovljeno prečno preverjanje s Holmovim popravkom na podatkovni množici Medic3. Razlika je povprečna razlika ROC-AUC (prvi minus drugi algoritem) čez 15 učenj, zmage pa število učenj, v katerih je boljši prvi oziroma drugi. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$; -- označuje par z algoritmom, ki ni uspel.}
 \label{tab:medic3-test}
@@ -383,7 +386,7 @@ def mcell(tab, algo, metric):
 t = src([M_RAW + f'/summary/{m}/per_dataset.csv' for m in MET] + [M_160 + f'/summary/{m}/per_dataset.csv' for m in MET],
         what="naključni gozd in XGBoost iz medic3_raw_v2/medic3_160_v2, ostali iz medic3_raw/medic3_160; "
              "metrike iz shranjenih napovedi, scripts/compute_metrics.py")
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Dodatni metriki na podatkovni množici Medic3: povprečna točnost in povprečna logaritemska izguba $\pm$ standardni odklon čez 15 učenj. Pri logaritemski izgubi je boljša nižja vrednost. -- označuje neuspeh vseh učenj. Algoritmi so urejeni kot v tabeli~\ref{tab:medic3}.}
 \label{tab:medic3-metrike}

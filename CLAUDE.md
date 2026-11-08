@@ -24,6 +24,12 @@ ne opozori posebej.
   učenje iz konteksta, uhajanje podatkov). Ustaljenim izrazom (strojno učenje,
   naključni gozd, točnost, prečno preverjanje, iskanje po mreži ...) ga ne
   dodajamo, ker preveč prevodov moti branje (uporabnik, 2026-11-04).
+- **Izrazi po napotku mentorja** (sporočil uporabnik, 2026-11-08):
+  *tabelarični temeljni modeli* (angl. tabular foundation models, TFM);
+  *vgrajena obravnava* za angl. native, nikoli »nativno« ali »domorodno«;
+  *manjkajoče vrednosti* (angl. missing values); za splošno kakovost algoritma
+  *uspešnost*, za accuracy *točnost*; *natančnost* le za precision (npr.
+  strojna natančnost).
 - **Ista ugotovitev na več mestih, na različnih ravneh podrobnosti:**
   visokonivojsko v povzetku, motivacijsko v uvodu, tehnično v jedru, sintetično
   v zaključku. To ni podvajanje, ampak zahtevana struktura.
