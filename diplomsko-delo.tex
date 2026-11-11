@@ -707,8 +707,9 @@ katerega ima knjižnica vgrajeno obravnavo; številske stolpce le pretvorimo v z
 plavajočo vejico, saj stolpcev splošnega tipa ne sprejme.
 % enable_categorical=True in zavrnitev stolpcev tipa object: preverjeno v nameščeni
 % knjižnici xgboost 3.4.1 (Diplomsko-delo_Koda/scripts/audit_defaults.py). Vir
-% xgboostdocs je dokumentacija 3.4.2 (stran »stable«; ločene dokumentacije za 3.4.1
-% readthedocs nima, preverjeno 2026-11-05). Število iteracij: v nameščeni 3.4.1
+% xgboostdocs je izvorna datoteka dokumentacije ob oznaki v3.4.1 na GitHubu
+% (doc/parameter.rst; ločene dokumentacije za 3.4.1 readthedocs nima), privzete
+% vrednosti v njej preverjene 2026-11-11. Število iteracij: v nameščeni 3.4.1
 % xgboost.sklearn.DEFAULT_N_ESTIMATORS = 100, parameter n_estimators pa je privzeto
 % None (preverjeno 2026-11-05).
 
@@ -930,7 +931,7 @@ zajamejo tudi naključnost samega algoritma, ne le delitve.
 % (preverjeno 2026-11-06).
 
 Zbirka OpenML-CC18 za vsako podatkovno množico sicer določa desetkratno
-stratificirano prečno preverjanje z vnaprej določenimi
+prečno preverjanje z vnaprej določenimi
 delitvami~\cite{bischl2021openml}. Uporabimo lastne delitve, da vse podatkovne
 množice, tudi Medic3, ki ni na platformi OpenML, ovrednotimo po enakem
 protokolu in da ponovitve zajamejo naključnost delitve in algoritma. Petkratno
@@ -940,9 +941,10 @@ algoritmi učijo na \SI{80}{\percent} namesto na \SI{90}{\percent} primerov,
 kar pa zaradi skupnih delitev velja za vse algoritme enako.
 % bischl2021openml (arXiv 1708.03731v3): str. 3 (naloga določa postopek vrednotenja
 % in delitve), str. 6 (merilo (c) utemeljeno z desetkratnim preverjanjem), str. 9
-% (»suite-defined 10-fold cross-validation«); stratificiranost: OpenML
-% api/v1/json/task/<id>, estimation_procedure (preverjeno 2026-11-06, glej
-% razdelek sec:cc18-literatura). Utemeljitev lastnih delitev potrdil uporabnik
+% (»suite-defined 10-fold cross-validation«). Stratificiranosti članek ne omenja, zato
+% je tu ne navajamo (2026-11-11); po OpenML api/v1/json/task/<id>,
+% estimation_procedure (preverjeno 2026-11-06) jo brez sklica na članek navaja
+% razdelek sec:cc18-literatura. Utemeljitev lastnih delitev potrdil uporabnik
 % 2026-11-07; n_splits 5 je v kodi od prve različice (2026-07-16), n_repeats 3 od
 % 2026-09.
 
@@ -1012,10 +1014,14 @@ OvO~\cite{hollmann2023tabpfn,hand2001simple}. Dokumentacija knjižnice
 scikit-learn opozarja, da je različica OvR za razliko od različice OvO
 občutljiva na neuravnoteženost razredov tudi pri neuteženem povprečju, saj ta
 vpliva na sestavo skupine ostalih razredov~\cite{sklearndocsroc}. Hand je
-ROC-AUC kritiziral kot nekoherentno mero stroškov napačne klasifikacije, ker za
-različne klasifikatorje implicitno predpostavi različne porazdelitve
-stroškov~\cite{hand2009measuring}; ker v naši primerjavi stroški napak niso
-znani, ROC-AUC kljub temu uporabljamo kot splošno mero ločevanja med razredi.
+ROC-AUC kritiziral kot mero, ki je nekoherentna glede stroškov napačne
+klasifikacije, saj za različne klasifikatorje implicitno predpostavi različne
+porazdelitve stroškov~\cite{hand2009measuring}; ker v naši primerjavi stroški
+napak niso znani, ROC-AUC kljub temu uporabljamo kot splošno mero ločevanja med
+razredi.
+% hand2009measuring str. 103: »incoherent in terms of misclassification costs: the
+% AUC uses different misclassification cost distributions for different
+% classifiers« (preverjeno v PDF 2026-11-11).
 % Implementacija: Diplomsko-delo_Koda/src/utils.py (compute_roc_auc). Povprečje
 % teče le čez razrede, prisotne v testnem foldu; na vseh naših množicah so v
 % vsakem foldu prisotni vsi razredi, zato je izid enak klicu
@@ -1125,7 +1131,14 @@ Na eni sami podatkovni množici (Medic3) testov čez več množic ne moremo
 uporabiti~\cite{demsar2006statistical}. Pare algoritmov zato primerjamo s
 popravljenim t-testom za ponovljeno prečno
 preverjanje~\cite{bouckaert2004evaluating}, ki pri oceni variance razlik
-upošteva, da se učni deli zaporednih učenj prekrivajo~\cite{nadeau2003inference}.
+upošteva, da ocene posameznih učenj niso neodvisne, ker učenja potekajo na
+prekrivajočih se delih istih
+podatkov~\cite{nadeau2003inference,bouckaert2004evaluating}.
+% nadeau2003inference str. 239 (variabilnost zaradi izbire učne množice), str. 248
+% (korelacija med ocenami posameznih delitev, faktor 1/J + n2/n1), str. 254
+% (popravljeni t-test z J - 1 prostostnimi stopnjami); bouckaert2004evaluating
+% razd. 3.2: »the samples are not independent (i.e. the different training and test
+% sets overlap)« (preverjeno v PDF 2026-11-11).
 Statistika
 \[
 t = \frac{\bar{d}}{\sqrt{\left(1/m + n_2/n_1\right)\hat{\sigma}^2}}
@@ -2157,8 +2170,10 @@ popravimo s Holmovim popravkom znotraj modela, kot so to storili Biloš in
 sodelavci~\cite{bilos2026mechanistic}. Glavni model testa je TabPFN-3.5,
 TabICL je drugotni.
 % Galili in Meilijson str. 2 (citat knjige CART, str. 57) in str. 1 (izjema ob
-% novih vrednostih blizu točke delitve); bilos2026mechanistic dodatek H.5 in H.6
-% (str. 44). Ničle pri Wilcoxonovem testu: zero_method="zsplit".
+% novih vrednostih blizu točke delitve); bilos2026mechanistic dodatka H.3 in H.4
+% (tabeli 63 in 64, str. 43: XGBoost pri mono_cube 0,828 oziroma 0,862, enako kot
+% na izvirnih podatkih) in H.6 (str. 44: Holmov popravek znotraj modela). Ničle pri
+% Wilcoxonovem testu: zero_method="zsplit".
 
 Značilen $\Delta$ še ne pomeni pomnjenja, saj je model na preslikavo lahko
 splošno občutljiv. Enake kopije smo zato pripravili tudi za podatkovno množico
