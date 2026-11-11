@@ -878,8 +878,8 @@ izboljšan postopek predhodnega učenja z optimizatorjem
 Muon~\cite{qu2026tabiclv2}.
 % qu2026tabiclv2 povzetek: »three pillars«: generator sintetičnih podatkov, arhitekturne
 % novosti z »scalable softmax in attention«, pretraining protocols z optimizatorjem Muon
-% (preverjeno 2026-11-04, arXiv 2602.11139v2). Enako kot TabPFN tudi TabICL uteži prenese ob
-prvi uporabi in za smiselno hitrost potrebuje grafično procesno enoto.
+% (preverjeno 2026-11-04, arXiv 2602.11139v2).
+Enako kot TabPFN tudi TabICL uteži prenese ob prvi uporabi in za smiselno hitrost potrebuje grafično procesno enoto.
 
 Za razliko od modela TabPFN-3.5 paket tabicl podatke pred modelom predobdela
 sam. Kategorične atribute kodira ordinalno, manjkajoče vrednosti številskih
@@ -1187,9 +1187,8 @@ zato najbolj pozna.
 
 Vsa učenja glavne primerjave in obeh dodatnih poskusov so tekla na gruči
 Arnes (Akademska in raziskovalna mreža Slovenije), ki opravila razporeja s
-sistemom SLURM. Na lokalnih računalnikih smo izvedli le diagnostiko modela
-LightGBM v razdelku~\ref{sec:rez-medic3} in preverjanja, ki niso del
-rezultatov, na primer meritev največjega števila razredov modela TabPFN-3.5
+sistemom SLURM. Na lokalnih računalnikih smo izvedli le preverjanja, ki niso
+del rezultatov, na primer meritev največjega števila razredov modela TabPFN-3.5
 (podrazdelek~\ref{sec:tabpfn}).
 % PREVERI: ali je treba gručo Arnes in porabljeni računski čas navesti tudi v
 % zahvali oziroma s posebnim navedkom, kot to zahtevajo pogoji uporabe.
@@ -1749,8 +1748,6 @@ množicami niso strogo primerljivi. Pri temeljnih modelih klic učenja ne
 posodobi uteži (razdelek~\ref{sec:tabpfn}), zato večji del njune računske
 zahtevnosti odpade na napovedovanje.
 
-\input{rezultati/tab_casi.tex}
-
 Skupni čas vseh 6480 učenj je znašal \num{62.3} ure, od tega \num{47.8} ure
 CatBoost. Njegova mediana časa učenja (\num{4.584} s) je od 18- do 38-krat
 večja od median preostalih treh drevesnih ansamblov (od \num{0.121} do
@@ -1759,6 +1756,10 @@ večja od median preostalih treh drevesnih ansamblov (od \num{0.121} do
 \num{0.211} s (TabPFN-3.5) in \num{0.487} s (TabICL), mediani časa
 napovedovanja pa \num{0.487} s in \num{0.200} s. Mediane časa napovedovanja
 drevesnih ansamblov so od \num{0.004} do \num{0.015} s.
+
+\input{rezultati/tab_casi.tex}
+% Tabela je za obema odstavkoma, ki jo opisujeta: mediane in skupni čas iz drugega so
+% njeni stolpci (kot pri tab:medic3; uporabnik, 2026-11-09).
 
 \section{Neuspela in pomnilniško zahtevna učenja}
 \label{sec:rez-pomnilnik}
@@ -1848,10 +1849,9 @@ katere je bil ovrednoten TabPFN v2~\cite{hollmann2025tabpfn}.}
 \label{sec:rez-medic3}
 % Vir: tab_medic3.tex, tab_medic3_test.tex in izpis skripta
 % generiraj_rezultate.py (medic3_raw_v2/combined, medic3_160_v2/combined;
-% primerjava z medic3_raw in medic3_160 pred popravkom). Diagnostika LightGBM:
-% medic3_raw/diagnostics in medic3_160/diagnostics, datoteke
-% lightgbm_4.7.0_independent.csv in lightgbm_4.6.0_independent.csv, ki jih
-% ustvari scripts/diagnose_lightgbm_medic3.py (prva delitev, seme 42).
+% primerjava z medic3_raw in medic3_160 pred popravkom). Diagnostika LightGBM (v
+% besedilu je ne opisujemo): medic3_raw/diagnostics in medic3_160/diagnostics,
+% scripts/diagnose_lightgbm_medic3.py.
 
 Na podatkovni množici Medic3 (razdelek~\ref{sec:medic3}) smo vseh šest
 algoritmov ovrednotili v dveh različicah: z vsemi 220 razredi (\num{122093}
@@ -1928,23 +1928,12 @@ modela LightGBM (\num{34.12} pri 160 razredih) je blizu zgornje meje
 LightGBM je na obeh različicah v vseh učenjih dosegel ROC-AUC blizu \num{0.5},
 torej raven naključnega ugibanja (od \num{0.4994} do \num{0.5125} pri 220 in od
 \num{0.4999} do \num{0.5193} pri 160 razredih), ne da bi knjižnica javila
-napako. Da vzrok ni v naši kodi, smo preverili z ločeno potjo brez nje: na prvi
-delitvi smo podatke prebrali in razdelili neposredno s knjižnicama pandas in
-scikit-learn, LightGBM pa učili z njegovim izvornim vmesnikom in privzetimi
-parametri. Pokazal se je enak propad. Učna izguba, ki jo izračuna LightGBM sam,
-je po prvi iteraciji znašala \num{4.91} pri 220 oziroma \num{3.91} pri 160
-razredih in do konca učenja narasla na \num{32.6} oziroma \num{32.7}. Največja
-absolutna vrednost lista je narasla s \num{129} oziroma \num{73} na
-\num{2.4e6} oziroma \num{4.4e6}, točnost (\num{0.057} oziroma \num{0.050}) pa ni
-presegla deleža največjega razreda v testnem delu (\num{0.061} oziroma
-\num{0.063}). Enako se je obnašala tudi starejša različica LightGBM~4.6.0. Že ena
-sama sprememba privzete vrednosti je učenje ustalila: s koeficientom
-regularizacije L2 \texttt{reg\_lambda=1} je ROC-AUC na isti delitvi znašal
-\num{0.938} oziroma \num{0.948}, z najmanjšo vsoto drugih odvodov v listu
-\texttt{min\_child\_weight=1} pa \num{0.938} oziroma \num{0.945}; obe vrednosti
-sta privzeti vrednosti knjižnice XGBoost. Ker protokol predvideva privzete
-nastavitve, kot rezultat LightGBM poročamo propadle vrednosti; vzrok obravnavamo
-v poglavju~\ref{ch:zakljucek}.
+napako. Ker protokol predvideva privzete nastavitve, te vrednosti poročamo kot
+rezultat modela LightGBM.
+% Diagnostike propada (ločena pot brez naše kode, učna izguba, vrednosti listov,
+% reg_lambda=1 in min_child_weight=1) v besedilu ne opisujemo, ker LightGBM ni v
+% središču naloge (uporabnik, 2026-11-09); izhodi so v medic3_raw/diagnostics in
+% medic3_160/diagnostics repozitorija s kodo.
 
 \section{Uglaševanje modela XGBoost}
 \label{sec:rez-uglasevanje}
@@ -1984,8 +1973,10 @@ zagonom in je med poskusom nismo spreminjali.
 
 Če bi nastavitev izbrali na istih testnih delih, na katerih poročamo
 uspešnost, bi bila ocena optimistično pristranska~\cite{cawley2010over,varma2006bias},
-zato smo uporabili gnezdeno prečno preverjanje. Zunanje delitve so iste kot v glavnem protokolu, zato je
-uglašeni XGBoost neposredno primerljiv z ostalimi algoritmi. Na učnem delu
+zato smo uporabili gnezdeno prečno preverjanje. Zunanje delitve so iste kot v glavnem protokolu,
+torej petkratno stratificirano prečno preverjanje s tremi ponovitvami (15
+delitev na podatkovno množico), zato je uglašeni XGBoost neposredno primerljiv
+z ostalimi algoritmi. Na učnem delu
 vsake zunanje delitve vseh 128 nastavitev ovrednotimo s trikratnim
 stratificiranim prečnim preverjanjem. Nastavitev z najvišjim povprečnim
 ROC-AUC na notranjih delitvah nato naučimo na celotnem učnem delu in jo enkrat
@@ -1999,23 +1990,37 @@ privzetem modelu XGBoost.
 Poskus smo izvedli na 68 podatkovnih množicah zbirke OpenML-CC18; zaradi
 računske zahtevnosti smo izpustili štiri največje slikovne množice
 (mnist\_784, Devnagari-Script, CIFAR\_10 in Fashion-MNIST). Nenasičenih je
-med njimi 36. V vsaki zunanji delitvi smo za kontrolo in kot časovno izhodišče
-naučili še privzeti XGBoost; njegov ROC-AUC je bil v vseh 1020 učenjih enak
-rezultatu glavne primerjave, z razliko največ \num{1.1e-16}.
+med njimi 36.
+
+Privzeta nastavitev je sicer del mreže, a jo iskanje ovrednoti le na notranjih
+delitvah; na celotnem učnem delu se nauči le, če zmaga. Zato smo v vsaki zunanji
+delitvi v istem procesu posebej naučili še privzeti XGBoost, z dvema namenoma.
+Kot kontrola potrdi, da poskus ponovi glavno primerjavo: njegov ROC-AUC je bil v
+vseh 1020 zunanjih delitvah do zaokrožitvene napake (razlika največ
+\num{1.1e-16}) enak rezultatu privzetega modela XGBoost iz glavne primerjave.
+Njegov čas učenja pa je izhodišče, s katerim ocenimo ceno uglaševanja na istem
+vozlišču.
+% Privzeti XGBoost v primerjavah (tabela tab_uglasevanje) je iz cc18_v4/combined;
+% kontrolni privzeti XGBoost iz zagona (default_test_roc_auc) je enak na 693 od
+% 1020 foldov, na ostalih do 1,1e-16 (tuning_report.txt, PROVENANCE.md).
 
 \subsection{Rezultati}
 
-Uglašeni XGBoost je bil boljši od privzetega na 61 od 68 podatkovnih množic
-(povprečna razlika ROC-AUC \num{0.0083}, mediana \num{0.0016}, Wilcoxonov test
-$p = \num{1.6e-10}$). Dobiček je skoraj ves na nenasičenih množicah, kjer znaša
+Uglašeni XGBoost je bil boljši od privzetega na 61 od 68 podatkovnih množic,
+s povprečno razliko ROC-AUC \num{0.0083} in mediano \num{0.0016}. Razliko smo
+preverili s parnim Wilcoxonovim testom predznačenih rangov, ki primerja le ta
+dva modela: vsaka od 68 množic prispeva par povprečnih ROC-AUC čez 15 zunanjih
+delitev ($p = \num{1.6e-10}$; s Holmovim popravkom čez šest primerjav v
+tabeli~\ref{tab:uglasevanje} $p_\mathrm{Holm} = \num{7.9e-10}$).
+% Dvostranski test, zero_method="zsplit" (analyze_tuning.py, wilcoxon); nepopravljeni
+% p iz tuning_report.txt, p_Holm iz tuning_wilcoxon_holm.csv.
+Dobiček je skoraj ves na nenasičenih množicah, kjer znaša
 povprečno \num{0.0141} (boljši na 33 od 36), na nasičenih pa \num{0.0018} (boljši
 na 28 od 32). Največji je na množicah kc2 (\num{0.0535}),
 blood-transfusion-service-center (\num{0.0493}), diabetes (\num{0.0414}) in cmc
 (\num{0.0392}). Opazno slabši od privzetega je bil uglašeni XGBoost le na
 množici ilpd (\num{-0.0088}): notranje preverjanje je dobiček obetalo v vseh 15
 zunanjih delitvah, na testnih delih pa je bil uglašeni model slabši v 11.
-
-\input{rezultati/tab_uglasevanje.tex}
 
 Tabela~\ref{tab:uglasevanje} postavi uglašeni XGBoost ob privzete algoritme na
 istih 68 množicah. Po povprečnem ROC-AUC se uglašeni XGBoost uvrsti pred
@@ -2029,6 +2034,8 @@ tic-tac-toe in wall-robot-navigation, obakrat za manj kot \num{0.0004}.
 Povprečni zaostanek za TabPFN-3.5 se z uglaševanjem zmanjša z \num{0.0218} na
 \num{0.0135}, torej za \SI{38}{\percent}; na nenasičenih množicah se zmanjša za
 \SI{39}{\percent}.
+
+\input{rezultati/tab_uglasevanje.tex}
 
 Uglaševanje je izboljšalo tudi dodatni metriki, čeprav je izbira nastavitev
 upoštevala le ROC-AUC. Povprečna točnost se je povečala z \num{0.8664} na
@@ -2083,8 +2090,17 @@ TabPFN-3.5 je na zbirki OpenML-CC18 najuspešnejši algoritem
 (razdelek~\ref{sec:rez-skupno}). Podatkovne množice zbirke so javne že od leta
 2018, poročilo o modelu TabPFN-3.5 pa navaja, da so pri vrednotenju na zbirki
 TALENT izločili 26 množic, uporabljenih pri razvoju modelov TabPFN v2 in
-TabICLv2~\cite{jager2026tabpfn35}; razvijalci so torej med razvojem
-uporabljali tudi realne podatkovne množice. Postavi se vprašanje, ali je model
+TabICLv2~\cite{jager2026tabpfn35}. Predhodno učenje teh modelov je sicer
+sintetično, realne množice pa so razvijalci uporabljali za vrednotenje
+odločitev med razvojem; avtorji modela TabICLv2 so na primer različice
+arhitekture primerjali na 60 validacijskih množicah, uporabljenih pri razvoju
+modela TabPFN v2~\cite{qu2026tabiclv2}.
+% jager2026tabpfn35, dodatek C.5, str. 29: »the 300 base datasets minus the 26 that
+% were used during the development of TabPFN-2 and TabICLv2«. qu2026tabiclv2
+% (arXiv 2602.11139), napis slike 10, str. 7: »Performance metrics are computed on
+% the 60 validation datasets used for TabPFNv2 development (Hollmann et al., 2025,
+% supplementary Table 5)«. Preverjeno 2026-11-09 iz PDF (pdftotext).
+Postavi se vprašanje, ali je model
 nekatere množice zbirke OpenML-CC18 videl in si zapomnil njihove vrednosti, kar
 bi njegovo uspešnost na njih umetno izboljšalo. To smo preverili s testom,
 katerega zasnovo, parametre in analizo smo zapisali in shranili v repozitorij
@@ -2154,27 +2170,39 @@ petih delitvah (podrazdelek~\ref{sec:statistika}). Primerjava zapomnjenih in
 novih podatkovnih množic je osrednji del zasnove Bordta in
 sodelavcev~\cite{bordt2024elephants}, samo pravilo pa je naše.
 
-Test smo izvedli na 34 nenasičenih podatkovnih množicah zbirke OpenML-CC18. Od
-37 nenasičenih smo izpustili CIFAR\_10 zaradi računske zahtevnosti ter
+Test smo izvedli na 34 nenasičenih podatkovnih množicah zbirke OpenML-CC18.
+Nasičenih množic nismo vključili: na njih najboljši algoritem doseže ROC-AUC
+vsaj \num{0.995}, prednost modela TabPFN-3.5 pred CatBoostom pa je povprečno
+le \num{0.0042} (na nenasičenih \num{0.0220}), zato je vprašanje, ali je ta
+prednost umetno povečana, pomembno predvsem na nenasičenih množicah.
+% Utemeljitev je naša (DESIGN.md: izbiro 36 nenasičenih je odobril mentor). Številke:
+% izpis generiraj_rezultate.py, razdelek 14 (cc18_v4/combined/summary/pivot.csv, 35
+% nasičenih, 37 nenasičenih). Izjema med nasičenimi: balance-scale, prednost 0,0489
+% (najboljši ansambel 0,9506), zato ne trdimo, da je prednost tam povsod omejena.
+Od 37 nenasičenih smo izpustili CIFAR\_10 zaradi računske zahtevnosti ter
 analcatdata\_dmft in connect-4, ki nimata nobenega številskega atributa, zato
-ju preslikava ne spremeni. Uporabili smo prvih pet delitev glavnega protokola,
-zato izvirna različica ponovi rezultate glavne primerjave do razlik zaradi
-strojne opreme (največ \num{0.0044} na posameznem učenju). Vse tri različice
-podatkovne množice so tekle v istem opravilu na istem vozlišču.
+ju preslikava ne spremeni. Uporabili smo petkratno stratificirano prečno
+preverjanje brez ponovitev, in sicer pet delitev prve ponovitve glavnega
+protokola s semenom modela 42; vsak model se na vsaki različici podatkovne
+množice torej uči petkrat, skupaj je to 1530 učenj (34 množic, 3 različice,
+3 modeli, 5 delitev). Ker so delitve iste, izvirna različica ponovi rezultate
+glavne primerjave do razlik zaradi strojne opreme (največ \num{0.0044} na
+posameznem učenju).
+% config.yaml, leakage.repeats = 1 (foldi 0-4 diplomskih zagonov); DESIGN.md, Foldi;
+% cc18_leakage/results.csv: 1530 vrstic.
+Vse tri različice podatkovne množice so tekle v istem opravilu na istem vozlišču.
 % PROVENANCE.md cc18_leakage, Preverbe: izvirna različica proti cc18_v4/combined
 % (foldi 0-4): TabPFN-3.5 enak v 167/170 (do 9,3e-5), TabICL v 95/170 (do 4,4e-3),
 % CatBoost v 165/170 (numerai28.6 na drugem vozlišču, do 2,9e-3).
 
 \subsection{Rezultati}
 
-\input{rezultati/tab_uhajanje.tex}
-
 Rezultate vnaprej določenega testa povzema tabela~\ref{tab:uhajanje}. Padec
 kontrole ob monotoni preslikavi je bil zanemarljiv (mediana \num{4.4e-7},
 največ \num{0.0013}), CatBoost torej preslikave skoraj ne zazna.
 % Največji padec kontrole 0,001346 (Bioresponse), summary/leakage_per_dataset.csv;
-% na Medic3 TabPFN-3.5 ob šumu izgubi 0,0024, CatBoost 0,0028 (leakage_reference.csv). TabPFN-3.5 je
-na spremenjenih kopijah izgubil značilno več od CatBoosta: ob monotoni
+% na Medic3 TabPFN-3.5 ob šumu izgubi 0,0024, CatBoost 0,0028 (leakage_reference.csv).
+TabPFN-3.5 je na spremenjenih kopijah izgubil značilno več od CatBoosta: ob monotoni
 preslikavi je bila mediana $\Delta$ \num{0.0026} (pozitiven $\Delta$ na 29 od 34
 množic, $p_\mathrm{Holm} = \num{7.7e-7}$), ob preslikavi s šumom \num{0.0025} (23
 od 34, $p_\mathrm{Holm} = \num{0.011}$). Na množici Medic3 TabPFN-3.5 ni izgubil
@@ -2186,8 +2214,10 @@ $\Delta$ \num{0.0013}, $p_\mathrm{Holm} = \num{2.8e-6}$, na množici Medic3
 ($\Delta$ \num{0.0059}), zato tam njegovega padca ne moremo ločiti od splošne
 občutljivosti na preslikavo.
 
-Učinek je majhen. Pregled po testu, ki ni bil vnaprej določen, pokaže, da
-TabPFN-3.5 ostane boljši od CatBoosta na 33 od 34 množic ob monotoni preslikavi
+\input{rezultati/tab_uhajanje.tex}
+
+Učinek je majhen. Za oceno njegove velikosti smo po testu opravili še dodatno
+analizo, ki je nismo določili vnaprej. Ta pokaže, da TabPFN-3.5 ostane boljši od CatBoosta na 33 od 34 množic ob monotoni preslikavi
 in na 32 ob preslikavi s šumom. Njegova povprečna prednost pred CatBoostom se
 zmanjša z \num{0.0222} na \num{0.0185} oziroma \num{0.0163}, torej obdrži
 \SI{84}{\percent} oziroma \SI{74}{\percent} prvotne prednosti; na množici
@@ -2219,10 +2249,10 @@ poglavju~\ref{ch:zakljucek}.
 % uhajanje navedemo kot omejitev ne glede na izid testa.
 
 V tem poglavju rezultate razložimo, jih primerjamo z objavljenimi in navedemo
-omejitve naloge. Sklenemo z odgovori na raziskovalna vprašanja iz uvoda in z
-možnostmi za nadaljnje delo.
+omejitve naloge. Na koncu odgovorimo na raziskovalna vprašanja iz uvoda in
+predstavimo možnosti za nadaljnje delo.
 
-\section{Temeljni modeli in drevesni ansambli}
+\section{Temeljni modeli in drevesni ansambli na zbirki OpenML-CC18}
 \label{sec:disk-cc18}
 
 Na zbirki OpenML-CC18 sta oba tabelarična temeljna modela, uporabljena brez
@@ -2238,11 +2268,10 @@ CatBoostovega, uglaševanje pa je modelu XGBoost dodalo povprečno \num{0.0141}
 Ugotovitev se ujema s poročili razvijalcev, ki so prednost temeljnih modelov
 pokazali na drugih zbirkah~\cite{grinsztajn2025tabpfn25,grinsztajn2026tabpfn3,qu2025tabicl},
 in z zbirko TabArena, na kateri so se temeljni modeli najbolje izkazali na
-manjših podatkovnih množicah~\cite{erickson2025tabarena}. Starejše
-primerjave, po katerih drevesni ansambli na množicah srednje velikosti ostajajo
-najboljši~\cite{grinsztajn2022why}, tabelaričnih temeljnih modelov še niso
-vključevale; naši rezultati kažejo, da njihov sklep za temeljne modele ne velja
-več. Prednost tudi ni omejena na majhne množice, za katere je bila paradigma
+manjših podatkovnih množicah~\cite{erickson2025tabarena}. Naši rezultati
+kažejo, da sta temeljna modela boljša od drevesnih ansamblov tudi na množicah
+srednje velikosti, kakršne vsebuje zbirka OpenML-CC18
+(razdelek~\ref{sec:cc18}). Prednost tudi ni omejena na majhne množice, za katere je bila paradigma
 prvotno zasnovana: temeljni model je bil boljši od vseh ansamblov na vseh 22
 množicah zunaj območja, na katerem je bil ovrednoten TabPFN v2, med njimi na
 vseh 16 z več kot \num{10000} primeri (razdelek~\ref{sec:rez-lastnosti}).
@@ -2259,13 +2288,23 @@ torej že ob eni zamenjavi različice obrnila, zato je ne bi posploševali.
 Uglaševanje modela XGBoost je zaprlo \SI{38}{\percent} zaostanka za
 TabPFN-3.5 in uglašeni XGBoost izenačilo s privzetim CatBoostom, za kar je
 potreboval več stokrat več računanja od privzetega učenja
-(razdelek~\ref{sec:rez-uglasevanje}). Dobiček je manjši od uglasljivosti
-\num{0.043}, ki jo za XGBoost navajajo Probst in
-sodelavci~\cite{probst2019tunability}. To je pričakovano, saj je njihova
-uglasljivost razlika do najboljše nastavitve na posamezni množici, poiskane s
-\num{100000} naključnimi točkami na nadomestnem modelu, torej zgornja meja, ki
-je postopek z izbiro na notranjih delitvah in omejeno mrežo ne doseže; poleg
-tega so primerjali s privzeto nastavitvijo s 500 iteracijami. Drugačen postopek,
+(razdelek~\ref{sec:rez-uglasevanje}). Povprečni dobiček (\num{0.0083}, na
+nenasičenih množicah \num{0.0141}) je manjši od uglasljivosti \num{0.043}, ki
+jo za XGBoost navajajo Probst in sodelavci~\cite{probst2019tunability}.
+Uglasljivost pri njih pomeni, za koliko je AUC najboljše nastavitve na
+posamezni podatkovni množici višji od AUC privzete nastavitve. Ker so najboljšo
+nastavitev za vsako množico posebej poiskali s \num{100000} naključnimi točkami
+na nadomestnem modelu, je njihova vrednost zgornja meja, ki je naš postopek z
+izbiro na notranjih delitvah in omejeno mrežo ne more doseči. Vrednosti tudi
+nista neposredno primerljivi: uglasljivost so izmerili na 38 binarnih
+množicah, njihov privzeti XGBoost pa je imel 500 iteracij, naš 100.
+% probst2019tunability: tabela 2 (uglasljivost XGBoost glede na privzete vrednosti
+% paketa 0,043 ± 0,006, AUC), enačba 4 (razlika do najboljše nastavitve na naboru),
+% nadomestni model s 100 000 naključnimi točkami, 38 binarnih naborov OpenML100,
+% privzeti nrounds paketa 500 (Diplomsko-delo_Koda/CLAUDE.md, Tuning - sources, in
+% cc18_xgb_tuned/PROVENANCE.md, Primerjava z literaturo; prebrano iz PDF 2026-10-21).
+% Naš privzeti n_estimators 100: razdelek sec:xgboost. Dobiček: tuning_report.txt.
+Drugačen postopek,
 na primer naključno iskanje, ki iskanje po mreži pogosto
 prekaša~\cite{bischl2023hyperparameter}, ali uglaševanje drugih ansamblov bi
 zaostanek morda zmanjšal še bolj. Da bi drevesni ansambel z uglaševanjem
@@ -2295,26 +2334,10 @@ manjkale, čeprav je to na tej množici močno povezano z razredom
 ansambli pa imajo vgrajeno obravnavo manjkajočih vrednosti. Te razlage s poskusom nismo
 preverili.
 
-LightGBM je na obeh različicah propadel, ne da bi knjižnica javila napako. Pri
-gradientnem pospeševanju z aproksimacijo drugega reda je vrednost lista
-$-G/(H + \lambda)$, kjer sta $G$ in $H$ vsoti prvih in drugih odvodov izgube po
-primerih v listu, $\lambda$ pa koeficient regularizacije
-L2~\cite{chen2016xgboost}. Pri večrazredni logaritemski izgubi je
-drugi odvod po izhodu za razred $k$ sorazmeren s $p_k(1 - p_k)$, kjer je $p_k$
-napovedana verjetnost razreda, zato je pri redkih razredih z majhno verjetnostjo
-blizu nič. LightGBM ima privzeto $\lambda = 0$ in najmanjšo vsoto drugih
-odvodov v listu \num{0.001}~\cite{lightgbmdocs}, zato lahko nastanejo listi z
-zelo majhnim imenovalcem in zelo velikimi vrednostmi. To se ujema z izmerjenim
-naraščanjem največje vrednosti lista do reda $10^6$ in z naraščanjem učne
-izgube, prav tako pa z ugotovitvijo, da učenje ustali že ena sama od privzetih
-vrednosti modela XGBoost ($\lambda = 1$ ali najmanjša vsota drugih odvodov 1).
-Razlaga je naša in je v izvorni kodi knjižnice nismo preverili. Zaradi
-protokola s privzetimi nastavitvami propadle vrednosti poročamo kot rezultat
-modela LightGBM; praktični nauk pa je, da privzete nastavitve na množicah z
-veliko redkimi razredi lahko odpovejo tiho in da je treba rezultat preveriti.
-% Odvod p_k(1 - p_k): lastna izpeljava (drugi odvod -log softmax po z_k).
-% lightgbmdocs: lambda_l2 = 0,0, min_sum_hessian_in_leaf = 1e-3 (privzeti vrednosti,
-% preverjeno tudi v nameščeni knjižnici 4.7.0, CLAUDE.md repozitorija s kodo).
+LightGBM je na obeh različicah propadel, ne da bi knjižnica javila napako
+(razdelek~\ref{sec:rez-medic3}). Vzroka v nalogi ne obravnavamo, ker LightGBM
+ni v središču raziskave. Primer pa kaže, da lahko privzete nastavitve tiho
+odpovejo, zato je treba rezultat vsakega učenja preveriti.
 
 \section{Logaritemska izguba naključnega gozda}
 \label{sec:disk-rf}
@@ -2371,10 +2394,11 @@ kombinacijo algoritma in strojne opreme, saj sta temeljna modela tekla na
 grafični procesni enoti, ansambli pa na procesorju. Zbirka OpenML-CC18 je
 statična in vsebuje množice, ki njenih meril ne izpolnjujejo
 povsem~\cite{bischl2021openml}, skoraj polovica njenih množic pa je nasičenih.
-Na podatkovni množici Medic3 so sklepi omejeni na eno množico, trikrat
-ponovljeno petkratno prečno preverjanje je manj ponovljivo od
-priporočenega (podrazdelek~\ref{sec:statistika}), izbor 160 razredov pa je le
-eden od mogočih (razdelek~\ref{sec:medic3}).
+Na podatkovni množici Medic3 so sklepi omejeni na eno množico, izbor 160
+razredov pa je le eden od mogočih (razdelek~\ref{sec:medic3}). Tudi trikrat
+ponovljeno petkratno prečno preverjanje je manj ponovljivo od desetkrat
+ponovljenega desetkratnega, ki ga za popravljeni t-test priporočata Bouckaert
+in Frank~\cite{bouckaert2004evaluating}.
 
 \section{Sklep}
 \label{sec:sklep}

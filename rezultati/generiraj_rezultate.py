@@ -71,8 +71,10 @@ else:
     povp = (f"Povprečni ROC-AUC je izračunan le na podatkovnih množicah, na katerih so uspeli vsi "
             f"algoritmi ({N_OK} od {N} oziroma {N_OK_NS} od {N_NS}), povprečni rang pa na vseh; "
             f"neuspeh na podatkovni množici prejme najslabši rang.")
+# Vse tabele poglavja Rezultati imajo [H] (paket float): vsaka stoji natanko za
+# odstavkom, ki jo opisuje, in ga ne preseka na prelomu strani (uporabnik, 2026-11-09).
 t = src([S + '/overall.csv', S + '/overall_nonsaturated.csv'])
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Skupna primerjava algoritmov na zbirki OpenML-CC18. """ + povp + r""" Zmage štejejo prvo mesto, vključno z izenačitvami.}
 \label{tab:skupno}
@@ -102,7 +104,7 @@ def wil(f):
 wa_, wn_ = wil(S + '/wilcoxon_holm.csv'), wil(S + '/wilcoxon_holm_nonsaturated.csv')
 keys = sorted(wa_, key=lambda k: (ORDER.index(k[0]), ORDER.index(k[1])))
 t = src([S + '/wilcoxon_holm.csv', S + '/wilcoxon_holm_nonsaturated.csv'])
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Parni Wilcoxonovi testi predznačenih rangov s Holmovim popravkom. Razlika je povprečna razlika ROC-AUC (prvi minus drugi algoritem) čez podatkovne množice, na katerih sta uspela oba; zmage so število množic, na katerih je boljši prvi oziroma drugi. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$.}
 \label{tab:wilcoxon}
@@ -133,7 +135,7 @@ assert set(gpus) <= set(IZVEDBA), gpus
 gpus = sorted(gpus, key=lambda g: IZVEDBA[g])
 ov['total_h'] = (ov.train_time_total_s + ov.inference_time_total_s) / 3600
 t = src([S + '/overall.csv', R + '/results.csv'])
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Časovna zahtevnost algoritmov. Mediani sta izračunani čez vseh """ + str(N_FITS) + r""" učenj posameznega algoritma, skupni čas je vsota časa učenja in napovedovanja čez vsa učenja. Časi niso neposredno primerljivi med algoritmi, ki so tekli na različni strojni opremi; temeljna modela sta tekla na grafični procesni enoti (GPE) NVIDIA H100 v dveh izvedbah (""" + ' in '.join(IZVEDBA[g] for g in gpus) + r"""; v stolpcu \texttt{device} datoteke z rezultati """ + ' in '.join(gpus) + r"""), drevesni ansambli pa na osmih jedrih centralne procesne enote (CPE) različnih vozlišč gruče.}
 \label{tab:casi}
@@ -354,7 +356,7 @@ movn = {m: msum(m, 'overall_nonsaturated.csv').set_index('algorithm') for m in M
 assert all(mov[m][f'mean_{m}_complete'].notna().all() for m in MET), 'povprečja le na vseh množicah'
 t = src([S + f'/{m}/{f}' for m in MET for f in ('overall.csv', 'overall_nonsaturated.csv')]
         + [R + '/metrics.csv'])
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Dodatni metriki na zbirki OpenML-CC18: povprečna točnost in povprečna logaritemska izguba čez podatkovne množice ter povprečni rang algoritma po posamezni metriki. Pri logaritemski izgubi je boljša nižja vrednost in rang 1 dobi najnižja izguba. Nasičenost množic je določena po ROC-AUC. Algoritmi so urejeni po povprečnem rangu po ROC-AUC (tabela~\ref{tab:skupno}).}
 \label{tab:metrike}
@@ -535,9 +537,11 @@ def tsub(metric, subset): return tov[(tov.metric == metric) & (tov.subset == sub
 a68, a36 = tsub('roc_auc', 'vsi'), tsub('roc_auc', 'nenasičeni')
 w68 = twh[(twh.metric == 'roc_auc') & (twh.subset == 'vsi')].set_index('b')
 N_T, N_T36 = int(a68.n.iloc[0]), int(a36.n.iloc[0])
+# [H] kot pri tabelah Medic3: stoji natanko za odstavkom, ki jo opisuje, in ga ne
+# preseka na prelomu strani (uporabnik, 2026-11-09).
 t = src([TU + '/tuning_overall.csv', TU + '/tuning_wilcoxon_holm.csv'],
         what='scripts/analyze_tuning.py: zagon cc18_xgb_tuned proti cc18_v4/combined, isti foldi')
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Uglašeni XGBoost in privzeti algoritmi na """ + str(N_T) + r""" podatkovnih množicah poskusa uglaševanja (od tega """ + str(N_T36) + r""" nenasičenih): povprečni ROC-AUC in povprečni rang med sedmimi algoritmi. Zadnja stolpca veljata za vseh """ + str(N_T) + r""" množic: število množic, na katerih je uglašeni XGBoost boljši oziroma slabši od algoritma v vrstici, in p-vrednost parnega Wilcoxonovega testa s Holmovim popravkom čez šest primerjav. Z zvezdico so označene razlike, značilne pri $\alpha = 0{,}05$.}
 \label{tab:uglasevanje}
@@ -581,7 +585,7 @@ ARM = {'monotone': 'monotona', 'monotone_noise': 's šumom'}
 SKLEP = {True: 'da', False: 'ne'}
 t = src([LK + '/leakage_tests.csv'], what='scripts/analyze_leakage.py, vnaprej določena analiza; '
         'referenca medic3_160_leakage')
-t += r"""\begin{table}[htbp]
+t += r"""\begin{table}[H]
 \centering
 \caption{Test uhajanja podatkov na """ + str(int(lt.n.iloc[0])) + r""" nenasičenih podatkovnih množicah zbirke OpenML-CC18. $\Delta$ je padec ROC-AUC temeljnega modela na spremenjeni kopiji, zmanjšan za padec CatBoosta; $p_\mathrm{Holm}$ je p-vrednost enostranskega Wilcoxonovega testa ($\Delta > 0$) s Holmovim popravkom znotraj modela. Zadnja stolpca: $\Delta$ na podatkovni množici Medic3 s 160 razredi in p-vrednost enostranskega popravljenega t-testa, da je manjši od mediane $\Delta$ na zbirki OpenML-CC18. Zadnji stolpec pove, ali je rezultat po vnaprej določenem pravilu skladen s pomnjenjem (značilni sta obe p-vrednosti); pri »ne« ga ne moremo ločiti od splošne občutljivosti modela na preslikavo.}
 \label{tab:uhajanje}
@@ -601,6 +605,11 @@ t += "\\hline\n\\end{tabular}\n\\end{table}\n"
 write('tab_uhajanje.tex', t)
 
 print('== Test uhajanja ==')
+# Zakaj test le na nenasičenih: prednost TabPFN-3.5 pred CatBoostom po nasičenosti (pivot.csv).
+for lab, mask in (('nasičene', pv.saturated), ('nenasičene', ~pv.saturated)):
+    lead = (pv.tabpfn - pv.catboost)[mask]
+    print(f'prednost TabPFN-3.5 pred CatBoost, {lab} ({int(mask.sum())}): povprečje {lead.mean():.4f}, '
+          f'največ {lead.max():.4f} ({lead.idxmax()})')
 print(open(LK + '/leakage_report.txt', encoding='utf-8').read())
 print(open(LK + '/leakage_exploratory_report.txt', encoding='utf-8').read())
 
