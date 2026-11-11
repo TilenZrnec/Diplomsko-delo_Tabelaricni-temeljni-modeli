@@ -49,6 +49,16 @@ ne opozori posebej.
   ostane v komentarjih LaTeX in v repozitoriju s kodo. Besedilo pa ne sme trditi
   ničesar, kar ne drži (npr. da so vsi algoritmi tekli v istem zagonu ali na
   istem vozlišču).
+- **Propad LightGBM na Medic3 — le dejstvo, brez razlage** (uporabnik,
+  2026-11-09). V besedilu navedemo samo, da je LightGBM na obeh različicah
+  dosegel ROC-AUC blizu 0,5, ne da bi knjižnica javila napako, in da te
+  vrednosti po protokolu poročamo kot njegov rezultat. Diagnostike (ločena pot
+  brez naše kode, učna izguba, vrednosti listov, `reg_lambda=1` /
+  `min_child_weight=1`) in razlage mehanizma ne opisujemo, ne v rezultatih ne v
+  diskusiji, ker LightGBM ni v središču naloge. Ne predlagaj in ne dodajaj je
+  nazaj. Ne pišemo »vzroka nismo raziskovali« (ni res), ampak »vzroka v nalogi
+  ne obravnavamo«. Diagnostika ostane v repozitoriju s kodo
+  (`results/runs/medic3_*/diagnostics`).
 
 ## Citiranje
 
